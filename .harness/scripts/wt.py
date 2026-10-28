@@ -64,6 +64,27 @@ def board_tasks(root):
     return [t for t in (data.get("tasks") or []) if isinstance(t, dict)], None
 
 
+def tree_state(target, main):
+    """量一棵树的收尾条件：返回 (干净吗, 已合进主树吗, 未提交清单, HEAD, 判不了的原因)。
+
+    「收尾做了一半」有两个档位，差别全在这两个布尔上：树里还有没提交的东西、或这份工作还没
+    落地，撤它就是丢活儿（ERROR）；两者都过了，剩下的只是忘撤一棵空树（WARN）。读不出来时
+    前两项给 None——判不了不许冒充「安全的那一档」。
+    """
+    code, dirty, err = git(target, "status", "--porcelain")
+    if code != 0:
+        return None, None, "", "", f"读不了 {target} 的工作区：{err or '这里不是 git 工作树'}"
+    code, sha, err = git(target, "rev-parse", "HEAD")
+    if code != 0:
+        return None, None, dirty, "", f"拿不到 {target} 的 HEAD：{err}"
+    code, _out, err = git(main, "merge-base", "--is-ancestor", sha, "HEAD")
+    if code == 0:
+        return not dirty, True, dirty, sha, None
+    if code == 1:
+        return not dirty, False, dirty, sha, None
+    return None, None, dirty, sha, f"判不了 {target}（{sha[:8]}）有没有合进 {main}：{err or 'merge-base 失败'}"
+
+
 def find_task(tasks, task_id):
     for task in tasks or []:
         if str(task.get("id")) == task_id or str(task.get("worktree") or "") == task_id:
@@ -123,10 +144,13 @@ def task_done(root, task_id):
         return 2, problem
     if not target.is_dir():
         return 2, f"没有这棵树：{target}"
-    code, dirty, err = git(target, "status", "--porcelain")
-    if code != 0:
-        return 2, f"读不了这棵树的工作区：{err}"
-    if dirty:
+    main, problem = main_worktree(root)
+    if problem:
+        return 2, problem
+    clean, merged, dirty, sha, problem = tree_state(target, main)
+    if problem:
+        return 2, problem
+    if not clean:
         return 1, f"树里有未提交的东西，先提交再收尾（删树会把它们一起丢掉）：\n{dirty}"
     tasks, problem = board_tasks(root)
     if problem:
@@ -135,16 +159,9 @@ def task_done(root, task_id):
     if entry is not None and str(entry.get("status")) != "done":
         return 1, (f"看板里 {task_id} 还是 {entry.get('status')}：先写成 done 并带可核验证据"
                    "（commit:<sha> 或 path:<文件>），否则删掉的树是一条没人认领的账")
-    code, sha, err = git(target, "rev-parse", "HEAD")
-    if code != 0:
-        return 2, f"拿不到这棵树的 HEAD：{err}"
-    main, problem = main_worktree(root)
-    if problem:
-        return 2, problem
-    code, _out, err = git(main, "merge-base", "--is-ancestor", sha, "HEAD")
-    if code != 0:
+    if not merged:
         return 1, (f"{target} 的提交（{sha[:8]}）还没合进主树 {main}："
-                    "先合并再删树，顺序反了就把没落地的工作删了")
+                   "先合并再删树，顺序反了就把没落地的工作删了")
     code, _out, err = git(root, "worktree", "remove", str(target))
     if code != 0:
         return 1, f"删树失败：{err}"

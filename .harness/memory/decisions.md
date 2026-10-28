@@ -236,3 +236,27 @@
 - 命令面：`make ignored` 把这张排除表变成可看的东西（CMD004 要求新脚本要么注册成命令、
   要么被引用；它确实是个要给人看的调试视图，就登记成命令）。
 - written_by: session 2026-10-29 / version: 1 / supersedes: — / status: active
+
+## D-19 收尾的档位只看「落地了没有」；一处判定、两档严重度
+
+- 现场：看板把 T-2 写成 done 的那一刻，`make check` = 1 ERROR / exit 2——WKT001「任务已 done，
+  树还在：要么撤树，要么把任务改回 doing」。两句都对，合起来没有出路：`make task-done` 要求
+  「看板已 done + 已合并」，而那两条得**先提交**才算数，提交得过钩子，钩子因为树还挂着报 ERROR。
+  照着消息走了一遍：`task-done` 回「看板里还是 doing」，写回 done 又撞这条 ERROR。
+- 根因（两层）：① 「收尾做了一半」被当成一种状态，其实 dangerous 的那半是**这份工作还没合进
+  主树**（撤树就是删掉没落地的活儿），另一半只是空树没撤；② 第一版按 (干净, 已合并) 两个布尔
+  分档，实测当场就被推翻——pre-commit 跑在 staged 状态下，`git status --porcelain` 必然非空，
+  把「脏」也算进 ERROR 等于**任何一次提交都别想把任务标成 done**。档位只看 merged。
+- 决策：这两个事实由 `wt.py` 的 `tree_state()` 算一次，`make task-done`（两条都要，脏就不许撤）
+  与 `WKT001`（只看 merged）都问它；已合并 → WARN 并点名 `make task-done TASK=<id>`，未合并 →
+  ERROR；读不出来（HEAD/`merge-base` 失败）→ ERROR + 登记判不了，不许冒充已落地那一档。
+  「没提交」不再降档，只写进消息：真会丢活儿由 `task-done` 拒绝撤树来挡，不由断言挡。
+- 被否：① `--no-verify` 提交这一步（把工具缺陷记在工作头上）；② 先撤树再补 done（要求没满足，
+  顺序反了会把没落地的工作删掉）；③ 在 `scopes/worktree.py` 里再算一遍（两份实现迟早漂移，
+  形态就是「脚本说可以撤、门禁说这是欠账」，与 L-6/L-8 同机制）；④ 整条降 WARN（未落地那档没牙）；
+  ⑤ 按 (干净, merged) 分档（见根因 ②，是这次现尝现推翻的那版）。
+- 限时没做：WARN 要按「N 天升 ERROR」得有天数来源，这一域没有——`stale` 与 `state` 已各算一份，
+  再算就是第三处抄本。欠账挂 T-15。
+- 邻居缺陷（本批没动，挂 T-16）：`task_done` 撤完树打印「分支 task/<id> 留在仓库里——
+  git branch -d task/<id>」，而目录名即分支名的人工树（go125 这种）根本没有那个分支。
+- written_by: session 2026-10-29 / version: 1 / supersedes: — / status: active

@@ -135,6 +135,24 @@
       "owner": "thooh",
       "evidence": "path:.harness/deliverables/gates/20261028T170822Z-repo-content-per-git.md",
       "scope": "secret"
+    },
+    {
+      "id": "T-15",
+      "title": "WKT001 的 WARN 档没有时限：这一域还没有年龄事实源",
+      "status": "open",
+      "priority": "low",
+      "detail": "「done 且这份工作已合进主树、只差撤树」现在是永久 WARN（撤树就消失）。按「限时而非禁止」本该 N 天 WARN、2N 天 ERROR，但 WKT001 手里没有可信的时刻：树的 HEAD 提交时间量的是工作何时做完，不是任务何时被判定结束；看板条目也没有 done_at。stale 与 state 已经各算一份天数，再补第三份就是第三处抄本（lessons L-6/L-8 的同一形状）。做法：先把年龄算法收成一处（带一个明确的时刻字段），再回来给这条加阈值。见 decisions D-19、standards.md「判不了」表。",
+      "owner": "thooh",
+      "scope": "worktree"
+    },
+    {
+      "id": "T-16",
+      "title": "make task-done 撤树后把分支名硬写成 task/<id>，给人一条指向不存在分支的命令",
+      "status": "open",
+      "priority": "low",
+      "detail": "wt.py 的 task_done 最后一句打印「分支 task/<id> 留在仓库里——git branch -d task/<id>」，但布局约定允许目录名即分支名（go125 这种人工树，WKT004 明明白白接受它）。撤这类树时提示里的分支不存在，照抄就跑错命令。改法：把消息里那个名字换成 rev-parse --abbrev-ref 读到的真分支，别再拿 task_id 拼第二次——拼字符串就是又开一份定义。现场：2026-10-29 撤 go125 时看到。",
+      "owner": "thooh",
+      "scope": "worktree"
     }
   ]
 }

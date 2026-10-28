@@ -39,7 +39,7 @@
 | 7 | 账本只减不增、豁免要盖章 | `scope=baseline`：BASE011 格式/必填、BASE012 过期、BASE013 上升、BASE014 可刷新（WARN） | ERROR / WARN | BASE011、BASE011b、BASE012、BASE013 + BASE00n 零基线正对照 |
 | 8 | 入口与磁盘对齐 | `scope=entry`：ENT001/002 header、ENT003 行数、ENT004 地图双向、ENT005 规则无载体、ENT006 未注册 scope、ENT007 派生索引、ENT008 样本为 0 | ERROR | ENT001–ENT008 + ENT00n 正对照 |
 | 9 | 结论 = 命令 + 退出码 + 完整输出 | `scope=build`：BLD001/BLD002 管证据在不在、新不新；证据内容本身是不是真的判不了（脚本不能替人相信一句话） | WARN | BLD001、BLD002 |
-| 10 | 一次一类修改；一个任务一棵树，看板先登记再开树 | `scope=worktree`：WKT001 任务已 done 而树还在（收尾做了一半）、WKT002 树在看板里没人登记或任务还挂 open/blocked（顺序反了）、WKT004 树的分支既不是 `task/<id>` 也不是目录名。**判不了**：「忘了开树」（任务可能在别人机器上做）、「改前 `git status` 干净」 | ERROR | WKT001、WKT002（无对应任务 + status=open 两式）、WKT003、WKT004 + WKT00n 树—分支—看板对齐正对照 |
+| 10 | 一次一类修改；一个任务一棵树，看板先登记再开树 | `scope=worktree`：WKT001 任务已 done 而树还在（收尾做了一半；**按「这份工作合进主树没有」分两档**——还没合进去是 ERROR，done 与未落地互相矛盾、撤它就是删掉没做的事；已合进去只 WARN，因为提交途中的树本来就是 dirty，把「脏」也当 ERROR 会把「标记 done 再提交」这一步自己挡在门外）、WKT002 树在看板里没人登记或任务还挂 open/blocked（顺序反了）、WKT004 树的分支既不是 `task/<id>` 也不是目录名。**判不了**：「忘了开树」（任务可能在别人机器上做）、「改前 `git status` 干净」 | ERROR / WARN | WKT001（已合并 → WARN 且消息点名 `make task-done`）、WKT001b（已合并但还有没提交的东西 → 仍 WARN，消息要点名那笔改动）、WKT001c（未合并 → ERROR）、WKT002（无对应任务 + status=open 两式）、WKT003、WKT004 + WKT00n 树—分支—看板对齐正对照 |
 | 11 | 判不了就说判不了 | 各域的样本守卫（MOD005 / SEC004 / STL005 / ENT008 / CMD005 / MSG005）+ `not_applicable` 清单；BLD004 两条分支——Go 工具链缺失、排除本地产物后没有 .go 可判——都走 WARN 并登记 | ERROR / WARN | 每条样本守卫都在 selftest 里单独造一例「目录为空」；BLD004 造得出「没有 .go」这一支，「工具链缺失」那一支故意不造（等于依赖坏环境） |
 | 12 | 一次提交说一件事 | `scope=commit`：MSG001 空标题或裸动词、MSG002 超 `subject_max_chars`、MSG003 标题并列（两个及以上「，」子句）、MSG004 正文出现顺带/另外/同时/此外、MSG005 拿不到消息。同一份 `check_message` 由 `commit-msg` 钩子在落笔时判 ERROR | WARN（钩子侧 ERROR） | MSG001–MSG005 + MSG00n 合规消息正对照 |
 | 13 | 一次修改走五段，每段有过法 | `scope=workflow`：FLOW001 flow.json 缺/坏/stages 空、FLOW002 阶段与 REQUIRED_STAGES 不齐、FLOW003 阶段既无 gate 又无 manual、FLOW004 门径不是 Makefile 的 target（含 Makefile 读不到）、FLOW005 转移表空/指向不存在的阶段/没写条件/非末阶段无出口、FLOW006 声明账本缺或一条没声明、FLOW007 声明未装机、FLOW008 装机未声明、FLOW009 SKILL.md 三条验收缺一、FLOW010 契约六问缺一 | ERROR | FLOW001–FLOW010（各一条独立夹具，含三条 FLOW005 变体与两条 FLOW006 变体）+ FLOW00n 最小仓库正对照 |
@@ -57,6 +57,7 @@
 | 本地产物目录（`.go/` 缓存、`node_modules/`、`__pycache__/`…）只有一份清单：`scopes/common.py` 的 `LOCAL_ARTIFACTS`，`build_guide` / `entry` / `secret` / `git_clean` / `go_files` 都走它。shell 里的 `find … -not -path` 也算一份抄本——收了五处、漏了第六处，现场见 lessons L-8 | 间接由 ENT007 判（派生索引在「有缓存的树」与「干净检出」上必须一致）与 BLD004/BLD005 判（gofmt 不许扫进依赖源码，也不许在没得扫时沉默） | ERROR / WARN | ENT007b（跨树复现正对照）、BLD005b（缓存里的依赖不算欠账）、BLD004（排除后无 .go 可判） |
 | 「哪些 `.go` 算本仓库的源码」只有一份实现：`scripts/go_files.py`（先 `is_file()` 再按整条路径段排除）。Makefile 的 `fmt` 与 `build` scope 都调它——一条命令和一个门禁各算一遍，漂移的形态就是「`make fmt` 红了但 `make check` 绿」 | `scope=build`：BLD004（清单为空 = 判不了，不沉默）、BLD005（未格式化） | ERROR / WARN | BLD005c（`nested.go/` 目录里那个文件只报一次：目录本身没混进清单）、BLD004 + BLD005n/BLD005b 正对照 |
 | 「这条路径 git 会不会带走」只有一份答案：`scripts/tracked.py`（问 `git ls-files --others --ignored --exclude-standard --directory`）。派生索引与被排除文件的密钥判定都问它；读不到 ignore 规则（没有 git）时一律当会入库，并登记 `secret:gitignore 判定` 为判不了 | `scope=entry`：ENT007 判两台机器看到的磁盘是否同一张；`scope=secret`：SEC005 把「不入库但本地是真凭据」点名而不是沉默 | ERROR / WARN | ENT007c（带 gitignore 本地目录的树上生成索引，没有它的检出也认它新鲜）、SEC005 + SEC001b（未跟踪但没被排除的仍算入库） |
+| 「这份工作落地了没有」只有一处判定：`wt.py` 的 `tree_state()`（工作区干净吗、HEAD 已合进主树吗）。`make task-done` 两条都要（脏就不许撤），WKT001 只按第二条分档——CLI 与门禁各算一遍的漂移形态就是「脚本说可以撤、门禁说这是欠账」，本批现场是撤树这一步在门禁里根本走不通（lessons L-10）。读不出来时两个布尔给 `None`，门禁按 ERROR 走，不许冒充已落地那一档 | `scope=worktree`：WKT001 按「已合并」分档，「还有没提交的」只写进消息 | ERROR / WARN | WKT001（已合并 → WARN）、WKT001b（已合并但没提交 → 仍 WARN 且消息点名那笔改动）、WKT001c（未合并 → ERROR）；把档位钉死成单一档、或假装 `tree_state` 永远返回「干净 + 已合并」，对应样本立刻变红 |
 
 code 的命名本身也是一条规矩：**3–6 个大写字母 + 三位数字**（`hooks` 的 `CODE_RE` 就按这个匹配）。
 两字母前缀（试过 `WF001`）不会被源码扫描看见——登记了、源码里也有，但对账那头是瞎的，
@@ -70,6 +71,9 @@ code 的命名本身也是一条规矩：**3–6 个大写字母 + 三位数字*
 | `--scope baseline` 单查 | 上游没跑，降级与新欠判不了；调度器输出里明说 |
 | 没有 git（导出、裸文件目录） | BASE013、BLD002、STL003 全报 WARN + 判不了；STATE006 的 `commit:` 证据同此处理 |
 | 拿不到 worktree 清单，或某棵树读不出分支 | WKT003 报 WARN 并登记 `worktree:…` 为判不了——有树却对不上账时不许沉默 |
+| 树 done 而这份工作有没有落地读不出来（树的 HEAD 读不出、`merge-base` 失败） | 登记 `worktree:…` 为判不了，同时**按 ERROR** 报 WKT001：判不了不许冒充「已落地」那一档。这一支没在语料里造假夹具（要故意把 git 弄坏），靠当场替换 `tree_state` 复现，数字记在本批门记录 |
+| WKT001 的 WARN 档（这份工作已落地，只差撤树）要不要按「限时而非禁止」升成 ERROR | 现在不升：这一域没有年龄事实源——树的 HEAD 提交时间量的是活儿什么时候做完，不是任务什么时候被判定结束；看板条目也没有 done_at。`stale` 与 `state` 已各算一份天数，再算就是第三处抄本。欠账挂看板 T-15 |
+| 一条门禁给出的出路到底走不走得通 | 判不了：机器能判「消息里有没有 code」，判不了「照着消息做能不能做完」。本批就是靠这条人判抓出来的——WKT001 让人「撤树或改回 doing」，而那两步各自被别的门禁挡住。做法写进 lessons L-10：新加或收紧断言时，把它给的两条出路真走一遍 |
 | 排除本地产物目录后没有 .go 可判 | BLD004 报 WARN 并登记 `build:gofmt`；「扫到 0 个文件」与「格式全对」长得一模一样 |
 | 慢域被跳过 | 打印「已跳过慢域（N）：build——不是通过」，退出码不受影响 |
 | `make help` 里每条命令是否真的跑得通 | `cmd` 域只判 target 与命令表一一对应，不执行命令——判不了。做法是人逐条跑（改清单或改工具层之后必跑，lessons L-8 的现场就是 `make fmt` 炸而门禁全绿）；不拿「有 target」当「能跑」 |
