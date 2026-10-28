@@ -1,6 +1,7 @@
 package pub
 
 import (
+	"strconv"
 	"strings"
 	"vben/modules/sys/menu"
 )
@@ -56,7 +57,7 @@ func buildMenus(menus []menu.SysMenu) []RouterVo {
 
 	for _, menu := range menus {
 		// 构建路由名称
-		name := menu.Name + string(menu.Id)
+		name := menu.Name + strconv.FormatInt(menu.Id, 10)
 
 		// 创建路由对象
 		router := RouterVo{
@@ -86,7 +87,7 @@ func buildMenus(menus []menu.SysMenu) []RouterVo {
 			}
 		} else if isMenuFrame(menu) {
 			// 处理菜单框架情况
-			frameName := upperFirst(menu.Path) + string(menu.Id)
+			frameName := upperFirst(menu.Path) + strconv.FormatInt(menu.Id, 10)
 			//router.Meta = nil
 
 			children := RouterVo{
@@ -113,7 +114,7 @@ func buildMenus(menus []menu.SysMenu) []RouterVo {
 			router.Path = "/"
 
 			routerPath := innerLinkReplaceEach(menu.Path)
-			innerLinkName := upperFirst(routerPath) + string(menu.Id)
+			innerLinkName := upperFirst(routerPath) + strconv.FormatInt(menu.Id, 10)
 
 			children := RouterVo{
 				Path: routerPath,

@@ -43,7 +43,7 @@ func connectMysql() {
 		Logger: newLogger,
 	})
 	if err != nil {
-		log.Printf("主数据库连接失败:", err)
+		log.Printf("主数据库连接失败: %v", err)
 		return
 	}
 

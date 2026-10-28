@@ -124,7 +124,7 @@ func GenBatchCode(table []string, fileName string) string {
 	autoData := make([]tools.GenTableVO, 0, len(table))
 
 	for _, v := range table {
-		log.Printf(v)
+		log.Print(v)
 		genTable := SelectGenTableByName(v)
 		/*测试数据*/
 		//genTable := tools.GenTable{
