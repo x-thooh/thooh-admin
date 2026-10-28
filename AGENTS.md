@@ -12,6 +12,7 @@
 
 | 命令 | 做什么 |
 | --- | --- |
+| `make help` | 列出这张表里的目标 |
 | `make init` | 装 git 钩子、建状态目录、生成代码库索引、跑 selftest |
 | `make check` | 门禁（跳过慢域 build）；退出码 0 才算过 |
 | `make check-all` | 门禁 + `go build`/`go vet`/`gofmt`/证据时效 |
@@ -21,7 +22,12 @@
 | `make evidence` | 把一次全量校验的完整输出存进 `.harness/deliverables/evidence/` |
 | `make selftest` | 反向测试：每条断言都要真的会报 |
 | `make build` / `vet` / `fmt` / `test` | Go 工具链 |
+| `make go-all` | build + vet（等价于 check-all 里的慢域） |
 | `make guide` | 重新生成 `.harness/codebase-guide/`（派生，禁手改） |
+| `make up` / `down` | 起停本地依赖（docker compose） |
+| `make clean` | 删派生目录与 go 构建缓存，不动状态目录 |
+
+这张表与 Makefile 的 target、磁盘上的脚本三方对账：`scope=cmd`。
 
 `GOPATH` 与 `GOPROXY` 在 Makefile 里钉死（GOPATH 在仓库外）。别在 shell 里改它：
 仓库内出现 `.go/` 目录时，一次 `git add -A` 就会把上万个模块缓存对象写进 `.git`。
@@ -43,7 +49,7 @@ web        前端构建产物（只入库结果，不入库源码）
 ## 硬规则
 
 1. 命令只走 `Makefile`；未注册的脚本一律不当命令用。跑脚本前先问「`make` 里有它吗」。
-   无断言（人判）：强度来自上面「常用命令」表与 `make help` 的清单一致性。
+   `scope=cmd`
 2. 加一个功能模块必须改两处：建目录（api.go/model.go/router.go + `func Init`）与
    `app/admin/router.go` 里 import + `alias.Init(e)`。漏一处路由静默不存在，编译照过。
    `scope=modules`

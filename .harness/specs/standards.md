@@ -10,17 +10,23 @@
 | 域 | 管什么 | 快/慢 | 文件 |
 | --- | --- | --- | --- |
 | `entry` | 入口文件、目录地图、派生索引 | 快 | `scripts/scopes/entry.py` |
+| `cmd` | 命令表 ↔ Makefile target ↔ 脚本文件三方对账 | 快 | `scripts/scopes/cmd.py` |
+| `hooks` | 每个域的 `PLAN`/`REFLECT` 与 scopes/ 源码逐条对账 | 快 | `scripts/scopes/hooks.py` |
+| `budget` | 工具层按角色的行数额度 | 快 | `scripts/scopes/budget.py` |
 | `modules` | 功能模块 ↔ `app/admin/router.go` 双向对账 | 快 | `scripts/scopes/modules.py` |
 | `secret` | 凭据入库、弱默认、本地覆盖文件 | 快 | `scripts/scopes/secret.py` |
 | `stale` | swagger 三方一致、web 产物引用、生成物时效 | 快 | `scripts/scopes/stale.py` |
 | `build` | go build / vet / gofmt / go 指令 / 证据时效 | 慢 | `scripts/scopes/build.py` |
 | `baseline` | 账本格式、豁免保质期、总数只减不增 | 快 | `scripts/scopes/baseline.py` |
 
+每个域一份反向语料：`scripts/tests/cases/<域>.py`。`reverse.py` 的 `coverage()` 机器判两件事——
+注册域没有语料文件是失败，`REFLECT` 里的 code 既没样本又没进该域的 `UNCOVERED` 也是失败。
+
 ## 规则 ↔ 断言
 
 | # | 规则 | 断言 | 严重度 | 反向样本 |
 | --- | --- | --- | --- | --- |
-| 1 | 命令只从 `Makefile` 走 | 无断言（人判）。强度来源：`make help` 的清单与本文件「常用命令」表一一对应；第二期把它做成 `scripts` 域的断言（未注册脚本报错） | — | — |
+| 1 | 命令只从 `Makefile` 走 | `scope=cmd`：CMD001 表里有 target 里没有、CMD002 target 有表里没登记、CMD003 Makefile 指向不存在的脚本、CMD004 脚本既不当命令也不被引用、CMD005 样本为 0 或缺输入 | ERROR | CMD001–CMD005（各一条独立夹具）+ CMD00n 三方一致正对照 |
 | 2 | 模块要在两处登记 | `scope=modules`：MOD001 未注册、MOD002 死引用、MOD003 只 import 不挂、MOD004 形状不完整、MOD005 样本为 0 | ERROR | `make selftest`：MOD001–MOD005、MOD003c（注释里的挂载不算）、MOD00n 正对照 |
 | 3 | 提交前 `make check` 退出码 0；合并前 `make check-all` | `scope=build`：BLD003 编译/vet 失败、BLD005 未 gofmt；BLD001/BLD002 证据缺失与过期为 WARN（留痕是流程账，不当提交门）。`.harness/git-hooks/pre-commit` 由 `make init` 通过 `core.hooksPath` 装上，跑快域 | ERROR / WARN | BLD003、BLD005、BLD001、BLD002 + 两条正对照 |
 | 4 | go 指令不低于 `go_version_min` | `scope=build`：BLD006 | ERROR | BLD006 + BLD006n |
@@ -31,6 +37,16 @@
 | 9 | 结论 = 命令 + 退出码 + 完整输出 | `scope=build`：BLD001/BLD002 管证据在不在、新不新；证据内容本身是不是真的判不了（脚本不能替人相信一句话） | WARN | BLD001、BLD002 |
 | 10 | 一次一类修改、工作树干净 | 无断言（人判）。任务是否在 worktree 里做，别人机器上判不了；写在这里靠下一次 `git status` | — | — |
 | 11 | 判不了就说判不了 | 各域的样本守卫（MOD005 / SEC004 / STL005 / ENT008）+ `not_applicable` 清单；BLD004 工具链缺失走 WARN | ERROR / WARN | 每条样本守卫都在 selftest 里单独造一例「目录为空」 |
+
+## 工具层自家规矩 ↔ 断言
+
+这三条管的是 harness 自己，不面向业务代码，所以不占上面「硬规则」的编号——但一样要有断言。
+
+| 规矩 | 断言 | 严重度 | 反向样本 |
+| --- | --- | --- | --- |
+| 每个域必须说清自己管什么（`PLAN`）与能报哪些 code（`REFLECT`），且与源码逐条一致 | `scope=hooks`：HOOK001 registry ↔ scopes/ 双向、HOOK002 空登记、HOOK003 登记了源码里没有的、HOOK004 源码会报但没登记、HOOK005 共享 helper 提到没人认领的 code | ERROR | HOOK001/001b/001c、HOOK002、HOOK003、HOOK004、HOOK005 + HOOK00n 干净树正对照 |
+| 加断言的同时加语料；注册域不许没有 `cases/<域>.py` | `make selftest` 的 `coverage()`（不是 scope：它判的是语料库自己，找不到「违规仓库」去扫） | selftest 退出码 1 | 由 reverse.py 自检：删一个 `cases/<域>.py` 立刻红 |
+| 工具层文件按角色有行数额度，超限即该拆 | `scope=budget`：BUDGET001 超额度、BUDGET002 额度表坏或样本为 0 | ERROR | BUDGET001、BUDGET002、BUDGET002b（0 样本）+ BUDGET00n 正对照 |
 
 ## 判不了（不是通过）
 
