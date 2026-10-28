@@ -2,10 +2,11 @@ package pub
 
 import (
 	"net/http"
-	"vben/app/core/utils/R"
-	"vben/common/r"
-	"vben/modules/sys/menu"
-	"vben/pkg/mysql"
+
+	"github.com/x-thooh/thooh-admin/app/core/utils/R"
+	"github.com/x-thooh/thooh-admin/common/r"
+	"github.com/x-thooh/thooh-admin/modules/sys/menu"
+	"github.com/x-thooh/thooh-admin/pkg/mysql"
 
 	"github.com/gin-gonic/gin"
 )
@@ -45,7 +46,7 @@ func GetUser(c *gin.Context) {
 	user.Orgna = "XX科技"
 	user.Nicna = "管理员"
 	user.Monum = "13812345678"
-	user.Avatar = "https://unpkg.com/@vbenjs/static-source@0.1.7/source/avatar-v1.webp"
+	user.Avatar = "https://unpkg.com/@github.com/x-thooh/thooh-adminjs/static-source@0.1.7/source/avatar-v1.webp"
 	vo.User = user
 	vo.Roles = append(vo.Roles, "superadmin")
 	vo.Perms = append(vo.Perms, "*:*:*")

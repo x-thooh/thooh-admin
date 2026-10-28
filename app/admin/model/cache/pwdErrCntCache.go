@@ -1,11 +1,11 @@
 package cache
 
 import (
+	"github.com/x-thooh/thooh-admin/app/admin/model/constants"
+	"github.com/x-thooh/thooh-admin/common/config"
+	"github.com/x-thooh/thooh-admin/pkg/cache/redisCache"
 	"strconv"
 	"time"
-	"vben/app/admin/model/constants"
-	"vben/common/config"
-	"vben/pkg/cache/redisCache"
 )
 
 // GetPasswordTryCount	获取输入次数

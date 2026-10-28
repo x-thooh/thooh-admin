@@ -4,10 +4,11 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"vben/app/core/utils/R"
-	"vben/common/r"
-	"vben/common/utils"
-	"vben/pkg/mysql"
+
+	"github.com/x-thooh/thooh-admin/app/core/utils/R"
+	"github.com/x-thooh/thooh-admin/common/r"
+	"github.com/x-thooh/thooh-admin/common/utils"
+	"github.com/x-thooh/thooh-admin/pkg/mysql"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"

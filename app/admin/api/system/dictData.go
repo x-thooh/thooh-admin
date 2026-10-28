@@ -1,14 +1,14 @@
 package system
 
 import (
+	"github.com/x-thooh/thooh-admin/app/admin/model/cache"
+	"github.com/x-thooh/thooh-admin/app/admin/model/system"
+	"github.com/x-thooh/thooh-admin/app/admin/model/tools"
+	"github.com/x-thooh/thooh-admin/app/core/utils"
+	"github.com/x-thooh/thooh-admin/app/core/utils/R"
 	"net/http"
 	"strconv"
 	"time"
-	"vben/app/admin/model/cache"
-	"vben/app/admin/model/system"
-	"vben/app/admin/model/tools"
-	"vben/app/core/utils"
-	"vben/app/core/utils/R"
 
 	"github.com/gin-gonic/gin"
 )

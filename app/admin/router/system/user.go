@@ -2,8 +2,8 @@ package system
 
 import (
 	"github.com/gin-gonic/gin"
-	"vben/app/admin/api/system"
-	"vben/app/core/utils/jwt"
+	"github.com/x-thooh/thooh-admin/app/admin/api/system"
+	"github.com/x-thooh/thooh-admin/app/core/utils/jwt"
 )
 
 func InitUser(e *gin.Engine) {

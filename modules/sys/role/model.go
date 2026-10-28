@@ -1,9 +1,9 @@
 package role
 
 import (
-	"vben/common/json/boolx"
-	"vben/common/json/timex"
-	"vben/common/r"
+	"github.com/x-thooh/thooh-admin/common/json/boolx"
+	"github.com/x-thooh/thooh-admin/common/json/timex"
+	"github.com/x-thooh/thooh-admin/common/r"
 )
 
 type SysRole struct {

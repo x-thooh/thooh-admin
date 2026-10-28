@@ -6,14 +6,14 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
+	"github.com/x-thooh/thooh-admin/app/admin/model/constants"
+	"github.com/x-thooh/thooh-admin/app/core/utils/R"
+	"github.com/x-thooh/thooh-admin/app/core/utils/jwt"
+	"github.com/x-thooh/thooh-admin/pkg/cache/redisCache"
 	"io"
 	"net/http"
 	"strings"
 	"time"
-	"vben/app/admin/model/constants"
-	"vben/app/core/utils/R"
-	"vben/app/core/utils/jwt"
-	"vben/pkg/cache/redisCache"
 )
 
 type RequestInfo struct {

@@ -2,8 +2,8 @@ package monitor
 
 import (
 	"github.com/gin-gonic/gin"
-	"vben/app/admin/api/monitor"
-	"vben/app/core/utils/jwt"
+	"github.com/x-thooh/thooh-admin/app/admin/api/monitor"
+	"github.com/x-thooh/thooh-admin/app/core/utils/jwt"
 )
 
 func InitCache(e *gin.Engine) {

@@ -3,7 +3,8 @@ package ristrettoCache
 import (
 	"errors"
 	"time"
-	"vben/pkg/ristretto"
+
+	"github.com/x-thooh/thooh-admin/pkg/ristretto"
 )
 
 type ristrettoCache struct {

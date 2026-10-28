@@ -2,7 +2,8 @@ package html
 
 import (
 	"time"
-	"vben/app/html/web"
+
+	"github.com/x-thooh/thooh-admin/app/html/web"
 
 	cache "github.com/chenyahui/gin-cache"
 	"github.com/chenyahui/gin-cache/persist"

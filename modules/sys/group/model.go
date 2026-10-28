@@ -1,8 +1,8 @@
 package group
 
 import (
-	"vben/common/json/timex"
-	"vben/modules/sys/actor"
+	"github.com/x-thooh/thooh-admin/common/json/timex"
+	"github.com/x-thooh/thooh-admin/modules/sys/actor"
 )
 
 type SysGroup struct {

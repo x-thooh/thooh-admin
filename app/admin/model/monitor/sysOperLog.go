@@ -1,14 +1,15 @@
 package monitor
 
 import (
-	"github.com/gin-gonic/gin"
 	"strconv"
 	"time"
-	"vben/app/admin/model/system"
-	"vben/app/admin/model/tools"
-	utils2 "vben/app/core/utils"
-	"vben/app/core/utils/R"
-	"vben/pkg/mysql"
+
+	"github.com/gin-gonic/gin"
+	"github.com/x-thooh/thooh-admin/app/admin/model/system"
+	"github.com/x-thooh/thooh-admin/app/admin/model/tools"
+	utils2 "github.com/x-thooh/thooh-admin/app/core/utils"
+	"github.com/x-thooh/thooh-admin/app/core/utils/R"
+	"github.com/x-thooh/thooh-admin/pkg/mysql"
 )
 
 // SysOperLog model：数据库字段

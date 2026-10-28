@@ -2,8 +2,9 @@ package auth
 
 import (
 	"net/http"
-	"vben/app/core/utils/R"
-	lolog "vben/modules/mon/login"
+
+	"github.com/x-thooh/thooh-admin/app/core/utils/R"
+	lolog "github.com/x-thooh/thooh-admin/modules/mon/login"
 
 	"github.com/gin-gonic/gin"
 )

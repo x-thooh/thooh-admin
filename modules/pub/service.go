@@ -2,7 +2,8 @@ package pub
 
 import (
 	"strings"
-	"vben/modules/sys/menu"
+
+	"github.com/x-thooh/thooh-admin/modules/sys/menu"
 )
 
 const (

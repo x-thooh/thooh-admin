@@ -1,7 +1,7 @@
 package tools
 
 import (
-	"vben/app/core/utils"
+	"github.com/x-thooh/thooh-admin/app/core/utils"
 )
 
 type GenTable struct {

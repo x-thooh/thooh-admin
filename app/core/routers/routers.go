@@ -3,13 +3,14 @@ package routers
 import (
 	"io/ioutil"
 	"strings"
-	"vben/app/admin"
-	"vben/app/core/utils"
-	error2 "vben/app/core/utils/error"
-	"vben/app/html"
-	"vben/common/config"
-	_ "vben/docs"
-	"vben/pkg/logs"
+
+	"github.com/x-thooh/thooh-admin/app/admin"
+	"github.com/x-thooh/thooh-admin/app/core/utils"
+	error2 "github.com/x-thooh/thooh-admin/app/core/utils/error"
+	"github.com/x-thooh/thooh-admin/app/html"
+	"github.com/x-thooh/thooh-admin/common/config"
+	_ "github.com/x-thooh/thooh-admin/docs"
+	"github.com/x-thooh/thooh-admin/pkg/logs"
 
 	"github.com/gin-contrib/multitemplate"
 	"github.com/gin-gonic/gin"

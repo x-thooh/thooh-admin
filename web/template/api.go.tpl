@@ -3,11 +3,11 @@ package {{.ModuleName}}
 import (
     "strconv"
 	"github.com/gin-gonic/gin"
-	"vben/app/admin/model/tools"
+	"github.com/x-thooh/thooh-admin/app/admin/model/tools"
 	"log"
 	"net/http"
-	"vben/app/pkg/utils/R"
-    model "vben/app/admin/model/{{.ModuleName}}"
+	"github.com/x-thooh/thooh-admin/app/pkg/utils/R"
+    model "github.com/x-thooh/thooh-admin/app/admin/model/{{.ModuleName}}"
 )
 
 func Create{{.ClassName}}(context *gin.Context) {

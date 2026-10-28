@@ -3,8 +3,8 @@ package utils
 import (
 	"database/sql/driver"
 	"fmt"
+	"github.com/x-thooh/thooh-admin/app/admin/model/constants"
 	"time"
-	"vben/app/admin/model/constants"
 )
 
 type JsonTime struct {

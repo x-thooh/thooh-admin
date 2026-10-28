@@ -2,8 +2,8 @@ package tools
 
 import (
 	"github.com/gin-gonic/gin"
-	"vben/app/admin/api/tools"
-	"vben/app/core/utils/jwt"
+	"github.com/x-thooh/thooh-admin/app/admin/api/tools"
+	"github.com/x-thooh/thooh-admin/app/core/utils/jwt"
 )
 
 func InitCommon(e *gin.Engine) {

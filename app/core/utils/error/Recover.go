@@ -5,7 +5,8 @@ import (
 	"log"
 	"net/http"
 	"runtime/debug"
-	"vben/app/admin/service/monitor"
+
+	"github.com/x-thooh/thooh-admin/app/admin/service/monitor"
 
 	"github.com/gin-gonic/gin"
 )

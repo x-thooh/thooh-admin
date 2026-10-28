@@ -1,0 +1,10 @@
+[tools]
+go = "1.25"
+lefthook = "2.1.11"
+golangci-lint = "2.12.2"
+
+[env]
+GOPROXY = "https://goproxy.cn,direct"
+GOPATH = "{{config_root}}/.go"
+GOBIN = "{{config_root}}/.go/bin"
+_.path = ["{{config_root}}/.go/bin"]

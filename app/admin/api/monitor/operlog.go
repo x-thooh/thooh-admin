@@ -1,13 +1,14 @@
 package monitor
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
-	"vben/app/admin/model/constants"
-	"vben/app/admin/model/monitor"
-	"vben/app/admin/model/tools"
-	"vben/app/core/utils"
+
+	"github.com/gin-gonic/gin"
+	"github.com/x-thooh/thooh-admin/app/admin/model/constants"
+	"github.com/x-thooh/thooh-admin/app/admin/model/monitor"
+	"github.com/x-thooh/thooh-admin/app/admin/model/tools"
+	"github.com/x-thooh/thooh-admin/app/core/utils"
 )
 
 func ListOperlog(context *gin.Context) {

@@ -2,13 +2,14 @@ package monitor
 
 import (
 	"encoding/json"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
-	"vben/app/admin/model/constants"
-	"vben/app/admin/model/monitor"
-	"vben/app/core/utils/R"
-	"vben/pkg/cache/redisCache"
+
+	"github.com/gin-gonic/gin"
+	"github.com/x-thooh/thooh-admin/app/admin/model/constants"
+	"github.com/x-thooh/thooh-admin/app/admin/model/monitor"
+	"github.com/x-thooh/thooh-admin/app/core/utils/R"
+	"github.com/x-thooh/thooh-admin/pkg/cache/redisCache"
 )
 
 func ListOnLine(context *gin.Context) {

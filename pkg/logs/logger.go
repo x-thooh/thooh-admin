@@ -5,10 +5,11 @@ import (
 	"os"
 	"strconv"
 	"time"
-	"vben/app/admin/model/constants"
-	"vben/app/admin/model/monitor"
-	"vben/app/core/utils"
-	config2 "vben/common/config"
+
+	"github.com/x-thooh/thooh-admin/app/admin/model/constants"
+	"github.com/x-thooh/thooh-admin/app/admin/model/monitor"
+	"github.com/x-thooh/thooh-admin/app/core/utils"
+	config2 "github.com/x-thooh/thooh-admin/common/config"
 
 	"github.com/fatih/color"
 	"github.com/gin-gonic/gin"
@@ -228,9 +229,9 @@ func Poster() {
                             __/ |                              
                            |___/                               
 ` +
-		"Author:		vben\r\n" +
+		"Author:		github.com/x-thooh/thooh-admin\r\n" +
 		"Version:	" + config2.ProjectVersion + "\r\n" +
 		"MiniGO_SDK: 	" + config2.MinGoVersion + "\r\n" +
-		"Link: https://gitee.com/vben/vben-go"
+		"Link: https://gitee.com/github.com/x-thooh/thooh-admin/github.com/x-thooh/thooh-admin-go"
 	fg.Println(logo)
 }

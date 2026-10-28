@@ -5,7 +5,7 @@
  Source Server Type    : MySQL
  Source Server Version : 80039 (8.0.39)
  Source Host           : localhost:3306
- Source Schema         : vben-go
+ Source Schema         : thooh-go
 
  Target Server Type    : MySQL
  Target Server Version : 80039 (8.0.39)
@@ -1039,8 +1039,8 @@ CREATE TABLE `sys_user`  (
 -- ----------------------------
 -- Records of sys_user
 -- ----------------------------
-INSERT INTO `sys_user` VALUES ('u1', NULL, NULL, NULL, b'1', b'0', '2026-01-20 15:03:01.014000', NULL, 'vben@qq.com', '1', NULL, NULL, NULL, NULL, NULL, '13812345678', '管理员', '管理员不给修改', NULL, 'o1000', 1, '$2a$10$09f8rxsX4tbj1CZla2MSOuiwHwp5QAPUzbp5whnoZEFK4/xplNwZq', '_o1000_u1_', NULL, NULL, NULL, 'admin');
-INSERT INTO `sys_user` VALUES ('u2', NULL, NULL, NULL, b'1', b'0', '2026-01-20 15:03:01.014000', NULL, NULL, '2', NULL, NULL, NULL, NULL, NULL, '13912345678', '小狐狸', NULL, NULL, 'o1000', 2, '$2a$10$09f8rxsX4tbj1CZla2MSOuiwHwp5QAPUzbp5whnoZEFK4/xplNwZq', '_o1000_u2_', NULL, NULL, NULL, 'vben');
+INSERT INTO `sys_user` VALUES ('u1', NULL, NULL, NULL, b'1', b'0', '2026-01-20 15:03:01.014000', NULL, 'thooh@qq.com', '1', NULL, NULL, NULL, NULL, NULL, '13812345678', '管理员', '管理员不给修改', NULL, 'o1000', 1, '$2a$10$09f8rxsX4tbj1CZla2MSOuiwHwp5QAPUzbp5whnoZEFK4/xplNwZq', '_o1000_u1_', NULL, NULL, NULL, 'admin');
+INSERT INTO `sys_user` VALUES ('u2', NULL, NULL, NULL, b'1', b'0', '2026-01-20 15:03:01.014000', NULL, NULL, '2', NULL, NULL, NULL, NULL, NULL, '13912345678', '小狐狸', NULL, NULL, 'o1000', 2, '$2a$10$09f8rxsX4tbj1CZla2MSOuiwHwp5QAPUzbp5whnoZEFK4/xplNwZq', '_o1000_u2_', NULL, NULL, NULL, 'thooh');
 INSERT INTO `sys_user` VALUES ('u3', NULL, NULL, NULL, b'1', b'0', '2026-01-20 15:03:01.014000', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '张三', NULL, NULL, 'o1000', 3, '$2a$10$09f8rxsX4tbj1CZla2MSOuiwHwp5QAPUzbp5whnoZEFK4/xplNwZq', '_o1000_u3_', NULL, NULL, NULL, 'zs');
 INSERT INTO `sys_user` VALUES ('u4', NULL, NULL, NULL, b'1', b'0', '2026-01-20 15:03:01.014000', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '李四', NULL, NULL, 'o1100', 4, '$2a$10$09f8rxsX4tbj1CZla2MSOuiwHwp5QAPUzbp5whnoZEFK4/xplNwZq', '_o1000_o1100_u4_', NULL, NULL, NULL, 'ls');
 INSERT INTO `sys_user` VALUES ('u5', NULL, NULL, NULL, b'1', b'0', '2026-01-20 15:03:01.014000', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '王五', NULL, NULL, 'o1110', 5, '$2a$10$09f8rxsX4tbj1CZla2MSOuiwHwp5QAPUzbp5whnoZEFK4/xplNwZq', '_o1000_o1100_o1110_u5_', NULL, NULL, NULL, 'ww');

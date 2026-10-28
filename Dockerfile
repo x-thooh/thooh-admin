@@ -1,7 +1,7 @@
 # 基础镜像
 FROM alpine:3.12
 # 维护者
-MAINTAINER 乐观开发者
+MAINTAINER RTHOOH
 # docker build 时执行命令 - 创建目录
 RUN mkdir -p "/data/app" \
 && ln -sf /dev/stdout /data/app/service.log

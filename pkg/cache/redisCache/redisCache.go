@@ -3,7 +3,8 @@ package redisCache
 import (
 	"context"
 	"time"
-	"vben/pkg/redis"
+
+	"github.com/x-thooh/thooh-admin/pkg/redis"
 )
 
 type redisCache struct {

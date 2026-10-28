@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"sync"
 	"time"
-	"vben/app/admin/model/monitor"
+
+	"github.com/x-thooh/thooh-admin/app/admin/model/monitor"
 
 	"github.com/robfig/cron"
 )

@@ -2,9 +2,9 @@ package redis
 
 import (
 	"context"
+	"github.com/x-thooh/thooh-admin/common/config"
 	"sync"
 	"time"
-	"vben/common/config"
 
 	"github.com/go-redis/redis/v8"
 )

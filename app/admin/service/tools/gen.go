@@ -10,12 +10,13 @@ import (
 	"strings"
 	"text/template"
 	"time"
-	"vben/app/admin/model/system"
-	"vben/app/admin/model/tools"
-	utils2 "vben/app/core/utils"
-	"vben/app/core/utils/R"
-	"vben/pkg/mysql"
-	"vben/pkg/strcase"
+
+	"github.com/x-thooh/thooh-admin/app/admin/model/system"
+	"github.com/x-thooh/thooh-admin/app/admin/model/tools"
+	utils2 "github.com/x-thooh/thooh-admin/app/core/utils"
+	"github.com/x-thooh/thooh-admin/app/core/utils/R"
+	"github.com/x-thooh/thooh-admin/pkg/mysql"
+	"github.com/x-thooh/thooh-admin/pkg/strcase"
 
 	"github.com/jinzhu/copier"
 	"github.com/wxnacy/wgo/file"
@@ -114,7 +115,7 @@ func GenBatchCode(table []string, fileName string) string {
 	// 运行路径
 	pwd, _ := os.Getwd()
 	dir := pwd + "/view/template"
-	dst := pwd + "/view/template/vben-go"
+	dst := pwd + "/view/template/github.com/x-thooh/thooh-admin-go"
 
 	if err := DirExistAndMake(dst); err != nil {
 		panic(R.ReturnFailMsg(err.Error()))

@@ -1,12 +1,12 @@
 package jwt
 
 import (
+	"github.com/x-thooh/thooh-admin/app/admin/model/constants"
+	config2 "github.com/x-thooh/thooh-admin/common/config"
+	"github.com/x-thooh/thooh-admin/pkg/cache/redisCache"
 	"net/http"
 	"strings"
 	"time"
-	"vben/app/admin/model/constants"
-	config2 "vben/common/config"
-	"vben/pkg/cache/redisCache"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
@@ -18,7 +18,7 @@ func CreateToken(UserName string, UserId int, DeptId int, uuid string) (string, 
 		"user_id":   UserId,
 		"dept_id":   DeptId,
 		"exp":       time.Now().Unix() + int64(config2.Jwt.JwtTtl),
-		"iss":       "vben-go",
+		"iss":       "github.com/x-thooh/thooh-admin-go",
 		"uuid":      uuid,
 	})
 

@@ -1,8 +1,8 @@
 package system
 
 import (
-	"vben/app/admin/model/tools"
-	"vben/pkg/mysql"
+	"github.com/x-thooh/thooh-admin/app/admin/model/tools"
+	"github.com/x-thooh/thooh-admin/pkg/mysql"
 )
 
 // SysUserRole model：数据库字段
