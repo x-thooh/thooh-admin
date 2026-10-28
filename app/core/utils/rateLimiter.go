@@ -2,12 +2,12 @@ package utils
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/x-thooh/thooh-admin/app/admin/model/constants"
+	"github.com/x-thooh/thooh-admin/app/core/utils/R"
+	"github.com/x-thooh/thooh-admin/pkg/cache/redisCache"
 	"log"
 	"net/http"
 	"strings"
-	"vben/app/admin/model/constants"
-	"vben/app/core/utils/R"
-	"vben/pkg/cache/redisCache"
 )
 
 // 定义Lua限流脚本

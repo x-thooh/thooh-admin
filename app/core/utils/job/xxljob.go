@@ -1,8 +1,8 @@
 package job
 
 import (
+	"github.com/x-thooh/thooh-admin/common/config"
 	"strconv"
-	"vben/common/config"
 
 	"github.com/xxl-job/xxl-job-executor-go"
 	"github.com/xxl-job/xxl-job-executor-go/example/task"

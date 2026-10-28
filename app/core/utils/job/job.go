@@ -6,7 +6,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"vben/common/config"
+
+	"github.com/x-thooh/thooh-admin/common/config"
 )
 
 func GetXxlJobCookie() []byte {

@@ -1,15 +1,15 @@
 package dict
 
 import (
+	"github.com/x-thooh/thooh-admin/app/core/utils/R"
+	"github.com/x-thooh/thooh-admin/common/json/timex"
+	"github.com/x-thooh/thooh-admin/common/r"
+	"github.com/x-thooh/thooh-admin/common/utils"
+	"github.com/x-thooh/thooh-admin/pkg/mysql"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
-	"vben/app/core/utils/R"
-	"vben/common/json/timex"
-	"vben/common/r"
-	"vben/common/utils"
-	"vben/pkg/mysql"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"

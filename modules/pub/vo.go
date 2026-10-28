@@ -1,8 +1,8 @@
 package pub
 
 import (
+	"github.com/x-thooh/thooh-admin/common/json/boolx"
 	"time"
-	"vben/common/json/boolx"
 )
 
 type UserInfoVo struct {

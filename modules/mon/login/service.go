@@ -2,18 +2,19 @@ package lolog
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
-	"vben/app/core/utils/R"
-	"vben/common/json/boolx"
-	"vben/common/json/timex"
-	"vben/common/utils"
-	"vben/pkg/mysql"
+
+	"github.com/x-thooh/thooh-admin/app/core/utils/R"
+	"github.com/x-thooh/thooh-admin/common/json/boolx"
+	"github.com/x-thooh/thooh-admin/common/json/timex"
+	"github.com/x-thooh/thooh-admin/common/utils"
+	"github.com/x-thooh/thooh-admin/pkg/mysql"
 
 	"github.com/gin-gonic/gin"
-	"github.com/goccy/go-json"
 	useragent "github.com/wenlng/go-user-agent"
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"golang.org/x/text/transform"

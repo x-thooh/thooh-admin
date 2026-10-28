@@ -3,10 +3,11 @@ package system
 import (
 	"sort"
 	"time"
-	"vben/app/admin/model/tools"
-	"vben/app/core/utils"
-	"vben/app/core/utils/R"
-	"vben/pkg/mysql"
+
+	"github.com/x-thooh/thooh-admin/app/admin/model/tools"
+	"github.com/x-thooh/thooh-admin/app/core/utils"
+	"github.com/x-thooh/thooh-admin/app/core/utils/R"
+	"github.com/x-thooh/thooh-admin/pkg/mysql"
 )
 
 // SysDictData model：数据库字段

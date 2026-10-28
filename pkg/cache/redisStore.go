@@ -3,8 +3,9 @@ package cache
 import (
 	"fmt"
 	"time"
-	"vben/app/admin/model/constants"
-	"vben/pkg/cache/redisCache"
+
+	"github.com/x-thooh/thooh-admin/app/admin/model/constants"
+	"github.com/x-thooh/thooh-admin/pkg/cache/redisCache"
 )
 
 type RedisStore struct {

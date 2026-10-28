@@ -1,4 +1,4 @@
-<div align="center"><h1 align="center">vben-go</h1></div>
+<div align="center"><h1 align="center">thooh-go</h1></div>
 <div align="center"><h3 align="center">一个开箱即用的通用开发平台GO语言版</h3></div>
 
 # 🍿 相关地址
@@ -7,11 +7,11 @@
 * 移动端体验地址 ：[http://8.153.168.178/app/](http://8.153.168.178/app/)
 * 联系方式（加微信后可找小狐狸拉进交流群）：
 
-![输入图片说明](https://gitee.com/vben/vben-app/raw/master/docs/wx.jpg "微信联系方式")
+![输入图片说明](https://gitee.com/thooh/thooh-app/raw/master/docs/wx.jpg "微信联系方式")
 
 
 # 🍟 概述
-* 前端采用Vue3、Element Plus，基于vben5前端项目修改。
+* 前端采用Vue3、Element Plus，基于thooh5前端项目修改。
 * 后端参考学习的`乐观开发者`的 [https://gitee.com/OptimisticDevelopers/Ruoyi-Go](https://gitee.com/OptimisticDevelopers/Ruoyi-Go)
 * 后端采用go & gin & Jwt & gorm & mysql & copier & redis & gin-cache && xxl-job。
 * 权限认证使用OAuth2 & Jwt，支持多终端认证系统。
@@ -28,8 +28,8 @@ go mod tidy
 在config.yaml文件中配置开发环境的数据库和redis
 
 # 运行sql文件
-1.新建数据库vben-go(默认，可修改)
-2.使用命令或数据库连接工具运行根目录下的vben-go.sql
+1.新建数据库thooh-go(默认，可修改)
+2.使用命令或数据库连接工具运行根目录下的thooh-go.sql
 
 # 运行后端
 go run main.go
@@ -61,7 +61,7 @@ go run main.go
 
 # 💐 特别鸣谢
 - 👉 乐观开发者：[https://gitee.com/OptimisticDevelopers/Ruoyi-Go](https://gitee.com/OptimisticDevelopers/Ruoyi-Go)
-- 👉 Vben-Admin：[https://vvbin.cn/doc-next](https://vvbin.cn/doc-next)
+- 👉 thooh-Admin：[https://vvbin.cn/doc-next](https://vvbin.cn/doc-next)
 - 👉 vxe-table：[https://gitee.com/xuliangzhan_admin/vxe-table](https://gitee.com/xuliangzhan_admin/vxe-table)
 - 👉 VForm：[https://www.vform666.com](https://www.vform666.com/)
 

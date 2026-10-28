@@ -1,8 +1,8 @@
 package {{.ModuleName}}
 
 import (
-    "vben/app/pkg/utils"
-    "vben/app/pkg/utils/R"
+    "github.com/x-thooh/thooh-admin/app/pkg/utils"
+    "github.com/x-thooh/thooh-admin/app/pkg/utils/R"
 )
 
 // Model {{.Table_Name}}  {{.TableComment}}

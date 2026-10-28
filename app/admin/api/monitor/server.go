@@ -1,9 +1,10 @@
 package monitor
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
-	"vben/app/admin/model/monitor"
+
+	"github.com/gin-gonic/gin"
+	"github.com/x-thooh/thooh-admin/app/admin/model/monitor"
 )
 
 func ServerData(context *gin.Context) {

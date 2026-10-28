@@ -1,10 +1,10 @@
 package cache
 
 import (
-	"vben/app/admin/model/constants"
-	"vben/app/admin/model/system"
-	"vben/app/admin/model/tools"
-	"vben/pkg/cache/redisCache"
+	"github.com/x-thooh/thooh-admin/app/admin/model/constants"
+	"github.com/x-thooh/thooh-admin/app/admin/model/system"
+	"github.com/x-thooh/thooh-admin/app/admin/model/tools"
+	"github.com/x-thooh/thooh-admin/pkg/cache/redisCache"
 )
 
 // InitSysConfigCache 初始化参数配置到redis

@@ -1,8 +1,8 @@
 package dictd
 
 import (
-	"vben/common/json/boolx"
-	"vben/common/json/timex"
+	"github.com/x-thooh/thooh-admin/common/json/boolx"
+	"github.com/x-thooh/thooh-admin/common/json/timex"
 )
 
 type ToolDictData struct {

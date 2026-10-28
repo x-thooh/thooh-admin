@@ -2,7 +2,7 @@ package monitor
 
 import (
 	"github.com/gin-gonic/gin"
-	"vben/app/admin/model/monitor"
+	"github.com/x-thooh/thooh-admin/app/admin/model/monitor"
 )
 
 var (

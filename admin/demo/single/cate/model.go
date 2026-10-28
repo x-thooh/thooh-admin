@@ -1,8 +1,8 @@
 package singlec
 
 import (
-	"vben/common/json/boolx"
-	"vben/common/json/timex"
+	"github.com/x-thooh/thooh-admin/common/json/boolx"
+	"github.com/x-thooh/thooh-admin/common/json/timex"
 )
 
 type DemoSingleCate struct {

@@ -13,7 +13,7 @@ database:
     port: 3306
     username: root
     password: 123456
-    dbname: vben-go
+    dbname: thooh-go
   secondary:
     enabled: false
     type: mysql
@@ -21,7 +21,7 @@ database:
     port: 3306
     username: root
     password: 123456
-    dbname: vben-go2
+    dbname: thooh-go2
   max_idle_conn: 10
   max_open_conn: 30
   conn_max_lifetime: 300

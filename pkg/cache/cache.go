@@ -2,9 +2,10 @@ package cache
 
 import (
 	"time"
-	"vben/pkg/cache/fileCache"
-	"vben/pkg/cache/redisCache"
-	"vben/pkg/cache/ristrettoCache"
+
+	"github.com/x-thooh/thooh-admin/pkg/cache/fileCache"
+	"github.com/x-thooh/thooh-admin/pkg/cache/redisCache"
+	"github.com/x-thooh/thooh-admin/pkg/cache/ristrettoCache"
 )
 
 /**

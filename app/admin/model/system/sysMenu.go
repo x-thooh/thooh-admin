@@ -4,9 +4,10 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"vben/app/admin/model/tools"
-	"vben/app/core/utils/R"
-	"vben/pkg/mysql"
+
+	"github.com/x-thooh/thooh-admin/app/admin/model/tools"
+	"github.com/x-thooh/thooh-admin/app/core/utils/R"
+	"github.com/x-thooh/thooh-admin/pkg/mysql"
 )
 
 // SysMenu model：数据库字段

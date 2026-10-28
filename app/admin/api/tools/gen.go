@@ -4,10 +4,11 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"vben/app/admin/model/tools"
-	tools2 "vben/app/admin/service/tools"
-	utils2 "vben/app/core/utils"
-	"vben/app/core/utils/R"
+
+	"github.com/x-thooh/thooh-admin/app/admin/model/tools"
+	tools2 "github.com/x-thooh/thooh-admin/app/admin/service/tools"
+	utils2 "github.com/x-thooh/thooh-admin/app/core/utils"
+	"github.com/x-thooh/thooh-admin/app/core/utils/R"
 
 	"github.com/gin-gonic/gin"
 )
@@ -111,7 +112,7 @@ func GenDownload(context *gin.Context) {
 func GenBatchCode(context *gin.Context) {
 	var tables = context.DefaultQuery("tables", "")
 	table := utils2.SplitStr(tables)
-	const fileName = "vben-go.zip"
+	const fileName = "thooh-go.zip"
 	filePath := tools2.GenBatchCode(table, fileName)
 	utils2.DonwloadFile(context, fileName, filePath)
 	utils2.DirExistAndDel(filePath)

@@ -1,8 +1,8 @@
 package system
 
 import (
-	"vben/app/core/utils/R"
-	"vben/pkg/mysql"
+	"github.com/x-thooh/thooh-admin/app/core/utils/R"
+	"github.com/x-thooh/thooh-admin/pkg/mysql"
 )
 
 type SysRoleDept struct {

@@ -5,7 +5,8 @@ import (
 	"os"
 	"sync"
 	"time"
-	"vben/common/config"
+
+	"github.com/x-thooh/thooh-admin/common/config"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"

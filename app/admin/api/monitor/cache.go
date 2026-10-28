@@ -1,11 +1,12 @@
 package monitor
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
-	"vben/app/admin/model/constants"
-	"vben/app/admin/model/monitor"
-	"vben/pkg/cache/redisCache"
+
+	"github.com/gin-gonic/gin"
+	"github.com/x-thooh/thooh-admin/app/admin/model/constants"
+	"github.com/x-thooh/thooh-admin/app/admin/model/monitor"
+	"github.com/x-thooh/thooh-admin/pkg/cache/redisCache"
 )
 
 func CacheHandler(context *gin.Context) {

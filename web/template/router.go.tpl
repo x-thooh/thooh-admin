@@ -2,8 +2,8 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
-	 api "vben/app/admin/api/{{.ModuleName}}"
-	"vben/app/pkg/utils"
+	 api "github.com/x-thooh/thooh-admin/app/admin/api/{{.ModuleName}}"
+	"github.com/x-thooh/thooh-admin/app/pkg/utils"
 )
 
 func init{{.ClassName}}(e *gin.Engine) {

@@ -2,8 +2,9 @@ package utils
 
 import (
 	"image/color"
-	"vben/common/config"
-	"vben/pkg/cache"
+
+	"github.com/x-thooh/thooh-admin/common/config"
+	"github.com/x-thooh/thooh-admin/pkg/cache"
 
 	"github.com/mojocn/base64Captcha"
 )

@@ -2,10 +2,11 @@ package pub
 
 import (
 	"net/http"
-	"vben/app/core/utils/R"
-	"vben/common/r"
-	"vben/modules/sys/menu"
-	"vben/pkg/mysql"
+
+	"github.com/x-thooh/thooh-admin/app/core/utils/R"
+	"github.com/x-thooh/thooh-admin/common/r"
+	"github.com/x-thooh/thooh-admin/modules/sys/menu"
+	"github.com/x-thooh/thooh-admin/pkg/mysql"
 
 	"github.com/gin-gonic/gin"
 )

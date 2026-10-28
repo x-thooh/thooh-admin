@@ -1,8 +1,8 @@
 package utils
 
 import (
+	"github.com/x-thooh/thooh-admin/app/admin/model/constants"
 	"time"
-	"vben/app/admin/model/constants"
 )
 
 func GetBeginAndEndTime(beginTime string, endTime string) (time.Time, time.Time) {

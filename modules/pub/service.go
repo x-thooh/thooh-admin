@@ -3,7 +3,8 @@ package pub
 import (
 	"strconv"
 	"strings"
-	"vben/modules/sys/menu"
+
+	"github.com/x-thooh/thooh-admin/modules/sys/menu"
 )
 
 const (

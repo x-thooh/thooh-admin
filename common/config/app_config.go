@@ -5,7 +5,8 @@ import (
 	"log"
 	"os"
 	"path"
-	"vben/app/core/utils/R"
+
+	"github.com/x-thooh/thooh-admin/app/core/utils/R"
 
 	"gopkg.in/yaml.v2"
 )
