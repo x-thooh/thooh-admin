@@ -109,10 +109,11 @@
     {
       "id": "T-12",
       "title": "派生索引与 gofmt 会把 .go/ 模块缓存当成仓库内容",
-      "status": "open",
+      "status": "done",
       "priority": "high",
-      "detail": "带 .go/ 缓存的树上 make guide 会写进 .go 与 .go/pkg 两条，换一棵干净检出就报 ENT007（实测 e38496c 的临时树）。同一个目录又让 gofmt -l . 退出码 2，被 BLD004 报成「工具链不可用」。修法：易变目录做成一份共享常量，gen_guide 与 build 都走它，别再各写一遍排除表。",
+      "detail": "带 .go/ 缓存的树上 make guide 会写进 .go 与 .go/pkg 两条，换一棵干净检出就报 ENT007（实测 e38496c 的临时树）。同一个目录又让 gofmt -l . 退出码 2（现树实测命中 1078 个路径，全在缓存里），被 BLD004 报成「工具链不可用」。修法已落地：本地产物清单收成 common.LOCAL_ARTIFACTS 一份，gen_guide、entry、secret、git_clean、build 五处都走它；反向样本 ENT007b / BLD005b / BLD004 钉住。见门记录 20261028T163745Z-local-artifacts、decisions D-16、lessons L-6/L-7。",
       "owner": "thooh",
+      "evidence": "path:.harness/deliverables/gates/20261028T163745Z-local-artifacts.md",
       "scope": "entry"
     }
   ]

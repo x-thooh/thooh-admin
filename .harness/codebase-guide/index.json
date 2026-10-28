@@ -3,14 +3,6 @@
   "depth": 2,
   "entries": [
     {
-      "path": ".go",
-      "kind": "dir"
-    },
-    {
-      "path": ".go/pkg",
-      "kind": "dir"
-    },
-    {
       "path": ".harness",
       "kind": "dir"
     },

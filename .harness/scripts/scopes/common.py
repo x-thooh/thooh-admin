@@ -316,8 +316,21 @@ def go_imports(path):
 WORD_ERR = re.compile(r"\berr\b")
 
 
-GUIDE_IGNORE = {".git", "__pycache__", ".idea", ".ruff_cache", "node_modules", ".venv"}
+LOCAL_ARTIFACTS = frozenset({".git", ".go", ".idea", ".ruff_cache", ".venv", "node_modules", "__pycache__"})
+"""机器本地产物：谁装了什么、缓存放在哪，都不算仓库内容。
+
+这份清单只此一处。此前它抄了四份（entry 的 SKIP_DIRS、common 的 GUIDE_IGNORE、secret 的
+SKIP_PARTS、git_clean 的 volatile），每份各自增删——漂移的现场：GUIDE_IGNORE 少了 `.go`，
+于是 `make guide` 把 303M 模块缓存的两条目录写进派生索引，换一棵干净检出 ENT007 判「索引过期」；
+同一个目录又让 `gofmt -l .` 退出码 2，被 BLD004 报成「工具链不可用」。环境的脏不是代码的错。
+"""
+
 GUIDE_SUFFIXES = {".py", ".json", ".md", ".sh", ".go", ".yaml", ".yml", ".toml"}
+
+
+def in_local_artifact(parts):
+    """路径的某一段落在本地产物目录里——整个子树就不该被扫。"""
+    return bool(set(parts) & LOCAL_ARTIFACTS)
 
 
 def build_guide(root, depth=2):
@@ -326,7 +339,7 @@ def build_guide(root, depth=2):
     entries = []
     for path in sorted(root.rglob("*")):
         rel = path.relative_to(root)
-        if any(part in GUIDE_IGNORE for part in rel.parts):
+        if in_local_artifact(rel.parts):
             continue
         if len(rel.parts) > depth:
             continue
@@ -386,8 +399,8 @@ def git_clean(root, targets=()):
         return "需要 git 仓库（没有回滚点就不许改文件）：先 git init 并提交一次"
     # 只看 root 子树：harness 可能只是某个大仓库里的一个目录，
     # 仓库别处的脏文件跟这次修复无关，不该拦。
-    # 易变路径不参与「干净」判定：否则每次都要被自己的缓存拦下（断言坑 #2）
-    volatile = (".go/", ".idea/", "__pycache__/")
+    # 本地产物不参与「干净」判定：否则每次都要被自己的缓存拦下（断言坑 #2）
+    volatile = tuple(f"{name}/" for name in sorted(LOCAL_ARTIFACTS))
     # 长形式 `:(exclude)`：`:!` 短形式在 Apple Git 2.50.1 上会报
     # `Unimplemented pathspec magic '_'`（本轮 `make fix` 实际撞到）。
     pathspec = [".", *[f":(exclude){v}" for v in volatile], *[f":(exclude){target}" for target in targets]]

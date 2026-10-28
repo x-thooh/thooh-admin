@@ -6,7 +6,8 @@
   BLD001  一条构建证据都没有（`.harness/deliverables/evidence/` 为空）
   BLD002  最近一次证据之后，.go / go.mod / go.sum 又变了——那份结论已经过期
   BLD003  `go build` 或 `go vet` 失败
-  BLD004  工具链或 git 不可用：报 WARN 并登记 not_applicable，不冒充绿（断言坑 #11 的另一半）
+  BLD004  判不了：Go 工具链/git 不可用，或排除本地产物目录后没有 .go 可扫——报 WARN 并登记
+          not_applicable，不冒充绿（断言坑 #11 的另一半）
   BLD005  `gofmt -l` 有输出——本仓库提交前必须已过 gofmt
   BLD006  go.mod 的 `go` 指令低于 config.json 的 `go_version_min`
 
@@ -19,7 +20,7 @@ import re
 import subprocess
 from pathlib import Path
 
-from .common import add, quality_get, rel_to
+from .common import add, in_local_artifact, quality_get, rel_to
 
 NAME = "build"
 PLAN = "慢域：go.mod 的工具链下限、`go build` / `go vet` 是否真的跑过并留下带 commit 的证据、" \
@@ -116,20 +117,38 @@ def check_evidence(root, findings, na):
             f"{len(changed)} 处（如 {changed[0]}）：结论过期，重跑 make evidence")
 
 
-def check_gofmt(root, findings):
-    p, out = sh(["gofmt", "-l", "."], root)
+def go_files(root):
+    """仓库自己的 .go 文件，排除本地产物目录（清单在 `common.LOCAL_ARTIFACTS`）。
+
+    `gofmt -l .` 会一路走进 `.go/pkg/mod/` 里的依赖源码，退出码 2 被下面报成
+    「工具链不可用」——那是环境的脏，不是代码的错。Makefile 的 `fmt` 用 find 排除同一批目录。
+    """
+    files = []
+    for path in sorted(Path(root).rglob("*.go")):
+        rel = path.relative_to(root)
+        # rglob 的 `*.go` 也匹配**目录**（`.go` 就是模块缓存本身），is_file 先筛掉；
+        # 再用全路径段判本地产物，只判父目录会漏掉根上那个 `.go` 自己。
+        if not path.is_file() or in_local_artifact(rel.parts):
+            continue
+        files.append(rel.as_posix())
+    return files
+
+
+def check_gofmt(root, findings, na):
+    files = go_files(root)
+    if not files:
+        add(findings, "WARN", NAME, ".", 1, "BLD004",
+            "排除本地产物目录后没有 .go 可判——这一条判不了，不是通过")
+        na.append("build:gofmt")
+        return
+    p, out = sh(["gofmt", "-l", *files], root)
     if p is None:
         add(findings, "WARN", NAME, ".", 1, "BLD004", f"gofmt 不可用：{out}")
         return
     if p.returncode != 0:
         add(findings, "WARN", NAME, ".", 1, "BLD004", f"gofmt 退出码 {p.returncode}：{head(out)}")
         return
-    offenders = [
-        ln.strip().lstrip("./")
-        for ln in out.splitlines()
-        if ln.strip() and not any(part.startswith(".") or part.startswith("_") for part in Path(ln.strip()).parts)
-    ]
-    for rel in offenders:
+    for rel in (ln.strip() for ln in out.splitlines() if ln.strip()):
         add(findings, "ERROR", NAME, rel, 1, "BLD005", "未过 gofmt：跑 gofmt -w 再提交")
 
 
@@ -157,6 +176,6 @@ def run(ctx, findings):
     quality = ctx.get("quality") or {}
     na = ctx.setdefault("not_applicable", [])
     check_gomod(root, quality, findings)
-    check_gofmt(root, findings)
+    check_gofmt(root, findings, na)
     check_evidence(root, findings, na)
     check_compile(root, quality, findings, na)

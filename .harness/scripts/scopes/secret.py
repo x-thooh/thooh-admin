@@ -18,7 +18,7 @@ import re
 import subprocess
 from pathlib import Path
 
-from .common import add, quality_get
+from .common import LOCAL_ARTIFACTS, add, quality_get
 
 NAME = "secret"
 PLAN = "配置里的密钥与弱凭据：只报「哪个键路径有问题」，永不报出值本身；命中基线的老账标「基线内」"
@@ -35,8 +35,9 @@ LOCAL_OVERRIDES = (".env", ".env.local", "config.local.yaml", "config.local.yml"
                    "config.dev.yaml", "id_rsa", "service-account.json")
 SCAN_SUFFIXES = {".go", ".yaml", ".yml", ".json", ".sh", ".md"}
 SCAN_NAMES = {"Dockerfile", "Makefile", "docker-compose.yml", "config.yaml", ".env"}
-SKIP_PARTS = {".git", ".go", ".idea", "node_modules", "__pycache__", ".ruff_cache",
-              "web", "docs", "dist", "static"}
+# 本地产物（common.LOCAL_ARTIFACTS）+ 生成物：这两类都不是「人写的凭据可能藏在哪」的答案，
+# 扫它们只会得到一批没人能修的告警（web/ 与 docs/ 是构建产物，dist/ 与 static/ 同理）。
+SKIP_PARTS = LOCAL_ARTIFACTS | {"web", "docs", "dist", "static"}
 
 
 def sh(argv, cwd):

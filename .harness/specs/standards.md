@@ -40,7 +40,7 @@
 | 8 | 入口与磁盘对齐 | `scope=entry`：ENT001/002 header、ENT003 行数、ENT004 地图双向、ENT005 规则无载体、ENT006 未注册 scope、ENT007 派生索引、ENT008 样本为 0 | ERROR | ENT001–ENT008 + ENT00n 正对照 |
 | 9 | 结论 = 命令 + 退出码 + 完整输出 | `scope=build`：BLD001/BLD002 管证据在不在、新不新；证据内容本身是不是真的判不了（脚本不能替人相信一句话） | WARN | BLD001、BLD002 |
 | 10 | 一次一类修改；一个任务一棵树，看板先登记再开树 | `scope=worktree`：WKT001 任务已 done 而树还在（收尾做了一半）、WKT002 树在看板里没人登记或任务还挂 open/blocked（顺序反了）、WKT004 树的分支既不是 `task/<id>` 也不是目录名。**判不了**：「忘了开树」（任务可能在别人机器上做）、「改前 `git status` 干净」 | ERROR | WKT001、WKT002（无对应任务 + status=open 两式）、WKT003、WKT004 + WKT00n 树—分支—看板对齐正对照 |
-| 11 | 判不了就说判不了 | 各域的样本守卫（MOD005 / SEC004 / STL005 / ENT008 / CMD005 / MSG005）+ `not_applicable` 清单；BLD004 工具链缺失走 WARN | ERROR / WARN | 每条样本守卫都在 selftest 里单独造一例「目录为空」 |
+| 11 | 判不了就说判不了 | 各域的样本守卫（MOD005 / SEC004 / STL005 / ENT008 / CMD005 / MSG005）+ `not_applicable` 清单；BLD004 两条分支——Go 工具链缺失、排除本地产物后没有 .go 可判——都走 WARN 并登记 | ERROR / WARN | 每条样本守卫都在 selftest 里单独造一例「目录为空」；BLD004 造得出「没有 .go」这一支，「工具链缺失」那一支故意不造（等于依赖坏环境） |
 | 12 | 一次提交说一件事 | `scope=commit`：MSG001 空标题或裸动词、MSG002 超 `subject_max_chars`、MSG003 标题并列（两个及以上「，」子句）、MSG004 正文出现顺带/另外/同时/此外、MSG005 拿不到消息。同一份 `check_message` 由 `commit-msg` 钩子在落笔时判 ERROR | WARN（钩子侧 ERROR） | MSG001–MSG005 + MSG00n 合规消息正对照 |
 | 13 | 一次修改走五段，每段有过法 | `scope=workflow`：FLOW001 flow.json 缺/坏/stages 空、FLOW002 阶段与 REQUIRED_STAGES 不齐、FLOW003 阶段既无 gate 又无 manual、FLOW004 门径不是 Makefile 的 target（含 Makefile 读不到）、FLOW005 转移表空/指向不存在的阶段/没写条件/非末阶段无出口、FLOW006 声明账本缺或一条没声明、FLOW007 声明未装机、FLOW008 装机未声明、FLOW009 SKILL.md 三条验收缺一、FLOW010 契约六问缺一 | ERROR | FLOW001–FLOW010（各一条独立夹具，含三条 FLOW005 变体与两条 FLOW006 变体）+ FLOW00n 最小仓库正对照 |
 | 14 | 状态层是事实：闭集取值、完成态带证据、INDEX 只派生 | `scope=state`：STATE001 看板缺/坏/tasks 空、STATE002 条目缺必填或 `updated` 坏/在未来、STATE003 status/priority 越出闭集或 blocked 没写等什么、STATE004 id 重复、STATE005 done 无证据或证据格式不认识、STATE006 证据核验失败（无 git 时 WARN + 判不了）、STATE007 INDEX 与现算不一致（`--fix` 可重建）、STATE008 看板过期（30 天 WARN、两倍 ERROR） | ERROR / WARN | STATE001–STATE008（含两条 STATE002 变体、三条 STATE003 变体、STATE006 的 path/commit 两式）+ STATE00n 现算 INDEX 正对照 |
@@ -54,6 +54,7 @@
 | 每个域必须说清自己管什么（`PLAN`）与能报哪些 code（`REFLECT`），且与源码逐条一致 | `scope=hooks`：HOOK001 registry ↔ scopes/ 双向、HOOK002 空登记、HOOK003 登记了源码里没有的、HOOK004 源码会报但没登记、HOOK005 共享 helper 提到没人认领的 code | ERROR | HOOK001/001b/001c、HOOK002、HOOK003、HOOK004、HOOK005 + HOOK00n 干净树正对照 |
 | 加断言的同时加语料；注册域不许没有 `cases/<域>.py` | `make selftest` 的 `coverage()`（不是 scope：它判的是语料库自己，找不到「违规仓库」去扫） | selftest 退出码 1 | 由 reverse.py 自检：删一个 `cases/<域>.py` 立刻红 |
 | 工具层文件按角色有行数额度，超限即该拆 | `scope=budget`：BUDGET001 超额度、BUDGET002 额度表坏或样本为 0 | ERROR | BUDGET001、BUDGET002、BUDGET002b（0 样本）+ BUDGET00n 正对照 |
+| 本地产物目录（`.go/` 缓存、`node_modules/`、`__pycache__/`…）只有一份清单：`scopes/common.py` 的 `LOCAL_ARTIFACTS`，`build_guide` / `entry` / `secret` / `git_clean` / `check_gofmt` 都走它 | 间接由 ENT007 判（派生索引在「有缓存的树」与「干净检出」上必须一致）与 BLD004/BLD005 判（gofmt 不许扫进依赖源码，也不许在没得扫时沉默） | ERROR / WARN | ENT007b（跨树复现正对照）、BLD005b（缓存里的依赖不算欠账）、BLD004（排除后无 .go 可判） |
 
 code 的命名本身也是一条规矩：**3–6 个大写字母 + 三位数字**（`hooks` 的 `CODE_RE` 就按这个匹配）。
 两字母前缀（试过 `WF001`）不会被源码扫描看见——登记了、源码里也有，但对账那头是瞎的，
@@ -67,6 +68,7 @@ code 的命名本身也是一条规矩：**3–6 个大写字母 + 三位数字*
 | `--scope baseline` 单查 | 上游没跑，降级与新欠判不了；调度器输出里明说 |
 | 没有 git（导出、裸文件目录） | BASE013、BLD002、STL003 全报 WARN + 判不了；STATE006 的 `commit:` 证据同此处理 |
 | 拿不到 worktree 清单，或某棵树读不出分支 | WKT003 报 WARN 并登记 `worktree:…` 为判不了——有树却对不上账时不许沉默 |
+| 排除本地产物目录后没有 .go 可判 | BLD004 报 WARN 并登记 `build:gofmt`；「扫到 0 个文件」与「格式全对」长得一模一样 |
 | 慢域被跳过 | 打印「已跳过慢域（N）：build——不是通过」，退出码不受影响 |
 
 ## 账本

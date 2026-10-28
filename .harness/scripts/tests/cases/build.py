@@ -2,7 +2,8 @@
 
 慢域按函数取样（`check_gomod` / `check_gofmt` / `check_compile` / `check_evidence`），
 不去跑整条 `run()`——那要把 go 工具链真的叫起来，selftest 就变成 build 了。
-BLD004（工具链缺失）故意不造样本：环境故障不是违规，造它等于让 selftest 依赖一个坏环境。
+BLD004 有两支：「排除本地产物后没有 .go 可判」造得出（下面有样本），「工具链缺失」造不出——
+环境故障不是违规，故意不造它，否则 selftest 依赖一个坏环境。
 """
 
 from scopes import build as sc_build
@@ -10,9 +11,9 @@ from support import codes_of, ctx_for, git, git_text, new_root
 
 NAME = "build"
 
-UNCOVERED = (
-    ("BLD004", "工具链缺失 = 环境故障，故意造它等于让 selftest 依赖一个坏环境"),
-)
+MOD = "module x\n\ngo 1.25\n"
+GOOD_GO = "package x\n\nfunc F() int { return 1 }\n"
+UGLY_GO = "package x\n\nfunc F() int {\nreturn 1\n}\n"
 
 
 def cases():
@@ -28,16 +29,28 @@ def cases():
     sc_build.check_gomod(root, quality, f)
     out.append(("BLD006n", "正对照：达标版本不报", bool(codes_of(f))))
 
-    root = new_root({"go.mod": "module x\n\ngo 1.25\n",
-                     "bad.go": "package x\n\nfunc F() int {\nreturn 1\n}\n"})
+    root = new_root({"go.mod": MOD, "bad.go": UGLY_GO})
     f = []
-    sc_build.check_gofmt(root, f)
+    sc_build.check_gofmt(root, f, [])
     out.append(("BLD005", "未过 gofmt（函数体没缩进）", "BLD005" in codes_of(f)))
 
-    root = new_root({"go.mod": "module x\n\ngo 1.25\n", "ok.go": "package x\n\nfunc F() int { return 1 }\n"})
+    root = new_root({"go.mod": MOD, "ok.go": GOOD_GO})
     f = []
-    sc_build.check_gofmt(root, f)
+    sc_build.check_gofmt(root, f, [])
     out.append(("BLD005n", "正对照：已格式化不报", bool(codes_of(f))))
+
+    root = new_root({"go.mod": MOD, "ok.go": GOOD_GO, ".go/pkg/mod/dep/bad.go": UGLY_GO})
+    f = []
+    sc_build.check_gofmt(root, f, [])
+    out.append(("BLD005b", "正对照：模块缓存里未格式化的依赖源码不是本仓库的欠账", bool(codes_of(f))))
+
+    root = new_root({"go.mod": MOD, ".go/pkg/mod/dep/x.go": GOOD_GO})
+    f = []
+    na = []
+    sc_build.check_gofmt(root, f, na)
+    got = codes_of(f)
+    out.append(("BLD004", "排除本地产物后没有 .go 可判：报判不了并登记",
+                "BLD004" in got and any("build:gofmt" in x for x in na)))
 
     root = new_root({"go.mod": "module x\n\ngo 1.25\n", "bad.go": "package x\n\nfunc F() { undefined() }\n"})
     findings = []

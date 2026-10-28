@@ -171,3 +171,21 @@
 - 被否：① 靠 `git stash` 隔离两个任务（丢失无痕）；② 树放仓库内（进 `git status`，
   一次 `git add -A` 就收进提交）；③ `task-done` 顺手把任务标 done（脚本替人认领工作）。
 - written_by: session 2026-10-29 / version: 1 / supersedes: — / status: active
+
+## D-16 本地产物目录是一份常量，不是各域的私有排除表
+
+- 决策：`scopes/common.py` 的 `LOCAL_ARTIFACTS` 是「机器本地产物」的唯一清单
+  （`.git`、`.go`、`.idea`、`.ruff_cache`、`.venv`、`node_modules`、`__pycache__`），
+  `build_guide`、`entry.SKIP_DIRS`、`secret.SKIP_PARTS`（并上它自己的生成物目录）、
+  `git_clean` 的 volatile、`build.go_files` 五处都用它。
+- 触发事实：这四份各自漂转过。`GUIDE_IGNORE` 少了 `.go`，`make guide` 就把模块缓存写进派生索引，
+  干净检出上 ENT007 判「索引过期」；`gofmt -l .` 一份都没用，退出码 2 被报成「工具链不可用」。
+  详见 lessons L-6。
+- 「生成」与「校验」必须看到同一张磁盘：派生数据可复现才算派生。所以新增的反向样本是
+  `ENT007b`——在带缓存的树上生成索引，拿到不带缓存的树上判新鲜度，必须 0 条。
+- 判不了的新分支：排除本地产物后没有 `.go` 可扫时，`check_gofmt` 报 BLD004 WARN 并登记
+  `build:gofmt`。「扫到 0 个文件」与「格式全过」在输出里长得一样，这是断言坑 #11 的第三次落地。
+- 被否：① 删掉仓库里那个 303M 的 `.go/` 缓存当修法（环境里的东西会再长回来，断言照样瞎）；
+  ② 给 `gofmt` 传 `.` 再过滤输出（把「不该扫」的东西先扫一遍，代价留在每次跑的门禁里）；
+  ③ 每个域自带一份排除表并在文档里提醒保持一致（这正是本次漂移的成因）。
+- written_by: session 2026-10-29 / version: 1 / supersedes: — / status: active

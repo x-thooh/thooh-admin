@@ -16,7 +16,7 @@
 import re
 from pathlib import Path
 
-from .common import add, build_guide, code_lines, load_json
+from .common import LOCAL_ARTIFACTS, add, build_guide, code_lines, load_json
 
 NAME = "entry"
 PLAN = "入口文件（根与各目录 AGENTS.md）自己站得住：头部 scope/parent、目录地图与磁盘双向比对、" \
@@ -25,7 +25,7 @@ REFLECT = ("ENT001", "ENT002", "ENT003", "ENT004", "ENT005", "ENT006", "ENT007",
 HEADER = re.compile(r"<!--\s*agents:\s*scope=(\S+)\s+parent=(\S*)\s*-->")
 RULE_LINE = re.compile(r"^\s*(\d+)\.\s+(.*)$")
 SCOPE_TAG = re.compile(r"`scope=([A-Za-z_][A-Za-z0-9_]*)`")
-SKIP_DIRS = {".git", ".go", ".idea", "node_modules", "__pycache__", ".ruff_cache"}
+SKIP_DIRS = LOCAL_ARTIFACTS  # 本地产物的清单只有一份，见 common.LOCAL_ARTIFACTS
 GUIDE_REL = ".harness/codebase-guide/index.json"
 
 
