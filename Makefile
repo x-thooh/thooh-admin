@@ -16,6 +16,7 @@ REVERSE := $(SCRIPTS)/tests/reverse.py
 GEN_GUIDE := $(SCRIPTS)/gen_guide.py
 DISCOVERY := $(SCRIPTS)/discovery.py
 CHECK_COMMIT := $(SCRIPTS)/check_commit.py
+WT := $(SCRIPTS)/wt.py
 PY ?= python3
 
 export GOPATH := $(HOME)/.go
@@ -25,7 +26,7 @@ export GOFLAGS := -buildvcs=false
 
 .DEFAULT_GOAL := help
 .PHONY: help init check check-all check-json check-strict fix guide index evidence selftest commit-msg \
-	build vet fmt test go-all up down clean
+	task-new task-done task-list build vet fmt test go-all up down clean
 
 help: ## 列出可用命令
 	@echo "用法：make <目标>"
@@ -65,6 +66,15 @@ guide: ## 重新生成 .harness/codebase-guide/（派生，禁手改）
 
 index: ## 重新生成 .harness/INDEX.md（派生：下一步、没人守的规则、流程装机状态）
 	@$(PY) $(DISCOVERY) --root $(ROOT)
+
+task-new: ## 给看板里已登记的任务开一棵工作树：TASK=<看板 id>
+	@$(PY) $(WT) --root $(ROOT) task-new $(TASK)
+
+task-done: ## 收尾一棵树（干净 + 看板 done + 已合并才动手）：TASK=<看板 id>
+	@$(PY) $(WT) --root $(ROOT) task-done $(TASK)
+
+task-list: ## 列出已开的工作树
+	@$(PY) $(WT) --root $(ROOT) list
 
 evidence: ## 把一次全量校验的完整输出存成证据
 	@mkdir -p $(HARNESS)/deliverables/evidence

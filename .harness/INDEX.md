@@ -5,10 +5,11 @@
 
 ## 下一步（看板）
 
-- 看板更新于 2026-10-28，共 11 条：open 8、blocked 1、done 2
+- 看板更新于 2026-10-29，共 12 条：open 7、doing 1、blocked 1、done 3
 - 高优先级未完成（逐条点名，不写概括句）：
   - `T-1` sys_config 的 DDL 与 GORM 模型列名不一致
   - `T-2` harness 只在 go125 分支，主树还没有门禁
+  - `T-12` 派生索引与 gofmt 会把 .go/ 模块缓存当成仓库内容
 - `T-9` main.go 里 r.Static() 挂载的 ./static/images 目录不存在：blocked，等 使用者回答：静态资源是否入库
 
 ## 检查面：已注册的域
@@ -25,13 +26,13 @@
 | `secret` | 配置里的密钥与弱凭据：只报「哪个键路径有问题」，永不报出值本身；命中基线的老账标「基线内」 | SEC001, SEC002, SEC003, SEC004 |
 | `stale` | 会过期的引用：前端产物里被 `r.Static()` 挂载的资产还存不存在、swagger 三份元数据（注解 / docs.go / json / yaml）是否互相一致、文档时效是否越过告警线 | STL001, STL002, STL003, STL004, STL005 |
 | `state` | 状态层是事实不是装饰：看板每条有形状与闭集取值、完成态带可核验证据，INDEX 与磁盘现算一致 | STATE001, STATE002, STATE003, STATE004, STATE005, STATE006, STATE007, STATE008 |
+| `worktree` | 任务级隔离是真的：每棵任务树在看板里有对应的进行中任务、分支名与树对得上、任务做完树就撤 | WKT001, WKT002, WKT003, WKT004 |
 | `build` | 慢域：go.mod 的工具链下限、`go build` / `go vet` 是否真的跑过并留下带 commit 的证据、证据是否过期、gofmt 是否干净 | BLD001, BLD002, BLD003, BLD004, BLD005, BLD006 |
 | `baseline` | 存量欠账的账本：老账逐条标「基线内 / 新欠」，总数只减不增；accepted 豁免必须有理由、负责人和未过期的复查日期 | BASE011, BASE012, BASE013, BASE014 |
 
 ## 没有断言兜着的规则
 
-- 10. 工作树里一次只做一类修改，改前先 `git status` 确认干净。无断言（人判）： 任务是否隔离在 worktree 里，脚本判不了别人的机器。
-- 这些条靠人守。要么补断言，要么留着并在评审时逐条问一遍。
+- 没有：每条硬规则都指向一个已注册的域
 
 ## 可安装流程
 

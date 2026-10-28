@@ -19,6 +19,7 @@
 | `secret` | 凭据入库、弱默认、本地覆盖文件 | 快 | `scripts/scopes/secret.py` |
 | `stale` | swagger 三方一致、web 产物引用、生成物时效 | 快 | `scripts/scopes/stale.py` |
 | `state` | 状态层是真的：看板形状与闭集、完成态可核验证据、INDEX 与现算一致 | 快 | `scripts/scopes/state.py` |
+| `worktree` | 一个任务一棵树是真的：树—分支—看板三边对得上，收尾不半途 | 快 | `scripts/scopes/worktree.py` |
 | `build` | go build / vet / gofmt / go 指令 / 证据时效 | 慢 | `scripts/scopes/build.py` |
 | `baseline` | 账本格式、豁免保质期、总数只减不增 | 快 | `scripts/scopes/baseline.py` |
 
@@ -38,7 +39,7 @@
 | 7 | 账本只减不增、豁免要盖章 | `scope=baseline`：BASE011 格式/必填、BASE012 过期、BASE013 上升、BASE014 可刷新（WARN） | ERROR / WARN | BASE011、BASE011b、BASE012、BASE013 + BASE00n 零基线正对照 |
 | 8 | 入口与磁盘对齐 | `scope=entry`：ENT001/002 header、ENT003 行数、ENT004 地图双向、ENT005 规则无载体、ENT006 未注册 scope、ENT007 派生索引、ENT008 样本为 0 | ERROR | ENT001–ENT008 + ENT00n 正对照 |
 | 9 | 结论 = 命令 + 退出码 + 完整输出 | `scope=build`：BLD001/BLD002 管证据在不在、新不新；证据内容本身是不是真的判不了（脚本不能替人相信一句话） | WARN | BLD001、BLD002 |
-| 10 | 一次一类修改、工作树干净 | 无断言（人判）。任务是否在 worktree 里做，别人机器上判不了；写在这里靠下一次 `git status` | — | — |
+| 10 | 一次一类修改；一个任务一棵树，看板先登记再开树 | `scope=worktree`：WKT001 任务已 done 而树还在（收尾做了一半）、WKT002 树在看板里没人登记或任务还挂 open/blocked（顺序反了）、WKT004 树的分支既不是 `task/<id>` 也不是目录名。**判不了**：「忘了开树」（任务可能在别人机器上做）、「改前 `git status` 干净」 | ERROR | WKT001、WKT002（无对应任务 + status=open 两式）、WKT003、WKT004 + WKT00n 树—分支—看板对齐正对照 |
 | 11 | 判不了就说判不了 | 各域的样本守卫（MOD005 / SEC004 / STL005 / ENT008 / CMD005 / MSG005）+ `not_applicable` 清单；BLD004 工具链缺失走 WARN | ERROR / WARN | 每条样本守卫都在 selftest 里单独造一例「目录为空」 |
 | 12 | 一次提交说一件事 | `scope=commit`：MSG001 空标题或裸动词、MSG002 超 `subject_max_chars`、MSG003 标题并列（两个及以上「，」子句）、MSG004 正文出现顺带/另外/同时/此外、MSG005 拿不到消息。同一份 `check_message` 由 `commit-msg` 钩子在落笔时判 ERROR | WARN（钩子侧 ERROR） | MSG001–MSG005 + MSG00n 合规消息正对照 |
 | 13 | 一次修改走五段，每段有过法 | `scope=workflow`：FLOW001 flow.json 缺/坏/stages 空、FLOW002 阶段与 REQUIRED_STAGES 不齐、FLOW003 阶段既无 gate 又无 manual、FLOW004 门径不是 Makefile 的 target（含 Makefile 读不到）、FLOW005 转移表空/指向不存在的阶段/没写条件/非末阶段无出口、FLOW006 声明账本缺或一条没声明、FLOW007 声明未装机、FLOW008 装机未声明、FLOW009 SKILL.md 三条验收缺一、FLOW010 契约六问缺一 | ERROR | FLOW001–FLOW010（各一条独立夹具，含三条 FLOW005 变体与两条 FLOW006 变体）+ FLOW00n 最小仓库正对照 |
@@ -65,6 +66,7 @@ code 的命名本身也是一条规矩：**3–6 个大写字母 + 三位数字*
 | `@Router` 注解为 0（当前全库如此） | STL003 登记 `stale:swagger 时效` 为判不了，不拿「docs 比源码旧」当 ERROR |
 | `--scope baseline` 单查 | 上游没跑，降级与新欠判不了；调度器输出里明说 |
 | 没有 git（导出、裸文件目录） | BASE013、BLD002、STL003 全报 WARN + 判不了；STATE006 的 `commit:` 证据同此处理 |
+| 拿不到 worktree 清单，或某棵树读不出分支 | WKT003 报 WARN 并登记 `worktree:…` 为判不了——有树却对不上账时不许沉默 |
 | 慢域被跳过 | 打印「已跳过慢域（N）：build——不是通过」，退出码不受影响 |
 
 ## 账本
@@ -76,11 +78,12 @@ code 的命名本身也是一条规矩：**3–6 个大写字母 + 三位数字*
 
 ## 第二期不做的事（写明，避免当成已完成）
 
-- `retro`/`round` 复盘脚本（事实底板：数字先算，AI 只在数字上写；环比 ERROR 与手册行数）、
-  `wt`（任务级 worktree 隔离）与 `task-new`/`task-done`：第三期，已作为 `T-7`/`T-8` 进看板。
+- `retro`/`round` 复盘脚本（事实底板：数字先算，AI 只在数字上写；环比 ERROR 与手册行数）：
+  第三期，已作为 `T-7` 进看板。
 - 流程层与状态层已上线：`workflow/flow.json` + `skills` 双向对账（`scope=workflow`）、
   看板 + 派生 INDEX（`scope=state`）、门记录与笔记模板（`stack-templates/`）、
-  决策三态目录（`specs/notes/{proposed,implemented,rejected}/`）。
+  决策三态目录（`specs/notes/{proposed,implemented,rejected}/`）、
+  任务级隔离 `make task-new`/`task-done`/`task-list`（`scope=worktree`）。
 - 提交信息钩子已上线（`git-hooks/commit-msg` + `scope=commit`）；没上线的是**历史扫描**：
   本域只判 HEAD，不回头改旧提交——重写历史的代价高于一条措辞欠账。
 - 「文档点名的路径必须存在」这类断言：本仓库大量反引号写的是**目标代码**路径，

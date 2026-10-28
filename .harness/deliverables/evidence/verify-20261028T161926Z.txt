@@ -1,0 +1,16 @@
+# 命令：make check-all
+# UTC：2026-10-28T16:19:26Z
+# commit: e38496c0348173872533096e87aa23154b724b6d
+# 工作区：dirty
+# 首条未提交改动： M .harness/AGENTS.md
+# 退出码契约：0 = 无 ERROR，1 = 有 ERROR，2 = 前置条件不满足
+
+WARN  build        .:1  BLD004   gofmt 退出码 2：.go/pkg/mod/github.com/!kyle!banks/depth@v1.2.1/depth.go | .go/pkg/mod/github.com/!p!gshen/go-xxl-executor@v1.0.2/app/test_jobhandler.go | .go/pkg/mod/github.com/!p!gshen/go-xxl-executor@v1.0.2/biz/admin_biz.go | .go/pkg/mod/github.com/!p!gshen/go-xxl-executor@v1.0.2/biz/executor_biz.go | .go/pkg/mod/github.com/!p!gshen/go-xxl-executor@v1.0.2/biz/model/handle_callback_param.go | .go/pkg/mod/github.com/!p!gshen/go-xxl-executor@v1.0.2/biz/model/kill_param.go
+WARN  secret       config.yaml:15  SEC002   弱默认凭据 database.primary.password（6 位）：换成环境变量或随机值
+WARN  secret       config.yaml:23  SEC002   弱默认凭据 database.secondary.password（6 位）：换成环境变量或随机值
+WARN  secret       config.yaml:36  SEC001   基线内（账本 1 条）：高熵密钥入库 jwt.secret
+WARN  secret       config.yaml:46  SEC002   弱默认凭据 xxl-job.job_upass（5 位）：换成环境变量或随机值
+WARN  stale        docs/swagger.json:1  STL004   swagger paths 为空：文档里没有一条接口，多半是注解缺失或没跑 swag init
+判不了（1）: stale:swagger 时效——这不是通过：先把它被依赖的那些 scope 一起跑
+0 ERROR, 6 WARN  (scopes: entry, commit, cmd, workflow, hooks, budget, modules, secret, stale, state, worktree, build, baseline; mode: normal)  无断言项见 AGENTS.md「硬规则」与 .harness/specs/standards.md
+exit=0

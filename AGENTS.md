@@ -26,6 +26,9 @@
 | `make go-all` | build + vet（等价于 check-all 里的慢域） |
 | `make guide` | 重新生成 `.harness/codebase-guide/`（派生，禁手改） |
 | `make index` | 重新生成 `.harness/INDEX.md`（派生：下一步、没人守的规则、流程装机状态） |
+| `make task-new TASK=<id>` | 给看板里已登记的任务开一棵工作树 |
+| `make task-done TASK=<id>` | 收尾一棵树：干净 + 看板 done + 已合并，三条都过才撤 |
+| `make task-list` | 列出已开的工作树 |
 | `make up` / `down` | 起停本地依赖（docker compose） |
 | `make clean` | 删派生目录与 go 构建缓存，不动状态目录 |
 
@@ -64,8 +67,10 @@ skills     可安装流程（每条一个目录，正文是 SKILL.md）；与声
 7. 账本只减不增。新增一条欠账 = ERROR；要么修掉，要么逐条盖章。`scope=baseline`
 8. 入口与磁盘对齐：新增一级目录必须进「目录地图」；子目录入口只在规则真不同时才写。`scope=entry`
 9. 结论 = 命令 + 退出码 + 完整输出。「修好了」不是结论。`scope=build`
-10. 工作树里一次只做一类修改，改前先 `git status` 确认干净。无断言（人判）：
-    任务是否隔离在 worktree 里，脚本判不了别人的机器。
+10. 一次只做一类修改，且一个任务一棵树：看板里先有这条任务，再 `make task-new TASK=<id>`。
+    树—分支—看板三边对不上（收尾做了一半、先建树后记账、分支对不上号）由脚本判；
+    「忘了开树」判不了——任务可能在别人机器上做，改前 `git status` 确认干净靠人守。
+    `scope=worktree`
 11. 判不了就说判不了，不冒充通过。缺样本、缺工具链、缺上游 scope 的域一律登记
     `not_applicable`，输出里与「通过」分得很开。`scope=baseline`
 12. 一次提交说一件事：标题是动宾短语、不并列、不超长，正文不许出现「顺带 / 另外 / 同时 /
