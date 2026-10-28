@@ -34,7 +34,7 @@
 | 2 | 模块要在两处登记 | `scope=modules`：MOD001 未注册、MOD002 死引用、MOD003 只 import 不挂、MOD004 形状不完整、MOD005 样本为 0 | ERROR | `make selftest`：MOD001–MOD005、MOD003c（注释里的挂载不算）、MOD00n 正对照 |
 | 3 | 提交前 `make check` 退出码 0；合并前 `make check-all` | `scope=build`：BLD003 编译/vet 失败、BLD005 未 gofmt；BLD001/BLD002 证据缺失与过期为 WARN（留痕是流程账，不当提交门）。`.harness/git-hooks/pre-commit` 由 `make init` 通过 `core.hooksPath` 装上，跑快域 | ERROR / WARN | BLD003、BLD005、BLD001、BLD002 + 两条正对照 |
 | 4 | go 指令不低于 `go_version_min` | `scope=build`：BLD006 | ERROR | BLD006 + BLD006n |
-| 5 | 密钥与本地覆盖配置不入库 | `scope=secret`：SEC001 高熵、SEC002 弱默认（WARN）、SEC003 覆盖文件被跟踪、SEC004 样本为 0 | ERROR / WARN | SEC001–SEC004 + SEC00n（`${...}` 占位符不报） |
+| 5 | 密钥与本地覆盖配置不入库 | `scope=secret`：SEC001 高熵、SEC002 弱默认（WARN）、SEC003 覆盖文件被跟踪、SEC004 样本为 0、SEC005 高熵键只在 gitignore 排除的本地文件里（WARN，点名不判入库） | ERROR / WARN | SEC001、SEC001b（未跟踪且没被排除→仍算入库）、SEC002、SEC003、SEC004、SEC005 + SEC00n（`${...}` 占位符不报） |
 | 6 | 生成物跟着源码走 | `scope=stale`：STL001 三方元数据一致、STL002 产物引用齐全、STL003 时效（限时）、STL004 paths 空（WARN）、STL005 样本为 0 | ERROR / WARN | STL001、STL002、STL004、STL005、STL00n。**STL003 无样本**：要跨天提交才造得出来，见下「判不了」 |
 | 7 | 账本只减不增、豁免要盖章 | `scope=baseline`：BASE011 格式/必填、BASE012 过期、BASE013 上升、BASE014 可刷新（WARN） | ERROR / WARN | BASE011、BASE011b、BASE012、BASE013 + BASE00n 零基线正对照 |
 | 8 | 入口与磁盘对齐 | `scope=entry`：ENT001/002 header、ENT003 行数、ENT004 地图双向、ENT005 规则无载体、ENT006 未注册 scope、ENT007 派生索引、ENT008 样本为 0 | ERROR | ENT001–ENT008 + ENT00n 正对照 |
@@ -56,6 +56,7 @@
 | 工具层文件按角色有行数额度，超限即该拆 | `scope=budget`：BUDGET001 超额度、BUDGET002 额度表坏或样本为 0 | ERROR | BUDGET001、BUDGET002、BUDGET002b（0 样本）+ BUDGET00n 正对照 |
 | 本地产物目录（`.go/` 缓存、`node_modules/`、`__pycache__/`…）只有一份清单：`scopes/common.py` 的 `LOCAL_ARTIFACTS`，`build_guide` / `entry` / `secret` / `git_clean` / `go_files` 都走它。shell 里的 `find … -not -path` 也算一份抄本——收了五处、漏了第六处，现场见 lessons L-8 | 间接由 ENT007 判（派生索引在「有缓存的树」与「干净检出」上必须一致）与 BLD004/BLD005 判（gofmt 不许扫进依赖源码，也不许在没得扫时沉默） | ERROR / WARN | ENT007b（跨树复现正对照）、BLD005b（缓存里的依赖不算欠账）、BLD004（排除后无 .go 可判） |
 | 「哪些 `.go` 算本仓库的源码」只有一份实现：`scripts/go_files.py`（先 `is_file()` 再按整条路径段排除）。Makefile 的 `fmt` 与 `build` scope 都调它——一条命令和一个门禁各算一遍，漂移的形态就是「`make fmt` 红了但 `make check` 绿」 | `scope=build`：BLD004（清单为空 = 判不了，不沉默）、BLD005（未格式化） | ERROR / WARN | BLD005c（`nested.go/` 目录里那个文件只报一次：目录本身没混进清单）、BLD004 + BLD005n/BLD005b 正对照 |
+| 「这条路径 git 会不会带走」只有一份答案：`scripts/tracked.py`（问 `git ls-files --others --ignored --exclude-standard --directory`）。派生索引与被排除文件的密钥判定都问它；读不到 ignore 规则（没有 git）时一律当会入库，并登记 `secret:gitignore 判定` 为判不了 | `scope=entry`：ENT007 判两台机器看到的磁盘是否同一张；`scope=secret`：SEC005 把「不入库但本地是真凭据」点名而不是沉默 | ERROR / WARN | ENT007c（带 gitignore 本地目录的树上生成索引，没有它的检出也认它新鲜）、SEC005 + SEC001b（未跟踪但没被排除的仍算入库） |
 
 code 的命名本身也是一条规矩：**3–6 个大写字母 + 三位数字**（`hooks` 的 `CODE_RE` 就按这个匹配）。
 两字母前缀（试过 `WF001`）不会被源码扫描看见——登记了、源码里也有，但对账那头是瞎的，

@@ -18,6 +18,7 @@ DISCOVERY := $(SCRIPTS)/discovery.py
 CHECK_COMMIT := $(SCRIPTS)/check_commit.py
 WT := $(SCRIPTS)/wt.py
 GO_FILES := $(SCRIPTS)/go_files.py
+TRACKED := $(SCRIPTS)/tracked.py
 PY ?= python3
 
 export GOPATH := $(HOME)/.go
@@ -26,7 +27,7 @@ export GOPROXY := https://goproxy.cn,direct
 export GOFLAGS := -buildvcs=false
 
 .DEFAULT_GOAL := help
-.PHONY: help init check check-all check-json check-strict fix guide index evidence selftest commit-msg \
+.PHONY: help init check check-all check-json check-strict fix guide index ignored evidence selftest commit-msg \
 	task-new task-done task-list build vet fmt test go-all up down clean
 
 help: ## 列出可用命令
@@ -111,6 +112,9 @@ fmt: ## 列出未格式化的 .go（只报告，不代改）
 	@cd $(ROOT) && files=$$($(PY) $(GO_FILES) $(ROOT)) || \
 		{ echo "make fmt：判不了——排除本地产物后没有 .go 可判，这不是通过"; exit 2; }; \
 	gofmt -l $$files
+
+ignored: ## 列出被 gitignore 排除的本地路径（门禁判「不入库」时看这张表）
+	@$(PY) $(TRACKED) $(ROOT)
 
 test: ## go test
 	@cd $(ROOT) && go test ./...

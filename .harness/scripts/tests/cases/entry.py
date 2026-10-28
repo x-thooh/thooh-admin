@@ -5,7 +5,7 @@
 """
 
 from scopes import entry as sc_entry
-from support import codes_of, ctx_for, new_root
+from support import codes_of, ctx_for, git, new_root
 
 NAME = "entry"
 
@@ -37,6 +37,29 @@ def guide_survives_clean_checkout():
     sc_entry._fix_guide(with_cache)
     index = (with_cache / ".harness/codebase-guide/index.json").read_text(encoding="utf-8")
     clean = new_root({"AGENTS.md": ROOT_OK, "app/main.go": "package main\n"})
+    target = clean / ".harness/codebase-guide/index.json"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(index, encoding="utf-8")
+    findings = []
+    sc_entry.run(ctx_for(clean), findings)
+    return bool(codes_of(findings))
+
+
+def guide_survives_ignored_dir():
+    """带 gitignore 排除的本地目录（`.deploy/` 那种）的树上生成索引，没有它的检出也认它新鲜。
+
+    2026-10-29 现场：主树有 `.deploy/`（部署侧本地放的配置），go125 任务树没有。`make init`
+    在主树重算出的派生索引多了 `.deploy` 一条——提交上去，下一棵没有那个目录的检出立刻 ENT007。
+    「生成」与「校验」必须看到同一张磁盘，而磁盘不该包含只属于某台机器的那部分。
+    """
+    with_local = new_root({"AGENTS.md": ROOT_OK, "app/main.go": "package main\n",
+                           ".gitignore": "/deploy/\n", "deploy/config.yaml": "a: 1\n"})
+    ok, _ = git(with_local, "init", "-q")
+    if not ok:
+        return None
+    sc_entry._fix_guide(with_local)
+    index = (with_local / ".harness/codebase-guide/index.json").read_text(encoding="utf-8")
+    clean = new_root({"AGENTS.md": ROOT_OK, "app/main.go": "package main\n", ".gitignore": "/deploy/\n"})
     target = clean / ".harness/codebase-guide/index.json"
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(index, encoding="utf-8")
@@ -90,4 +113,6 @@ def cases():
     out.append(("ENT00n", "正对照：合规入口不该报任何 entry 发现", bool(codes_of(f))))
     out.append(("ENT007b", "正对照：带 .go/ 缓存的树上生成的索引，干净检出也认它新鲜",
                 guide_survives_clean_checkout()))
+    out.append(("ENT007c", "正对照：带 gitignore 本地目录的树上生成的索引，没有它的检出也认它新鲜",
+                guide_survives_ignored_dir()))
     return out

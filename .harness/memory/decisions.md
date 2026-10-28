@@ -213,3 +213,26 @@
 - 没断言的那半：`make fmt` 作为命令跑得通与否，`cmd` 域判不了（它只判 target ↔ 命令表）。
   这条写进 standards.md 的「判不了」表，靠人逐条跑 `make help`。
 - written_by: session 2026-10-29 / version: 1 / supersedes: D-16（`go_files` 的落点） / status: active
+
+## D-18 仓库内容分两半问：机器产物问常量，被排除的问 git
+
+- 决策：「这条路径算不算仓库内容」有两个问题、两个家。① 机器本地产物（`.go`、`node_modules`、
+  `__pycache__`…）名字可预测，留在 `scopes/common.py` 的 `LOCAL_ARTIFACTS`；② 用户用
+  `.gitignore` 排除的只有 git 知道答案，新模块 `scripts/tracked.py` 一次问完
+  （`ls-files --others --ignored --exclude-standard --directory -z`），按前缀逐段比对。
+  消费者：`common.build_guide`（派生索引只写会入库的东西）与 `secret`（SEC001 的主语是「入库」）。
+- 现场：快进合回 main 后 `make check-all` 立刻 3 条 SEC001，全在被 ignore 的
+  `.deploy/config.yaml` 里；`make init` 在主树又重算出带 `.deploy` 的索引——任务树全绿了
+  三批，一到主树就炸，因为两边磁盘本来就不是一张。详见 lessons L-9。
+- 降级不沉默：被排除文件里的高熵键改报一条聚合 WARN（SEC005，只写键路径与文件名，永不写值），
+  弱默认凭据（SEC002）照报——它判的是「有没有用」，与进不进仓库无关。
+- 没有 git 时的取向：**一律当会入库**，并登记 `secret:gitignore 判定` 为判不了。
+  宁可多报，不许因为读不到规则就静默少扫（断言坑 #11）。
+- 被否：① 把 `.deploy/` 写进 `LOCAL_ARTIFACTS`（把「用户主动排除的部署配置」说成「机器缓存」，
+  而且每换一台机器就要改一次代码）；② 只判 `git ls-files` 里已跟踪的文件（未跟踪但会被
+  `git add -A` 收走的正好是最常见的泄漏路径，等于关掉门禁）；③ 对被排除文件完全沉默
+  （跳过多少不留痕，下一个人以为部署配置是干净的）；④ 在主树手改或提交带 `.deploy` 的派生索引
+  （把某台机器的本地状态印进仓库内容）。
+- 命令面：`make ignored` 把这张排除表变成可看的东西（CMD004 要求新脚本要么注册成命令、
+  要么被引用；它确实是个要给人看的调试视图，就登记成命令）。
+- written_by: session 2026-10-29 / version: 1 / supersedes: — / status: active

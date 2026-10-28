@@ -26,6 +26,7 @@
 | `make go-all` | build + vet（等价于 check-all 里的慢域） |
 | `make guide` | 重新生成 `.harness/codebase-guide/`（派生，禁手改） |
 | `make index` | 重新生成 `.harness/INDEX.md`（派生：下一步、没人守的规则、流程装机状态） |
+| `make ignored` | 列出被 gitignore 排除的本地路径——门禁说「这条不会入库」时，看它到底排了什么 |
 | `make task-new TASK=<id>` | 给看板里已登记的任务开一棵工作树 |
 | `make task-done TASK=<id>` | 收尾一棵树：干净 + 看板 done + 已合并，三条都过才撤 |
 | `make task-list` | 列出已开的工作树 |

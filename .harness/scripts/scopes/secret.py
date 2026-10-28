@@ -5,6 +5,8 @@
           但改它常常要连着环境，所以按限时处理，不一刀切拦提交
   SEC003  本地覆盖文件被纳入版本控制（`.env`、`config.local.yaml`）——ERROR
   SEC004  一个候选文件都没扫到（扫描根写错、git 命令失败）——ERROR，绝不静默通过（断言坑 #11）
+  SEC005  高熵键只躺在被 gitignore 排除的本地文件里（`.deploy/config.yaml` 一类）——WARN：
+          「入库」这件事判不了它，但沉默会让人以为部署配置是干净的，所以点名到文件
 
 消息里只写**键路径**，绝不写值：SEC001 的发现会进 `.harness/deliverables/`、进终端输出、
 可能进提交信息。把密钥原文打印出来去修「密钥入库」，是把一个问题变成两个。
@@ -18,11 +20,12 @@ import re
 import subprocess
 from pathlib import Path
 
+import tracked as trackedlib
 from .common import LOCAL_ARTIFACTS, add, quality_get
 
 NAME = "secret"
 PLAN = "配置里的密钥与弱凭据：只报「哪个键路径有问题」，永不报出值本身；命中基线的老账标「基线内」"
-REFLECT = ("SEC001", "SEC002", "SEC003", "SEC004")
+REFLECT = ("SEC001", "SEC002", "SEC003", "SEC004", "SEC005")
 SECRET_KEYS = ("secret", "password", "passwd", "token", "apikey", "accesskey",
                "access_key", "privatekey", "private_key", "dsn", "upass", "clientsecret")
 WEAK = {"123456", "1234567", "12345678", "admin", "admin123", "root", "test", "password",
@@ -173,6 +176,16 @@ def check_tracked_overrides(root, findings):
             f"{rel} 被纳入版本控制——本地覆盖文件应当只存在于工作区")
 
 
+def scan_one(path, findings, root):
+    """按后缀挑扫描器；SEC001/SEC002/SEC005 的判断都在被调的那一个里。"""
+    if path.suffix in {".yaml", ".yml"}:
+        scan_yaml(path, findings, root)
+    elif path.suffix == ".go":
+        scan_go(path, findings, root)
+    elif path.suffix == ".json":
+        scan_json(path, findings, root)
+
+
 def run(ctx, findings):
     root = Path(ctx["root"])
     quality = ctx.get("quality") or {}
@@ -183,11 +196,30 @@ def run(ctx, findings):
         add(findings, "ERROR", NAME, ".", 1, "SEC004",
             "没有扫到任何候选文件——扫描根写错或后缀表过期，这不是通过")
         return
+    # 「入库」的主语是 git 会带走的东西：`.deploy/` 里那份真凭据不会进提交，把它报成
+    # SEC001 就等于拦下以后每一次提交。读不到 ignore 规则时（没有 git）一律当会入库——
+    # 宁可多报，不许因为读不到规则就静默少扫；这一条同时登记为判不了。
+    hidden, problem = trackedlib.ignored(root)
+    if problem:
+        ctx.setdefault("not_applicable", []).append(f"{NAME}:gitignore 判定")
+        hidden = frozenset()
+    local_only = []
     for path in files:
-        if path.suffix in {".yaml", ".yml"}:
-            scan_yaml(path, findings, root)
-        elif path.suffix == ".go":
-            scan_go(path, findings, root)
-        elif path.suffix == ".json":
-            scan_json(path, findings, root)
+        if trackedlib.is_ignored(path.relative_to(root).parts, hidden):
+            local_only.append(path)
+        else:
+            scan_one(path, findings, root)
+    if local_only:
+        probe = []
+        for path in local_only:
+            scan_one(path, probe, root)
+        keys = [x for x in probe if x.code == "SEC001"]
+        for x in probe:
+            if x.code != "SEC001":
+                add(findings, x.severity, NAME, x.path, x.line, x.code, x.message)
+        if keys:
+            where = "、".join(sorted({x.path for x in keys}))
+            add(findings, "WARN", NAME, keys[0].path, keys[0].line, "SEC005",
+                f"{len(keys)} 个高熵键在 gitignore 排除的本地文件里（{where}）："
+                "不会入库所以不判 SEC001，但那是部署侧的真凭据")
     check_tracked_overrides(root, findings)

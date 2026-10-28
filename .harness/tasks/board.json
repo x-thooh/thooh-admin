@@ -125,6 +125,16 @@
       "owner": "thooh",
       "evidence": "path:.harness/deliverables/gates/20261028T165106Z-make-fmt-single-list.md",
       "scope": "build"
+    },
+    {
+      "id": "T-14",
+      "title": "门禁按磁盘判而不是按 git 判：主树的 .deploy/ 被报成入库",
+      "status": "done",
+      "priority": "high",
+      "detail": "快进合回 main 后 make check-all 立刻 3 条 SEC001，全在被 .gitignore 排除的 .deploy/config.yaml（任务树没有那个目录，所以三批门禁全绿看不见它）；同一次 make init 又重算出带 .deploy 的派生索引，提交上去下一棵干净检出就报 ENT007。现在「git 会不会带走」只此一处（scripts/tracked.py），build_guide 与 secret 都问它；被排除文件的高熵键降级成 SEC005 点名 WARN，弱凭据照报，没有 git 时一律当会入库并登记判不了。反向样本 ENT007c / SEC005 / SEC001b。见 decisions D-18、lessons L-9。",
+      "owner": "thooh",
+      "evidence": "path:.harness/deliverables/gates/20261028T170822Z-repo-content-per-git.md",
+      "scope": "secret"
     }
   ]
 }

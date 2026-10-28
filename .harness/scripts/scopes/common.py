@@ -6,6 +6,8 @@ import re
 import subprocess
 from pathlib import Path
 
+import tracked as trackedlib  # 「git 会不会带走这条路径」的家；放脚本侧是因为本文件额度只剩 1 行
+
 
 class Finding:
     __slots__ = ("code", "line", "message", "path", "scope", "severity")
@@ -317,12 +319,12 @@ WORD_ERR = re.compile(r"\berr\b")
 
 
 LOCAL_ARTIFACTS = frozenset({".git", ".go", ".idea", ".ruff_cache", ".venv", "node_modules", "__pycache__"})
-"""机器本地产物：谁装了什么、缓存放在哪，都不算仓库内容。
-
-这份清单只此一处。此前它抄了四份（entry 的 SKIP_DIRS、common 的 GUIDE_IGNORE、secret 的
+"""机器本地产物：谁装了什么、缓存放在哪，都不算仓库内容。这份清单只此一处。
+此前它抄了四份（entry 的 SKIP_DIRS、common 的 GUIDE_IGNORE、secret 的
 SKIP_PARTS、git_clean 的 volatile），每份各自增删——漂移的现场：GUIDE_IGNORE 少了 `.go`，
-于是 `make guide` 把 303M 模块缓存的两条目录写进派生索引，换一棵干净检出 ENT007 判「索引过期」；
-同一个目录又让 `gofmt -l .` 退出码 2，被 BLD004 报成「工具链不可用」。环境的脏不是代码的错。
+于是 `make guide` 把 303M 模块缓存的两条目录写进派生索引，换一棵干净检出 ENT007 判「索引过期」，
+同一个目录又让 `gofmt -l .` 退出码 2 被 BLD004 报成「工具链不可用」。环境的脏不是代码的错；
+用户自己用 .gitignore 排除的那一半清单，家在 `scripts/tracked.py`。
 """
 
 GUIDE_SUFFIXES = {".py", ".json", ".md", ".sh", ".go", ".yaml", ".yml", ".toml"}
@@ -336,10 +338,12 @@ def in_local_artifact(parts):
 def build_guide(root, depth=2):
     """Deterministic code map: dirs and text files up to `depth`. Written only by gen_guide.py."""
     root = Path(root)
+    # 被 ignore 规则排除的东西不会进版本控制，写进派生索引就等于把本地目录印进仓库内容
+    hidden, _problem = trackedlib.ignored(root)
     entries = []
     for path in sorted(root.rglob("*")):
         rel = path.relative_to(root)
-        if in_local_artifact(rel.parts):
+        if in_local_artifact(rel.parts) or trackedlib.is_ignored(rel.parts, hidden):
             continue
         if len(rel.parts) > depth:
             continue
