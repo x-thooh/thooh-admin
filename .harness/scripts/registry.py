@@ -7,10 +7,12 @@
 `baseline` 必须最后：它读其它域已经报出来的 findings。
 """
 
-from scopes import baseline, build, entry, modules, secret, stale
+from scopes import baseline, budget, build, entry, hooks, modules, secret, stale
 
 SCOPES = (
     entry,
+    hooks,
+    budget,
     modules,
     secret,
     stale,

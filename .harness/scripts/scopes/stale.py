@@ -23,6 +23,9 @@ from pathlib import Path
 from .common import add, go_files, quality_get
 
 NAME = "stale"
+PLAN = "会过期的引用：前端产物里被 `r.Static()` 挂载的资产还存不存在、swagger 三份元数据" \
+    "（注解 / docs.go / json / yaml）是否互相一致、文档时效是否越过告警线"
+REFLECT = ("STL001", "STL002", "STL003", "STL004", "STL005")
 ANNOTATION_KEYS = {"title": "@title", "version": "@version", "description": "@description",
                    "host": "@host", "basePath": "@BasePath"}
 STATIC_MOUNT_RE = re.compile(r'\.Static\(\s*"([^"]+)"\s*,\s*".?/?([^"]*)"')

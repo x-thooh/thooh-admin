@@ -21,6 +21,9 @@ from pathlib import Path
 from .common import add, blank_strings, code_lines, go_package, quality_get
 
 NAME = "modules"
+PLAN = "业务模块清单与 `app/admin/router.go` 的注册表双向对账：多一个没注册的模块、" \
+    "少一个还在注册的文件都算缺陷；模块骨架（api.go/model.go/router.go）齐不齐也在这里判"
+REFLECT = ("MOD001", "MOD002", "MOD003", "MOD004", "MOD005")
 IMPORT_RE = re.compile(r'^(?:(?P<alias>[\w.]+|\.)\s+)?"(?P<path>[^"]+)"$')
 INIT_RE = re.compile(r"\b(?P<alias>[A-Za-z_]\w*)\.Init\w*\(")
 SHAPE_FILES = ("api.go", "model.go", "router.go")

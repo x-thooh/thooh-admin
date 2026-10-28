@@ -21,6 +21,8 @@ from pathlib import Path
 from .common import add, quality_get
 
 NAME = "secret"
+PLAN = "配置里的密钥与弱凭据：只报「哪个键路径有问题」，永不报出值本身；命中基线的老账标「基线内」"
+REFLECT = ("SEC001", "SEC002", "SEC003", "SEC004")
 SECRET_KEYS = ("secret", "password", "passwd", "token", "apikey", "accesskey",
                "access_key", "privatekey", "private_key", "dsn", "upass", "clientsecret")
 WEAK = {"123456", "1234567", "12345678", "admin", "admin123", "root", "test", "password",

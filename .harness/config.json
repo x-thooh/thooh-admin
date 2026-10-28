@@ -6,6 +6,12 @@
   },
   "agents_max_lines": 150,
   "sub_agents_max_lines": 80,
+  "budget": {
+    "scopes": 300,
+    "scripts": 300,
+    "shared": 420,
+    "corpus": 500
+  },
   "slow_scopes": ["build"],
   "module_roots": ["modules", "admin"],
   "registry_file": "app/admin/router.go",

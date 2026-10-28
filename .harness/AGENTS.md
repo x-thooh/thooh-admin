@@ -3,9 +3,9 @@
 
 | 子目录 | 层 | 能不能手改 |
 | --- | --- | --- |
-| `scripts/verify.py`、`registry.py` | 执行 | 能（改域 = 加文件 + 在 registry 加一行） |
+| `scripts/verify.py`、`registry.py` | 执行 | 能（改域 = 加 `scopes/<域>.py`（带 `PLAN`/`REFLECT`）+ registry 加一行 + `tests/cases/<域>.py` 备样本） |
 | `scripts/scopes/<域>.py` | 执行 | 能，每个 code 必须在 `specs/standards.md` 有行 |
-| `scripts/tests/reverse.py` | 执行 | 能，新域必须带至少一个违规样本 |
+| `scripts/tests/reverse.py`、`tests/cases/<域>.py` | 执行 | 能。语料一域一文件，`reverse.py` 只发现与对账 |
 | `config.json` | 执行 | 能（阈值与模块根的唯一来源） |
 | `git-hooks/` | 执行 | 能，装法是 `make init` 设 `core.hooksPath` |
 | `specs/standards.md` | 知识 | 能（规则↔断言对照表，含「无断言」列） |

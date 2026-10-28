@@ -37,6 +37,9 @@ from pathlib import Path
 from .common import add, as_dict
 
 NAME = "baseline"
+PLAN = "存量欠账的账本：老账逐条标「基线内 / 新欠」，总数只减不增；accepted 豁免必须有理由、" \
+    "负责人和未过期的复查日期"
+REFLECT = ("BASE011", "BASE012", "BASE013", "BASE014")
 BASELINE_REL = ".harness/baseline.txt"
 ACCEPTED_REL = ".harness/accepted.json"
 DIGITS = re.compile(r"\d+")

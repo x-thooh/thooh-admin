@@ -22,6 +22,9 @@ from pathlib import Path
 from .common import add, quality_get, rel_to
 
 NAME = "build"
+PLAN = "慢域：go.mod 的工具链下限、`go build` / `go vet` 是否真的跑过并留下带 commit 的证据、" \
+    "证据是否过期、gofmt 是否干净"
+REFLECT = ("BLD001", "BLD002", "BLD003", "BLD004", "BLD005", "BLD006")
 GO_TOUCHED = ("*.go", "go.mod", "go.sum")
 EVIDENCE_GLOB = "verify-*.txt"
 EVIDENCE_COMMIT_RE = re.compile(r"^#\s*commit:\s*([0-9a-f]{7,40})", re.M)
