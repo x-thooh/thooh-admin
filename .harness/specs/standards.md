@@ -11,6 +11,7 @@
 | --- | --- | --- | --- |
 | `entry` | 入口文件、目录地图、派生索引 | 快 | `scripts/scopes/entry.py` |
 | `cmd` | 命令表 ↔ Makefile target ↔ 脚本文件三方对账 | 快 | `scripts/scopes/cmd.py` |
+| `workflow` | 流程层：flow.json 的阶段/门径/转移 ↔ Makefile，skills 声明 ↔ 磁盘双向，契约六问 | 快 | `scripts/scopes/workflow.py` |
 | `commit` | 提交信息：一件事、动宾短语、不并列。钩子判 ERROR，本域判 HEAD 为 WARN | 快 | `scripts/scopes/commit.py` |
 | `hooks` | 每个域的 `PLAN`/`REFLECT` 与 scopes/ 源码逐条对账 | 快 | `scripts/scopes/hooks.py` |
 | `budget` | 工具层按角色的行数额度 | 快 | `scripts/scopes/budget.py` |
@@ -39,16 +40,21 @@
 | 10 | 一次一类修改、工作树干净 | 无断言（人判）。任务是否在 worktree 里做，别人机器上判不了；写在这里靠下一次 `git status` | — | — |
 | 11 | 判不了就说判不了 | 各域的样本守卫（MOD005 / SEC004 / STL005 / ENT008 / CMD005 / MSG005）+ `not_applicable` 清单；BLD004 工具链缺失走 WARN | ERROR / WARN | 每条样本守卫都在 selftest 里单独造一例「目录为空」 |
 | 12 | 一次提交说一件事 | `scope=commit`：MSG001 空标题或裸动词、MSG002 超 `subject_max_chars`、MSG003 标题并列（两个及以上「，」子句）、MSG004 正文出现顺带/另外/同时/此外、MSG005 拿不到消息。同一份 `check_message` 由 `commit-msg` 钩子在落笔时判 ERROR | WARN（钩子侧 ERROR） | MSG001–MSG005 + MSG00n 合规消息正对照 |
+| 13 | 一次修改走五段，每段有过法 | `scope=workflow`：FLOW001 flow.json 缺/坏/stages 空、FLOW002 阶段与 REQUIRED_STAGES 不齐、FLOW003 阶段既无 gate 又无 manual、FLOW004 门径不是 Makefile 的 target（含 Makefile 读不到）、FLOW005 转移表空/指向不存在的阶段/没写条件/非末阶段无出口、FLOW006 声明账本缺或一条没声明、FLOW007 声明未装机、FLOW008 装机未声明、FLOW009 SKILL.md 三条验收缺一、FLOW010 契约六问缺一 | ERROR | FLOW001–FLOW010（各一条独立夹具，含三条 FLOW005 变体与两条 FLOW006 变体）+ FLOW00n 最小仓库正对照 |
 
 ## 工具层自家规矩 ↔ 断言
 
-这三条管的是 harness 自己，不面向业务代码，所以不占上面「硬规则」的编号——但一样要有断言。
+这几条管的是 harness 自己，不面向业务代码，所以不占上面「硬规则」的编号——但一样要有断言。
 
 | 规矩 | 断言 | 严重度 | 反向样本 |
 | --- | --- | --- | --- |
 | 每个域必须说清自己管什么（`PLAN`）与能报哪些 code（`REFLECT`），且与源码逐条一致 | `scope=hooks`：HOOK001 registry ↔ scopes/ 双向、HOOK002 空登记、HOOK003 登记了源码里没有的、HOOK004 源码会报但没登记、HOOK005 共享 helper 提到没人认领的 code | ERROR | HOOK001/001b/001c、HOOK002、HOOK003、HOOK004、HOOK005 + HOOK00n 干净树正对照 |
 | 加断言的同时加语料；注册域不许没有 `cases/<域>.py` | `make selftest` 的 `coverage()`（不是 scope：它判的是语料库自己，找不到「违规仓库」去扫） | selftest 退出码 1 | 由 reverse.py 自检：删一个 `cases/<域>.py` 立刻红 |
 | 工具层文件按角色有行数额度，超限即该拆 | `scope=budget`：BUDGET001 超额度、BUDGET002 额度表坏或样本为 0 | ERROR | BUDGET001、BUDGET002、BUDGET002b（0 样本）+ BUDGET00n 正对照 |
+
+code 的命名本身也是一条规矩：**3–6 个大写字母 + 三位数字**（`hooks` 的 `CODE_RE` 就按这个匹配）。
+两字母前缀（试过 `WF001`）不会被源码扫描看见——登记了、源码里也有，但对账那头是瞎的，
+于是 `FLOWxxx` 这种改名比放宽正则更省事：正则一放宽，`GB001`、`ID001` 之类也会被抓进来。
 
 ## 判不了（不是通过）
 
@@ -68,9 +74,9 @@
 
 ## 第二期不做的事（写明，避免当成已完成）
 
-- `workflow/`：阶段、转移、契约与 flow.json；门记录模板。
-- `skills/` 与 `skills.declared.yaml` 的双向对账（声明即承诺）。
-- `INDEX.md` 派生索引、`retro`/`round` 复盘脚本、`wt`（任务级 worktree 隔离）与 `task-new`/`task-done`。
+- `INDEX.md` 派生索引、`retro`/`round` 复盘脚本、`wt`（任务级 worktree 隔离）与 `task-new`/`task-done`：
+  属第三期（状态层与复盘）。
+- 门记录模板：`stack-templates/` 目前是空目录（按需），流程层跑通后再定骨架。
 - 提交信息钩子已上线（`git-hooks/commit-msg` + `scope=commit`）；没上线的是**历史扫描**：
   本域只判 HEAD，不回头改旧提交——重写历史的代价高于一条措辞欠账。
 - 「文档点名的路径必须存在」这类断言：本仓库大量反引号写的是**目标代码**路径，

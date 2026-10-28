@@ -9,11 +9,13 @@
 | `config.json` | 执行 | 能（阈值与模块根的唯一来源） |
 | `git-hooks/` | 执行 | 能，装法是 `make init` 设 `core.hooksPath` |
 | `specs/standards.md` | 知识 | 能（规则↔断言对照表，含「无断言」列） |
+| `workflow/flow.json` | 流程 | 能，但它是阶段的**唯一事实源**：改阶段要同时改 `scopes/workflow.py` 的 `REQUIRED_STAGES`（FLOW002） |
+| `workflow/contract.md`、`workflow/skills.declared.yaml` | 流程 | 能（六问与声明账本；账本只读 `id`，与仓库根 `skills/` 双向对账） |
 | `codebase-guide/index.json` | 知识 | **禁手改**：派生数据，`make fix` / `make guide` 重建（ENT007） |
 | `baseline.txt`、`accepted.json` | 状态 | 能，但只减不增（BASE013），豁免要理由 + 负责人 + 复查日期 |
 | `deliverables/`、`tasks/`、`memory/` | 状态 | 能；`memory/` 只 `remember`，作废不删 |
 
-三条自家规矩：
+自家规矩：
 
 1. 加断言的同时加反向样本；两者不同批提交等于没提交。`scope=baseline`（账本只减不增
    会间接逼你处理新报出来的欠账）其余靠 `make selftest`。无断言（人判）：脚本没法替你
@@ -21,5 +23,7 @@
 2. `--fix` 只重建派生数据，不写理由、不选版本、不改业务代码。`scope=entry`
 3. 判不了就登记 `not_applicable`，输出里必须与「通过」分开。扫到 0 个样本要报错。
    `scope=modules`（MOD005 是本仓第一条 0 样本守卫，新域照抄它）
+4. code 名字是 3–6 个大写字母 + 三位数字（`FLOW001`、`BASE011`）。两字母前缀
+   `hooks` 的源码扫描看不见——它按这个形状匹配。`scope=hooks`
 
 命令一律从仓库根的 `Makefile` 走，这里没有第二条入口。

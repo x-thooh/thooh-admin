@@ -1,0 +1,68 @@
+{
+  "name": "本仓库的修改流程",
+  "note": "阶段的唯一事实源。README.md 讲道理，本文件讲有哪些阶段、每段怎么算过；两边漂移由 scope=workflow 判。",
+  "stages": [
+    {
+      "id": "survey",
+      "title": "盘点",
+      "does": "跑全量校验，把「改之前长什么样」原样记下来：ERROR/WARN 计数、账本里哪几条、工作区是否只剩本次要改的文件",
+      "gate": "check",
+      "exit": "说得出改前有几条 ERROR、几条在账本内；git status 里没有别人的改动"
+    },
+    {
+      "id": "plan",
+      "title": "规划",
+      "does": "动手前写本批的验收规则，机器判与人判分列；一次只筹划一类改动，批次按影响面从小到大",
+      "manual": "规则是否真能判、批次是否真按影响面拆——意图判不了，由评审人核。契约阶段的六问见 contract.md",
+      "exit": "每条验收规则要么指到一个 code，要么写明「无断言」+ 强度来源"
+    },
+    {
+      "id": "act",
+      "title": "行动",
+      "does": "只做那一类修改，改完立刻回归；能机检的那部分才自动修，写证据、选版本、补理由一律不代劳",
+      "gate": "check",
+      "exit": "make check 退出码 0；动了 .go 再加 make check-all"
+    },
+    {
+      "id": "reflect",
+      "title": "反思",
+      "does": "与改前基准逐项对照：锚点没恶化、目标问题变好、新增每条都归因；再造一个违规样本确认这次加的断言真的会报",
+      "gate": "selftest",
+      "exit": "make selftest 退出码 0，且账本总数不比改前多（BASE013）"
+    },
+    {
+      "id": "deliver",
+      "title": "交付",
+      "does": "一次提交说一件事，落痕（改了什么、为什么、跑了什么）进 memory/ 或提交信息；需要证据的存 make evidence",
+      "gate": "evidence",
+      "exit": "结论 = 命令 + 退出码 + 完整输出，文件落在 .harness/deliverables/evidence/"
+    }
+  ],
+  "transitions": [
+    {
+      "from": "survey",
+      "to": "plan",
+      "on": "基准已原样记录，工作区只剩本次计划内的改动"
+    },
+    {
+      "from": "plan",
+      "to": "act",
+      "on": "验收规则写好，且本批只有一类改动"
+    },
+    {
+      "from": "act",
+      "to": "reflect",
+      "on": "这一类改完，门禁退出码 0"
+    },
+    {
+      "from": "reflect",
+      "to": "act",
+      "on": "回归发现新欠、或这次加的断言打不中违规样本——回炉，不许带着未归因的上升交付"
+    },
+    {
+      "from": "reflect",
+      "to": "deliver",
+      "on": "与基准逐项对照完毕，每条上升都有原因"
+    }
+  ]
+}

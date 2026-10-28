@@ -107,3 +107,27 @@
 - 判不了而不报的东西：`r.Static()` 挂载的目录存在性（`./static/images` 实际不存在）。
   它不在首批商定的四个域里，加进来会把一期范围撑开；记在这里，二期或单独一轮再判。
 - written_by: session 2026-10-28 / version: 1 / supersedes: — / status: active
+
+## D-12 阶段清单放 `flow.json`，入口只留指针
+
+- 决策：五段循环（盘点→规划→行动→反思→交付）的阶段、门径、转移只写在
+  `.harness/workflow/flow.json`；根 `AGENTS.md` 的「开工四步」保留为压缩版并加一句指针，
+  `README.md` 只讲为什么这么排，不复制阶段清单。
+- 为什么：两处列同一件事就是两个事实源。阶段进 JSON 才能被断言检查（FLOW002/FLOW005），
+  进散文就只能靠人肉对齐。
+- 门径的表达：每个阶段要么有 `gate`（必须是 Makefile 里带 `##` 的真 target，FLOW004），
+  要么有 `manual`（明写人判与理由，FLOW003）。`plan` 段选后者——意图判不了，不拿弱断言假装守住。
+- 复用而非重写：gate 的对账调 `scopes/cmd.py` 的 `make_targets`。「这条命令存不存在」让两个域
+  各判一遍，两边会各自漂移，报错的人看不出该信谁。
+- written_by: session 2026-10-28 / version: 1 / supersedes: — / status: active
+
+## D-13 阶段 4 只装一条流程：`skills/add-module`
+
+- 决策：交付一条可安装流程 `skills/add-module/SKILL.md`，由 `skills.declared.yaml` 声明；
+  其余任务（改 SQL、改前端产物）暂不做成流程，留在任务路由表里。
+- 为什么：这条流程的失败模式最贵也最静默——漏登记路由编译照过；它有固定的两段修改点，
+  值得写成流程。别的任务还没有「每次都漏同一步」的证据。
+- 被否：一上来铺 5–6 条流程——没有装机证据的流程是文档不是流程，且每条都要过 FLOW009 三条验收。
+- `skills/` 放仓库根（与 `.harness/` 同级）。它同时是 `entry` 的目录地图项：新增一级目录不进地图
+  就报 ENT004，地图与磁盘的一致性是机器判的，不靠自觉。
+- written_by: session 2026-10-28 / version: 1 / supersedes: — / status: active

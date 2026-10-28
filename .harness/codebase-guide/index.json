@@ -59,6 +59,10 @@
       "kind": "dir"
     },
     {
+      "path": ".harness/workflow",
+      "kind": "dir"
+    },
+    {
       "path": "AGENTS.md",
       "kind": "file"
     },
@@ -224,6 +228,14 @@
     },
     {
       "path": "pkg/strcase",
+      "kind": "dir"
+    },
+    {
+      "path": "skills",
+      "kind": "dir"
+    },
+    {
+      "path": "skills/add-module",
       "kind": "dir"
     },
     {

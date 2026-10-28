@@ -3,7 +3,7 @@
 
 规则在文件里，不在会话里。细节一律下沉到 `.harness/`：断言与阈值在 `.harness/scripts/`，
 规范与规则↔断言对照表在 `.harness/specs/standards.md`，跨会话决策在 `.harness/memory/`，
-流程（第二期）在 `.harness/workflow/`。业务知识（模块怎么分层、SQL 怎么改）在
+流程（阶段、门径、转移）在 `.harness/workflow/`。业务知识（模块怎么分层、SQL 怎么改）在
 `docs/` 与各目录入口里。
 
 ## 常用命令
@@ -44,7 +44,8 @@ modules    业务模块，一个目录 = api.go + model.go + router.go + func In
 pkg        独立工具包（mysql、redis、logger、utils）
 tests      Go 测试与手工请求脚本
 web        前端构建产物（只入库结果，不入库源码）
-.harness   agent 工程层：脚本、状态、知识、规范
+skills     可安装流程（每条一个目录，正文是 SKILL.md）；与声明账本双向对账
+.harness   agent 工程层：脚本、状态、知识、规范、流程
 ```
 
 ## 硬规则
@@ -69,6 +70,9 @@ web        前端构建产物（只入库结果，不入库源码）
 12. 一次提交说一件事：标题是动宾短语、不并列、不超长，正文不许出现「顺带 / 另外 / 同时 /
     此外」。落笔时 `commit-msg` 钩子判 ERROR，复盘时 `scope=commit` 判 WARN——
     HEAD 已经写进历史，改它比一条措辞欠账贵。
+13. 一次修改走五段（盘点→规划→行动→反思→交付），每段的过法在 `.harness/workflow/flow.json`：
+    要么有 `gate`（一条真能跑的 `make` 目标），要么明写 `manual`。跳过反思段 = 没跑过
+    `make selftest` 就说「修好了」。`scope=workflow`
 
 ## 任务路由
 
@@ -79,6 +83,7 @@ web        前端构建产物（只入库结果，不入库源码）
 | 改数据库模型或 `vben-go.sql` | `pkg/AGENTS.md`（迁移与全量 dump 的关系） |
 | 动生成物（docs/、web/） | `docs/AGENTS.md`、`web/AGENTS.md` |
 | 加一条断言或改阈值 | `.harness/scripts/registry.py`、`.harness/specs/standards.md` |
+| 加一条可安装流程 | `.harness/workflow/README.md`、`.harness/workflow/skills.declared.yaml` |
 | 查「上次为什么这么定」 | `.harness/memory/decisions.md`、`.harness/memory/lessons.md` |
 
 ## 开工四步
@@ -87,6 +92,9 @@ web        前端构建产物（只入库结果，不入库源码）
 2. `make check`——把现状原样记下来，作为「改之前长什么样」。
 3. 一次一类改动，改完立刻 `make check`（动了 .go 就再加 `make check-all`）。
 4. 落痕：改了什么、为什么、跑了什么，写进 `.harness/memory/` 或提交信息。
+
+这四步是五段循环的压缩版（盘点→规划→行动→反思→交付）；段数不许省，只许压缩，
+展开与每段的门径在 `.harness/workflow/flow.json`。
 
 ## 证据规则
 
