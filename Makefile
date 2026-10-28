@@ -34,6 +34,8 @@ help: ## 列出可用命令
 
 init: ## 装 git 钩子、建状态目录、生成代码库索引
 	@git -C $(ROOT) config core.hooksPath .harness/git-hooks
+	@echo "hooksPath 写在 $$(git -C $(ROOT) config --show-origin --get core.hooksPath | cut -f1)" \
+		"——它是仓库级设置，同仓库的其它 worktree 一起受影响"
 	@chmod +x $(HARNESS)/git-hooks/pre-commit
 	@mkdir -p $(HARNESS)/deliverables/evidence $(HARNESS)/tasks
 	@$(PY) $(GEN_GUIDE) --root $(ROOT)

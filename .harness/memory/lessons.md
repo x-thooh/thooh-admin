@@ -38,4 +38,14 @@
   `make check` 里 0 ERROR 不等于 `make check-all`/`make evidence`/`make fix` 可用。
   第二期把「Makefile 里出现的每个脚本调用都能跑通」做成 `scripts` 域的断言。
 
+## L-4 `make init` 改的是整个仓库的钩子，不只是这个工作树
+
+- 现象：在 worktree `go125` 里跑 `make init` 之后，`git config --show-origin core.hooksPath`
+  显示的是 `/…/thooh-admin/.git/config`——主树也拿到了同一条设置。
+- 根因：`core.hooksPath` 不是 worktree-local 的键，写它等于改共享 config。主树当时还没有
+  `.harness/`，实测（临时仓库）确认钩子目录不存在时 `git commit` 静默通过：不报错，也没有门禁。
+- 断言：无机器断言。约定是 `make init` 必须打印出被改的 origin 文件，让跑的人看见「这次改的是
+  共享配置」；主树合并 go125 之前，那边的提交不受门禁保护——这是已知缺口，不当成已上锁。
+
+
 
