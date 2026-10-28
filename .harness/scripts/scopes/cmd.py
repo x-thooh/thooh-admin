@@ -26,8 +26,9 @@ REFLECT = ("CMD001", "CMD002", "CMD003", "CMD004", "CMD005")
 
 TABLE_SECTION = "## 常用命令"
 NEXT_H2 = re.compile(r"^## ", re.M)
-# `make init`、`make build` / `vet` / `fmt`：一格可能并列多个 target
-CELL_TOKEN = re.compile(r"`(?:make\s+)?([a-z0-9][a-z0-9_-]*)`")
+# `make init`、`make build` / `vet` / `fmt`、`make check-commit`（后面还跟参数说明）：
+# 一格可能并列多个 target，名字后面允许空格接别的写法
+CELL_TOKEN = re.compile(r"`(?:make\s+)?([a-z0-9][a-z0-9_-]*)\b")
 # 只有带 `## ` 的 target 才是「给人用的命令」——help 打印的就是这一批，命令表必须与它同集
 DOC_TARGET = re.compile(r"^([a-z0-9][a-z0-9_-]*):.*##\s", re.M)
 SCRIPT_PATH = re.compile(r"\$\(SCRIPTS\)/([A-Za-z0-9_./-]+)")
