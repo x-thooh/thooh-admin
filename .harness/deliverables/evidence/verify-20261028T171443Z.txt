@@ -1,0 +1,17 @@
+# 命令：make check-all
+# UTC：2026-10-28T17:14:43Z
+# commit: 156f8921d3d120918d3ef451e9152b113d290664
+# 工作区：
+# 首条未提交改动：
+# 退出码契约：0 = 无 ERROR，1 = 有 ERROR，2 = 前置条件不满足
+
+WARN  secret       .deploy/config.yaml:15  SEC005   3 个高熵键在 gitignore 排除的本地文件里（.deploy/config.yaml）：不会入库所以不判 SEC001，但那是部署侧的真凭据
+WARN  secret       .deploy/config.yaml:46  SEC002   弱默认凭据 xxl-job.job_upass（5 位）：换成环境变量或随机值
+WARN  secret       config.yaml:15  SEC002   弱默认凭据 database.primary.password（6 位）：换成环境变量或随机值
+WARN  secret       config.yaml:23  SEC002   弱默认凭据 database.secondary.password（6 位）：换成环境变量或随机值
+WARN  secret       config.yaml:36  SEC001   基线内（账本 1 条）：高熵密钥入库 jwt.secret
+WARN  secret       config.yaml:46  SEC002   弱默认凭据 xxl-job.job_upass（5 位）：换成环境变量或随机值
+WARN  stale        docs/swagger.json:1  STL004   swagger paths 为空：文档里没有一条接口，多半是注解缺失或没跑 swag init
+判不了（1）: stale:swagger 时效——这不是通过：先把它被依赖的那些 scope 一起跑
+0 ERROR, 7 WARN  (scopes: entry, commit, cmd, workflow, hooks, budget, modules, secret, stale, state, worktree, build, baseline; mode: normal)  无断言项见 AGENTS.md「硬规则」与 .harness/specs/standards.md
+exit=0

@@ -62,3 +62,11 @@ SEC005，另一条留在 SEC002），无一条上升。
 确认那三条 ERROR 真的消失、派生索引不再变脏；那一步的数子记在收尾门记录里。
 
 commit：基准 `f608aeb`（本批提交即它的下一条）。
+
+---
+
+追计（实测之后，数字以 `20261028T171644Z-harness-lands-on-main.md` 为准）：上面「WARN 主树
+6 → 5」算错了，现场是 **6 → 7**。错在把「三条折叠成一条」当成净减一条——被折的那三条在 ERROR 档，
+WARN 档只会长出折叠后的那一条 `SEC005`。ERROR 3 → 0 与「无新增欠账」两条仍然成立；发现数合计 9 → 7。
+主树实测：`make check-all` = 0 ERROR / 7 WARN、`make fmt`/`vet`/`build`/`test`/`ignored`/`init` 全部
+exit 0、`git status --short` 为空（派生索引里 `.deploy` 命中 0 次）。

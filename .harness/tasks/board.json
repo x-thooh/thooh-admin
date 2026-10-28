@@ -14,11 +14,12 @@
     {
       "id": "T-2",
       "title": "harness 只在 go125 分支，主树还没有门禁",
-      "status": "doing",
+      "status": "done",
       "priority": "high",
       "worktree": "go125",
       "detail": "core.hooksPath 是仓库级设置，主树里没有 .harness/git-hooks/ 目录时 git 静默跳过钩子——主树上的提交现在不受任何检查保护（lessons L-4）。收尾动作是把 go125 快进合进 main。",
       "owner": "thooh",
+      "evidence": "path:.harness/deliverables/gates/20261028T171644Z-harness-lands-on-main.md",
       "scope": "entry"
     },
     {

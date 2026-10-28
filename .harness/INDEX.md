@@ -5,10 +5,9 @@
 
 ## 下一步（看板）
 
-- 看板更新于 2026-10-29，共 16 条：open 8、doing 1、blocked 1、done 6
+- 看板更新于 2026-10-29，共 16 条：open 8、blocked 1、done 7
 - 高优先级未完成（逐条点名，不写概括句）：
   - `T-1` sys_config 的 DDL 与 GORM 模型列名不一致
-  - `T-2` harness 只在 go125 分支，主树还没有门禁
 - `T-9` main.go 里 r.Static() 挂载的 ./static/images 目录不存在：blocked，等 使用者回答：静态资源是否入库
 
 ## 检查面：已注册的域
