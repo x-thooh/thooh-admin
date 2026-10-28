@@ -229,9 +229,9 @@ func Poster() {
                             __/ |                              
                            |___/                               
 ` +
-		"Author:		github.com/x-thooh/thooh-admin\r\n" +
+		"Author:		thooh\r\n" +
 		"Version:	" + config2.ProjectVersion + "\r\n" +
 		"MiniGO_SDK: 	" + config2.MinGoVersion + "\r\n" +
-		"Link: https://gitee.com/github.com/x-thooh/thooh-admin/github.com/x-thooh/thooh-admin-go"
+		"Link: https://gitee.com/thooh/thooh-go"
 	fg.Println(logo)
 }

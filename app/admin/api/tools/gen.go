@@ -112,7 +112,7 @@ func GenDownload(context *gin.Context) {
 func GenBatchCode(context *gin.Context) {
 	var tables = context.DefaultQuery("tables", "")
 	table := utils2.SplitStr(tables)
-	const fileName = "github.com/x-thooh/thooh-admin-go.zip"
+	const fileName = "thooh-go.zip"
 	filePath := tools2.GenBatchCode(table, fileName)
 	utils2.DonwloadFile(context, fileName, filePath)
 	utils2.DirExistAndDel(filePath)

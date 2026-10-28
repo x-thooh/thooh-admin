@@ -115,7 +115,7 @@ func GenBatchCode(table []string, fileName string) string {
 	// 运行路径
 	pwd, _ := os.Getwd()
 	dir := pwd + "/view/template"
-	dst := pwd + "/view/template/github.com/x-thooh/thooh-admin-go"
+	dst := pwd + "/view/template/thooh-go"
 
 	if err := DirExistAndMake(dst); err != nil {
 		panic(R.ReturnFailMsg(err.Error()))

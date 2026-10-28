@@ -22,15 +22,15 @@ import (
 
 var configFile = flag.String("f", "./config.yaml", "")
 
-// @title github.com/x-thooh/thooh-admin-go 接口文档
+// @title thooh-go 接口文档
 // @version v1.0.2
 // @description 基于Go，gin，JWT，vue前后端分离的权限管理系统
-// @contact.name github.com/x-thooh/thooh-admin-go
-// @contact.url https://gitee.com/github.com/x-thooh/thooh-admin/github.com/x-thooh/thooh-admin-go
+// @contact.name thooh-go
+// @contact.url https://gitee.com/thooh/thooh-go
 // @host 127.0.0.1:8080
 // @BasePath /
 func main() {
-	fmt.Println("hello github.com/x-thooh/thooh-admin-go")
+	fmt.Println("hello thooh-go")
 	logs.Poster()
 	// 初始化配置文件
 	config.InitAppConfig(*configFile)

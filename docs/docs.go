@@ -10,8 +10,8 @@ const docTemplate = `{
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
         "contact": {
-            "name": "github.com/x-thooh/thooh-admin-go",
-            "url": "https://gitee.com/github.com/x-thooh/thooh-admin/github.com/x-thooh/thooh-admin-go"
+            "name": "thooh-go",
+            "url": "https://gitee.com/thooh/thooh-go"
         },
         "version": "{{.Version}}"
     },
@@ -26,7 +26,7 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "127.0.0.1:8080",
 	BasePath:         "/",
 	Schemes:          []string{},
-	Title:            "github.com/x-thooh/thooh-admin-go 接口文档",
+	Title:            "thooh-go 接口文档",
 	Description:      "基于Go，Gin，JWT，vue2前后端分离的权限管理系统",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,

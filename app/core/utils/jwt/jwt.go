@@ -18,7 +18,7 @@ func CreateToken(UserName string, UserId int, DeptId int, uuid string) (string, 
 		"user_id":   UserId,
 		"dept_id":   DeptId,
 		"exp":       time.Now().Unix() + int64(config2.Jwt.JwtTtl),
-		"iss":       "github.com/x-thooh/thooh-admin-go",
+		"iss":       "thooh-go",
 		"uuid":      uuid,
 	})
 
