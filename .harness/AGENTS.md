@@ -13,6 +13,9 @@
 | `workflow/contract.md`、`workflow/skills.declared.yaml` | 流程 | 能（六问与声明账本；账本只读 `id`，与仓库根 `skills/` 双向对账） |
 | `codebase-guide/index.json` | 知识 | **禁手改**：派生数据，`make fix` / `make guide` 重建（ENT007） |
 | `baseline.txt`、`accepted.json` | 状态 | 能，但只减不增（BASE013），豁免要理由 + 负责人 + 复查日期 |
+| `tasks/board.json` | 状态 | 能：status/priority 只取闭集，`done` 必须带 `commit:<sha>` 或 `path:<存在的文件>`（STATE003/STATE005/STATE006） |
+| `INDEX.md` | 状态 | **禁手改**：`scripts/discovery.py` 现算，`make index` 重建（STATE007） |
+| `stack-templates/`、`specs/notes/` | 模板 / 状态 | 能。笔记一片一决策，**状态是所在目录**：proposed → implemented（补 `Landed:` + 证据）或 rejected（不删） |
 | `deliverables/`、`tasks/`、`memory/` | 状态 | 能；`memory/` 只 `remember`，作废不删 |
 
 自家规矩：

@@ -25,6 +25,7 @@
 | `make build` / `vet` / `fmt` / `test` | Go 工具链 |
 | `make go-all` | build + vet（等价于 check-all 里的慢域） |
 | `make guide` | 重新生成 `.harness/codebase-guide/`（派生，禁手改） |
+| `make index` | 重新生成 `.harness/INDEX.md`（派生：下一步、没人守的规则、流程装机状态） |
 | `make up` / `down` | 起停本地依赖（docker compose） |
 | `make clean` | 删派生目录与 go 构建缓存，不动状态目录 |
 
@@ -73,6 +74,9 @@ skills     可安装流程（每条一个目录，正文是 SKILL.md）；与声
 13. 一次修改走五段（盘点→规划→行动→反思→交付），每段的过法在 `.harness/workflow/flow.json`：
     要么有 `gate`（一条真能跑的 `make` 目标），要么明写 `manual`。跳过反思段 = 没跑过
     `make selftest` 就说「修好了」。`scope=workflow`
+14. 状态层是事实不是装饰：看板的 status/priority 只能取闭集值，`done` 必须带可核验证据
+    （`commit:<sha>` 或 `path:<存在的文件>`），`blocked` 必须写等什么；INDEX 只由 `make index`
+    派生。`scope=state`
 
 ## 任务路由
 
@@ -85,6 +89,7 @@ skills     可安装流程（每条一个目录，正文是 SKILL.md）；与声
 | 加一条断言或改阈值 | `.harness/scripts/registry.py`、`.harness/specs/standards.md` |
 | 加一条可安装流程 | `.harness/workflow/README.md`、`.harness/workflow/skills.declared.yaml` |
 | 查「上次为什么这么定」 | `.harness/memory/decisions.md`、`.harness/memory/lessons.md` |
+| 看下一步该做什么 | `.harness/INDEX.md`（派生）、`.harness/tasks/board.json` |
 
 ## 开工四步
 

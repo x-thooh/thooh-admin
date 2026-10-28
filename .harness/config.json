@@ -26,5 +26,6 @@
   "swagger_yaml": "docs/swagger.yaml",
   "stale_days_warn": 7,
   "stale_days_error": 14,
+  "board_stale_days": 30,
   "rules_version": "1"
 }

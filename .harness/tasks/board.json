@@ -1,0 +1,108 @@
+{
+  "updated": "2026-10-28",
+  "note": "还没做什么。done 必须带可核验证据（commit:<sha> 或 path:<存在的文件>），否则 STATE005/STATE006 报。",
+  "tasks": [
+    {
+      "id": "T-1",
+      "title": "sys_config 的 DDL 与 GORM 模型列名不一致",
+      "status": "open",
+      "priority": "high",
+      "detail": "thooh-go.sql:390 的列是 id/kenam/keval/name/notes/ornum/crtim/uptim，而 app/admin/model/system/sysConfig.go:12 的 tag 是 config_id/config_key/config_value/…——按模型查这张表运行时会 Unknown column。改哪一边要人判：改 DDL 是迁移（存量数据跟着动），改模型是重写映射。",
+      "owner": "thooh",
+      "scope": ""
+    },
+    {
+      "id": "T-2",
+      "title": "harness 只在 go125 分支，主树还没有门禁",
+      "status": "open",
+      "priority": "high",
+      "detail": "core.hooksPath 是仓库级设置，主树里没有 .harness/git-hooks/ 目录时 git 静默跳过钩子——主树上的提交现在不受任何检查保护（lessons L-4）。收尾动作是把 go125 快进合进 main。",
+      "owner": "thooh",
+      "scope": "entry"
+    },
+    {
+      "id": "T-3",
+      "title": "docker-compose.yml 只有 webapp，缺 mysql 与 redis",
+      "status": "open",
+      "priority": "medium",
+      "detail": "容器一起来就找不到依赖；config.yaml 指向的库端口也没人监听。补齐服务、健康检查与卷，或明确「依赖由外部提供」并写进 README。",
+      "owner": "thooh",
+      "scope": ""
+    },
+    {
+      "id": "T-4",
+      "title": "mise.toml 里 GOSUMDB = \"off\"",
+      "status": "open",
+      "priority": "medium",
+      "detail": "校验和被关掉 = 依赖完整性没人背书。要么改回 sum.golang.org（或公司内代理）并保留 GOPROXY，要么把「为什么必须关」写进 decisions.md。这是安全决策，不由脚本代劳。",
+      "owner": "thooh",
+      "scope": ""
+    },
+    {
+      "id": "T-5",
+      "title": "docs/swagger.json 的 paths 为空",
+      "status": "open",
+      "priority": "medium",
+      "detail": "STL004 已报 WARN：文档里没有一条接口，多半是注解缺失或没跑 swag init。跑一次 swag init 并把生成物纳入提交，同时把 STL003（时效）的 0 样本解除。",
+      "owner": "thooh",
+      "scope": "stale"
+    },
+    {
+      "id": "T-6",
+      "title": "config.yaml 的 4 条弱默认凭据与账本里的 jwt.secret",
+      "status": "open",
+      "priority": "medium",
+      "detail": "SEC002 三条（database.primary/secondary、xxl-job）+ SEC001 一条已盖章豁免。轮换属于单独一轮：改值要同步部署侧，不能只改仓库。",
+      "owner": "thooh",
+      "scope": "secret"
+    },
+    {
+      "id": "T-7",
+      "title": "复盘与轮次脚本（retro / round）未做",
+      "status": "open",
+      "priority": "medium",
+      "detail": "第三期：复盘三问的事实底板（数字先算，AI 只在数字上写）、环比 ERROR 与手册行数。现在只有 lessons.md 的手写条目。",
+      "owner": "thooh",
+      "scope": ""
+    },
+    {
+      "id": "T-8",
+      "title": "任务级 worktree 隔离（wt.py + scope=worktree）未做",
+      "status": "open",
+      "priority": "medium",
+      "detail": "2026-10-28 主树工作目录被会话外进程整体重写、337 个未提交文件清零（见项目记忆）。一次提交是一轮、一个任务是一棵树的机制还没落地：make task-new / make task-done 与 WT001/WT002。",
+      "owner": "thooh",
+      "scope": ""
+    },
+    {
+      "id": "T-9",
+      "title": "main.go 里 r.Static() 挂载的 ./static/images 目录不存在",
+      "status": "blocked",
+      "priority": "low",
+      "detail": "目录不存在时静态挂载是死路由，但「上传文件到底落在仓库里还是对象存储」是使用者的决定。",
+      "owner": "thooh",
+      "waiting_on": "使用者回答：静态资源是否入库",
+      "scope": ""
+    },
+    {
+      "id": "T-10",
+      "title": "Go 升到 1.25 并真修 vet 报的 6 处缺陷",
+      "status": "done",
+      "priority": "high",
+      "detail": "信号通道加缓冲、两处日志格式串、三处 string(int64) 改 strconv.FormatInt——修掉而不是写进豁免。",
+      "owner": "thooh",
+      "evidence": "commit:e6d479b",
+      "scope": "build"
+    },
+    {
+      "id": "T-11",
+      "title": "全量门禁留一次完整证据",
+      "status": "done",
+      "priority": "low",
+      "detail": "make evidence 的产物：命令 + UTC 时间 + commit + 完整输出 + 退出码。",
+      "owner": "thooh",
+      "evidence": "path:.harness/deliverables/evidence/verify-20261028T142010Z.txt",
+      "scope": "build"
+    }
+  ]
+}

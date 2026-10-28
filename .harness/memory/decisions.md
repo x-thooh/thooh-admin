@@ -131,3 +131,19 @@
 - `skills/` 放仓库根（与 `.harness/` 同级）。它同时是 `entry` 的目录地图项：新增一级目录不进地图
   就报 ENT004，地图与磁盘的一致性是机器判的，不靠自觉。
 - written_by: session 2026-10-28 / version: 1 / supersedes: — / status: active
+
+## D-14 看板是唯一「还没做」的事实源，INDEX 只由现算得到
+
+- 决策：`.harness/tasks/board.json` 登记未完成的债（含今天的真实 11 条），`.harness/INDEX.md`
+  由 `scripts/discovery.py` 的 `render(root)` 现算；`scope=state` 的 STATE007 用**同一个函数**
+  比对内容，`--fix` 走同一条路径重建。
+- 为什么：派生数据一旦允许人手改，它就变成第二个事实源。生成与校验共用一份实现，
+  「文档说的 / 脚本做的 / 文件实际状态」三边才只剩一个口径。
+- 闭集：`status ∈ open|doing|blocked|done`、`priority ∈ high|medium|low`（常量表在 `state.py`），
+  同义词一律 STATE003——聚合口径靠闭集成立。
+- 完成态必须可核验：`evidence: commit:<sha>`（`git cat-file -e` 查得到对象）或
+  `path:<文件>`（磁盘上存在）。没有 git 可问时报 WARN 并登记判不了，不冒充通过。
+- 看板时效用限时不用禁止：`board_stale_days`（config，30 天）为限报 WARN，两倍报 ERROR。
+- 被否：把「下一步做什么」写进 `deliverables/` 的散文报告——报告是过去时，看板是现在时；
+  两者混在一处，过期的那半会把人带偏。
+- written_by: session 2026-10-28 / version: 1 / supersedes: — / status: active

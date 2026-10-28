@@ -14,6 +14,7 @@ SCRIPTS := $(HARNESS)/scripts
 VERIFY := $(SCRIPTS)/verify.py
 REVERSE := $(SCRIPTS)/tests/reverse.py
 GEN_GUIDE := $(SCRIPTS)/gen_guide.py
+DISCOVERY := $(SCRIPTS)/discovery.py
 CHECK_COMMIT := $(SCRIPTS)/check_commit.py
 PY ?= python3
 
@@ -23,7 +24,7 @@ export GOPROXY := https://goproxy.cn,direct
 export GOFLAGS := -buildvcs=false
 
 .DEFAULT_GOAL := help
-.PHONY: help init check check-all check-json check-strict fix guide evidence selftest commit-msg \
+.PHONY: help init check check-all check-json check-strict fix guide index evidence selftest commit-msg \
 	build vet fmt test go-all up down clean
 
 help: ## 列出可用命令
@@ -40,7 +41,8 @@ init: ## 装 git 钩子、建状态目录、生成代码库索引
 	@chmod +x $(HARNESS)/git-hooks/pre-commit $(HARNESS)/git-hooks/commit-msg
 	@mkdir -p $(HARNESS)/deliverables/evidence $(HARNESS)/tasks
 	@$(PY) $(GEN_GUIDE) --root $(ROOT)
-	@echo "init 完成：hooksPath=.harness/git-hooks，索引已重建"
+	@$(PY) $(DISCOVERY) --root $(ROOT)
+	@echo "init 完成：hooksPath=.harness/git-hooks，索引与 INDEX.md 已重建"
 	@$(MAKE) --no-print-directory selftest
 
 check: ## 跑门禁（跳过慢域）
@@ -60,6 +62,9 @@ fix: ## 只修派生数据（需工作区干净），修完自动重跑
 
 guide: ## 重新生成 .harness/codebase-guide/（派生，禁手改）
 	@$(PY) $(GEN_GUIDE) --root $(ROOT)
+
+index: ## 重新生成 .harness/INDEX.md（派生：下一步、没人守的规则、流程装机状态）
+	@$(PY) $(DISCOVERY) --root $(ROOT)
 
 evidence: ## 把一次全量校验的完整输出存成证据
 	@mkdir -p $(HARNESS)/deliverables/evidence

@@ -19,6 +19,10 @@
       "kind": "file"
     },
     {
+      "path": ".harness/INDEX.md",
+      "kind": "file"
+    },
+    {
       "path": ".harness/accepted.json",
       "kind": "file"
     },
