@@ -1,0 +1,19 @@
+#!/bin/sh
+# 提交前跑快域门禁。
+#
+# 为什么是 `make check` 而不是 `make check-all`：build 域要跑 `go build` + `go vet`，
+# 在本仓库是十几秒级，挂在每次提交上会被人手加 --no-verify 绕过去——一个能被绕过的
+# 钩子和没有钩子一样，还多了一条「我们是有门禁的」的假话。所以：
+#   提交前 = 快域（entry/modules/secret/stale/baseline）
+#   合并前 / CI = 全量（make check-all）
+# 慢域的账在 AGENTS.md 硬规则 3 里，由人守。
+set -e
+root=$(git rev-parse --show-toplevel)
+cd "$root"
+if ! make check; then
+	echo
+	echo "pre-commit：make check 有 ERROR，提交被拦下。"
+	echo "修掉它，或按 .harness/accepted.json 逐条盖章（理由 + 负责人 + 复查日期）。"
+	echo "不许用 --no-verify 绕；真要绕，把绕过的理由写进 .harness/memory/lessons.md。"
+	exit 1
+fi

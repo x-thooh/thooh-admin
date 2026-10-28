@@ -1,0 +1,254 @@
+{
+  "generated_by": ".harness/scripts/gen_guide.py",
+  "depth": 2,
+  "entries": [
+    {
+      "path": ".harness",
+      "kind": "dir"
+    },
+    {
+      "path": ".harness/AGENTS.md",
+      "kind": "file"
+    },
+    {
+      "path": ".harness/accepted.json",
+      "kind": "file"
+    },
+    {
+      "path": ".harness/codebase-guide",
+      "kind": "dir"
+    },
+    {
+      "path": ".harness/config.json",
+      "kind": "file"
+    },
+    {
+      "path": ".harness/deliverables",
+      "kind": "dir"
+    },
+    {
+      "path": ".harness/git-hooks",
+      "kind": "dir"
+    },
+    {
+      "path": ".harness/memory",
+      "kind": "dir"
+    },
+    {
+      "path": ".harness/scripts",
+      "kind": "dir"
+    },
+    {
+      "path": ".harness/specs",
+      "kind": "dir"
+    },
+    {
+      "path": ".harness/stack-templates",
+      "kind": "dir"
+    },
+    {
+      "path": ".harness/tasks",
+      "kind": "dir"
+    },
+    {
+      "path": "AGENTS.md",
+      "kind": "file"
+    },
+    {
+      "path": "README.md",
+      "kind": "file"
+    },
+    {
+      "path": "admin",
+      "kind": "dir"
+    },
+    {
+      "path": "admin/AGENTS.md",
+      "kind": "file"
+    },
+    {
+      "path": "admin/demo",
+      "kind": "dir"
+    },
+    {
+      "path": "app",
+      "kind": "dir"
+    },
+    {
+      "path": "app/AGENTS.md",
+      "kind": "file"
+    },
+    {
+      "path": "app/admin",
+      "kind": "dir"
+    },
+    {
+      "path": "app/core",
+      "kind": "dir"
+    },
+    {
+      "path": "app/html",
+      "kind": "dir"
+    },
+    {
+      "path": "common",
+      "kind": "dir"
+    },
+    {
+      "path": "common/AGENTS.md",
+      "kind": "file"
+    },
+    {
+      "path": "common/config",
+      "kind": "dir"
+    },
+    {
+      "path": "common/json",
+      "kind": "dir"
+    },
+    {
+      "path": "common/r",
+      "kind": "dir"
+    },
+    {
+      "path": "common/utils",
+      "kind": "dir"
+    },
+    {
+      "path": "config.yaml",
+      "kind": "file"
+    },
+    {
+      "path": "docker-compose.yml",
+      "kind": "file"
+    },
+    {
+      "path": "docs",
+      "kind": "dir"
+    },
+    {
+      "path": "docs/AGENTS.md",
+      "kind": "file"
+    },
+    {
+      "path": "docs/docs.go",
+      "kind": "file"
+    },
+    {
+      "path": "docs/swagger.json",
+      "kind": "file"
+    },
+    {
+      "path": "docs/swagger.yaml",
+      "kind": "file"
+    },
+    {
+      "path": "main.go",
+      "kind": "file"
+    },
+    {
+      "path": "modules",
+      "kind": "dir"
+    },
+    {
+      "path": "modules/AGENTS.md",
+      "kind": "file"
+    },
+    {
+      "path": "modules/auth",
+      "kind": "dir"
+    },
+    {
+      "path": "modules/mon",
+      "kind": "dir"
+    },
+    {
+      "path": "modules/pub",
+      "kind": "dir"
+    },
+    {
+      "path": "modules/sys",
+      "kind": "dir"
+    },
+    {
+      "path": "modules/tool",
+      "kind": "dir"
+    },
+    {
+      "path": "pkg",
+      "kind": "dir"
+    },
+    {
+      "path": "pkg/AGENTS.md",
+      "kind": "file"
+    },
+    {
+      "path": "pkg/cache",
+      "kind": "dir"
+    },
+    {
+      "path": "pkg/logs",
+      "kind": "dir"
+    },
+    {
+      "path": "pkg/middleware",
+      "kind": "dir"
+    },
+    {
+      "path": "pkg/mysql",
+      "kind": "dir"
+    },
+    {
+      "path": "pkg/redis",
+      "kind": "dir"
+    },
+    {
+      "path": "pkg/ristretto",
+      "kind": "dir"
+    },
+    {
+      "path": "pkg/scheduler",
+      "kind": "dir"
+    },
+    {
+      "path": "pkg/strcase",
+      "kind": "dir"
+    },
+    {
+      "path": "start.sh",
+      "kind": "file"
+    },
+    {
+      "path": "tests",
+      "kind": "dir"
+    },
+    {
+      "path": "tests/AGENTS.md",
+      "kind": "file"
+    },
+    {
+      "path": "web",
+      "kind": "dir"
+    },
+    {
+      "path": "web/AGENTS.md",
+      "kind": "file"
+    },
+    {
+      "path": "web/admin",
+      "kind": "dir"
+    },
+    {
+      "path": "web/mobile",
+      "kind": "dir"
+    },
+    {
+      "path": "web/mobile_old",
+      "kind": "dir"
+    },
+    {
+      "path": "web/template",
+      "kind": "dir"
+    }
+  ]
+}
