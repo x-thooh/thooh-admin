@@ -189,3 +189,27 @@
   ② 给 `gofmt` 传 `.` 再过滤输出（把「不该扫」的东西先扫一遍，代价留在每次跑的门禁里）；
   ③ 每个域自带一份排除表并在文档里提醒保持一致（这正是本次漂移的成因）。
 - written_by: session 2026-10-29 / version: 1 / supersedes: — / status: active
+- 2026-10-29 追记：本条写「清单只此一处」时只收了 Python 侧，Makefile 的 `fmt` 里还有一份
+  `find` 抄本（lessons L-8）；`build.go_files` 也随之挪进 `scripts/go_files.py`，见 D-17。
+  本条其余结论不变。
+
+## D-17 「哪些 .go 算源码」的家在脚本侧，不在 scope 里
+
+- 决策：唯一实现是 `scripts/go_files.py` 的 `go_files(root)`——先 `is_file()`，再按整条路径段
+  引 `common.LOCAL_ARTIFACTS`；它同时是个 CLI（打印空格分隔的清单，清单为空 exit 2 并说明
+  「判不了，不是通过」）。两个消费者：Makefile 的 `fmt` 与 `build` scope 的 `check_gofmt`。
+- 为什么不放进 `scopes/common.py`：`common.py` 的额度是 420 行、当时已 416 行，塞进去就撞
+  BUDGET001；而调大额度等于给新欠盖章（硬规则不许）。方向和 `worktree` 域一样——
+  **约定住在脚本里，scope import 它**（`scopes/worktree.py` 引 `wt.py` 是同一件事的前例）。
+- 触发事实：D-16 收了五处 Python 清单，门记录写下「清单只此一处」；同一轮 `make fmt` 仍炸，
+  因为 Makefile 里还有一份 `find` 抄本，而 `find -name '*.go'` 也匹配 `.go` 目录本身，
+  gofmt 收到目录会递归进 303M 依赖源码。详见 lessons L-8。
+- 反向样本：`BLD005c`（`nested.go/` 目录里的文件只报一次——目录混进清单时 gofmt 会递归、
+  同一个文件报两遍）。清单为空那一支复用 `BLD004`。
+- 被否：① `find . -name '*.go' -type d -prune -o …` 再抄一份排除清单（第六份抄本换第七份）；
+  ② `make fmt` 直接调 `verify --scope build`（把慢域的 go build / go vet 一起叫起来，
+  一条「列出未格式化文件」的命令变成一次编译）；③ 给 verify 加 `--list-go-files` 旗标
+  （调度器是门禁入口，不该兼职当查询工具）。
+- 没断言的那半：`make fmt` 作为命令跑得通与否，`cmd` 域判不了（它只判 target ↔ 命令表）。
+  这条写进 standards.md 的「判不了」表，靠人逐条跑 `make help`。
+- written_by: session 2026-10-29 / version: 1 / supersedes: D-16（`go_files` 的落点） / status: active

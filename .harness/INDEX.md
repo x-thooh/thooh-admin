@@ -5,7 +5,7 @@
 
 ## 下一步（看板）
 
-- 看板更新于 2026-10-29，共 12 条：open 6、doing 1、blocked 1、done 4
+- 看板更新于 2026-10-29，共 13 条：open 6、doing 1、blocked 1、done 5
 - 高优先级未完成（逐条点名，不写概括句）：
   - `T-1` sys_config 的 DDL 与 GORM 模型列名不一致
   - `T-2` harness 只在 go125 分支，主树还没有门禁

@@ -20,7 +20,8 @@ import re
 import subprocess
 from pathlib import Path
 
-from .common import add, in_local_artifact, quality_get, rel_to
+import go_files as gofiles
+from .common import add, quality_get, rel_to
 
 NAME = "build"
 PLAN = "慢域：go.mod 的工具链下限、`go build` / `go vet` 是否真的跑过并留下带 commit 的证据、" \
@@ -117,25 +118,9 @@ def check_evidence(root, findings, na):
             f"{len(changed)} 处（如 {changed[0]}）：结论过期，重跑 make evidence")
 
 
-def go_files(root):
-    """仓库自己的 .go 文件，排除本地产物目录（清单在 `common.LOCAL_ARTIFACTS`）。
-
-    `gofmt -l .` 会一路走进 `.go/pkg/mod/` 里的依赖源码，退出码 2 被下面报成
-    「工具链不可用」——那是环境的脏，不是代码的错。Makefile 的 `fmt` 用 find 排除同一批目录。
-    """
-    files = []
-    for path in sorted(Path(root).rglob("*.go")):
-        rel = path.relative_to(root)
-        # rglob 的 `*.go` 也匹配**目录**（`.go` 就是模块缓存本身），is_file 先筛掉；
-        # 再用全路径段判本地产物，只判父目录会漏掉根上那个 `.go` 自己。
-        if not path.is_file() or in_local_artifact(rel.parts):
-            continue
-        files.append(rel.as_posix())
-    return files
-
-
 def check_gofmt(root, findings, na):
-    files = go_files(root)
+    # 「哪些 .go 算本仓库的源码」只此一处（scripts/go_files.py）；Makefile 的 fmt 走同一个脚本
+    files = gofiles.go_files(root)
     if not files:
         add(findings, "WARN", NAME, ".", 1, "BLD004",
             "排除本地产物目录后没有 .go 可判——这一条判不了，不是通过")

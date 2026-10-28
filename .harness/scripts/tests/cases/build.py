@@ -52,6 +52,15 @@ def cases():
     out.append(("BLD004", "排除本地产物后没有 .go 可判：报判不了并登记",
                 "BLD004" in got and any("build:gofmt" in x for x in na)))
 
+    # `*.go` 连目录也匹配（缓存那个就叫 `.go`）。is_file 那一筛挡住目录本身、
+    # 目录里的真文件照收：清单里若混进目录，gofmt 会递归进去，同一个文件被报两遍。
+    root = new_root({"go.mod": MOD, "nested.go/bad.go": UGLY_GO})
+    f = []
+    sc_build.check_gofmt(root, f, [])
+    got = codes_of(f)
+    out.append(("BLD005c", "叫 nested.go 的目录里那个文件照样被判到，且只报一次",
+                "BLD005" in got and [x.path for x in f] == ["nested.go/bad.go"]))
+
     root = new_root({"go.mod": "module x\n\ngo 1.25\n", "bad.go": "package x\n\nfunc F() { undefined() }\n"})
     findings = []
     na = []

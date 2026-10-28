@@ -115,6 +115,16 @@
       "owner": "thooh",
       "evidence": "path:.harness/deliverables/gates/20261028T163745Z-local-artifacts.md",
       "scope": "entry"
+    },
+    {
+      "id": "T-13",
+      "title": "make fmt 里另有一份 find 排除清单，且把 .go 目录喂给 gofmt",
+      "status": "done",
+      "priority": "high",
+      "detail": "T-12 收了五处 Python 清单，Makefile 的 fmt 是第六份抄本：find -name '*.go' 也匹配 .go 目录本身，gofmt 收到目录就递归进 303M 依赖源码，退出码 2（门禁全绿而 make fmt 炸）。现在「哪些 .go 算源码」唯一实现在 scripts/go_files.py，fmt 与 build scope 都调它，清单为空时 exit 2 说「判不了」。反向样本 BLD005c。没断言的那半：make help 每条命令能否跑通由人逐条验（cmd 域只判 target↔表对应），见 standards.md「判不了」与 lessons L-8。",
+      "owner": "thooh",
+      "evidence": "path:.harness/deliverables/gates/20261028T165106Z-make-fmt-single-list.md",
+      "scope": "build"
     }
   ]
 }

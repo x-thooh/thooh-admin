@@ -17,6 +17,7 @@ GEN_GUIDE := $(SCRIPTS)/gen_guide.py
 DISCOVERY := $(SCRIPTS)/discovery.py
 CHECK_COMMIT := $(SCRIPTS)/check_commit.py
 WT := $(SCRIPTS)/wt.py
+GO_FILES := $(SCRIPTS)/go_files.py
 PY ?= python3
 
 export GOPATH := $(HOME)/.go
@@ -107,7 +108,9 @@ vet: ## go vet
 	echo "go vet exit=$$rc"; exit $$rc
 
 fmt: ## 列出未格式化的 .go（只报告，不代改）
-	@cd $(ROOT) && gofmt -l $$(find . -name '*.go' -not -path './.git/*' -not -path './.go/*')
+	@cd $(ROOT) && files=$$($(PY) $(GO_FILES) $(ROOT)) || \
+		{ echo "make fmt：判不了——排除本地产物后没有 .go 可判，这不是通过"; exit 2; }; \
+	gofmt -l $$files
 
 test: ## go test
 	@cd $(ROOT) && go test ./...

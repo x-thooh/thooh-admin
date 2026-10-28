@@ -86,3 +86,22 @@
 
 
 
+
+## L-8 「清单只此一处」写早了：第六份抄本在 Makefile 的 `find` 里
+
+- 现象：L-6 把五处 Python 收成一份 `LOCAL_ARTIFACTS`，门记录里落下「清单只此一处」。紧接着
+  同一轮回归跑 `make fmt`，它照样炸——退出码 2，报的还是 `.go/pkg/mod/gorm.io/…` 那些依赖源码。
+- 根因两条，都是老坑换工具再犯：
+  1. Makefile 里 `gofmt -l $(find . -name '*.go' -not -path './.go/*')` 是第六份抄本。
+     `-not -path './.go/*'` 排掉缓存的**子孙**，可 `find -name '*.go'` 也匹配 `.go` 这个**目录本身**
+     （L-7 讲的正是这件事），而 gofmt 收到目录会递归进去——排除清单写对了也没用。
+  2. 「收清单」只收了 Python 侧，因为验证跑的是 `make check` 与 `make selftest`，不是
+     `make help` 里的每一条命令。L-3（反向测试全绿，脚本作为命令是坏的）的镜像故障第二次发生，
+     而且这次是我自己在门记录里把话说满。
+- 断言：`scripts/go_files.py` 成为「哪些 `.go` 算本仓库源码」的唯一实现（先 `is_file()`，再按
+  整条路径段引 `LOCAL_ARTIFACTS`），Makefile 的 `fmt` 与 `build` scope 都调它；清单为空时脚本
+  exit 2 并把「判不了」说在前面，不交给 gofmt 读 stdin。反向样本 `BLD005c` 钉住目录不混进清单
+  （混进去时 gofmt 递归，同一个文件报两遍）。
+- **没断言的那半**：`make fmt` 作为命令能不能跑，机器判不了——`cmd` 域只判 target 与命令表
+  一一对应，不执行命令。所以规矩写进 `standards.md`：改清单或改工具层，`make help` 列出的命令
+  逐条跑一遍；这一条同时进「判不了」表，别拿弱断言假装守住。
