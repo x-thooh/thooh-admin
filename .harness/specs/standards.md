@@ -11,6 +11,7 @@
 | --- | --- | --- | --- |
 | `entry` | 入口文件、目录地图、派生索引 | 快 | `scripts/scopes/entry.py` |
 | `cmd` | 命令表 ↔ Makefile target ↔ 脚本文件三方对账 | 快 | `scripts/scopes/cmd.py` |
+| `commit` | 提交信息：一件事、动宾短语、不并列。钩子判 ERROR，本域判 HEAD 为 WARN | 快 | `scripts/scopes/commit.py` |
 | `hooks` | 每个域的 `PLAN`/`REFLECT` 与 scopes/ 源码逐条对账 | 快 | `scripts/scopes/hooks.py` |
 | `budget` | 工具层按角色的行数额度 | 快 | `scripts/scopes/budget.py` |
 | `modules` | 功能模块 ↔ `app/admin/router.go` 双向对账 | 快 | `scripts/scopes/modules.py` |
@@ -36,7 +37,8 @@
 | 8 | 入口与磁盘对齐 | `scope=entry`：ENT001/002 header、ENT003 行数、ENT004 地图双向、ENT005 规则无载体、ENT006 未注册 scope、ENT007 派生索引、ENT008 样本为 0 | ERROR | ENT001–ENT008 + ENT00n 正对照 |
 | 9 | 结论 = 命令 + 退出码 + 完整输出 | `scope=build`：BLD001/BLD002 管证据在不在、新不新；证据内容本身是不是真的判不了（脚本不能替人相信一句话） | WARN | BLD001、BLD002 |
 | 10 | 一次一类修改、工作树干净 | 无断言（人判）。任务是否在 worktree 里做，别人机器上判不了；写在这里靠下一次 `git status` | — | — |
-| 11 | 判不了就说判不了 | 各域的样本守卫（MOD005 / SEC004 / STL005 / ENT008）+ `not_applicable` 清单；BLD004 工具链缺失走 WARN | ERROR / WARN | 每条样本守卫都在 selftest 里单独造一例「目录为空」 |
+| 11 | 判不了就说判不了 | 各域的样本守卫（MOD005 / SEC004 / STL005 / ENT008 / CMD005 / MSG005）+ `not_applicable` 清单；BLD004 工具链缺失走 WARN | ERROR / WARN | 每条样本守卫都在 selftest 里单独造一例「目录为空」 |
+| 12 | 一次提交说一件事 | `scope=commit`：MSG001 空标题或裸动词、MSG002 超 `subject_max_chars`、MSG003 标题并列（两个及以上「，」子句）、MSG004 正文出现顺带/另外/同时/此外、MSG005 拿不到消息。同一份 `check_message` 由 `commit-msg` 钩子在落笔时判 ERROR | WARN（钩子侧 ERROR） | MSG001–MSG005 + MSG00n 合规消息正对照 |
 
 ## 工具层自家规矩 ↔ 断言
 
@@ -68,6 +70,8 @@
 
 - `workflow/`：阶段、转移、契约与 flow.json；门记录模板。
 - `skills/` 与 `skills.declared.yaml` 的双向对账（声明即承诺）。
-- `INDEX.md` 派生索引、`retro`/`round` 复盘脚本、commit-msg 钩子（动宾短语 + 一件事）。
+- `INDEX.md` 派生索引、`retro`/`round` 复盘脚本、`wt`（任务级 worktree 隔离）与 `task-new`/`task-done`。
+- 提交信息钩子已上线（`git-hooks/commit-msg` + `scope=commit`）；没上线的是**历史扫描**：
+  本域只判 HEAD，不回头改旧提交——重写历史的代价高于一条措辞欠账。
 - 「文档点名的路径必须存在」这类断言：本仓库大量反引号写的是**目标代码**路径，
   按仓库根判会产出一批语义正确的误报，只保留链接与 code/scope 名的检查。

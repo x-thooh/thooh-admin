@@ -6,14 +6,20 @@
   },
   "agents_max_lines": 150,
   "sub_agents_max_lines": 80,
+  "subject_max_chars": 50,
   "budget": {
     "scopes": 300,
     "scripts": 300,
     "shared": 420,
     "corpus": 500
   },
-  "slow_scopes": ["build"],
-  "module_roots": ["modules", "admin"],
+  "slow_scopes": [
+    "build"
+  ],
+  "module_roots": [
+    "modules",
+    "admin"
+  ],
   "registry_file": "app/admin/router.go",
   "web_index": "web/admin/index.html",
   "swagger_json": "docs/swagger.json",

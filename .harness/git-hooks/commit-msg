@@ -1,0 +1,15 @@
+#!/bin/sh
+# commit-msg 钩子：把「一次提交一件事」拦在落笔时。
+#
+# 为什么挂在钩子而不是只挂在 make check：`make check` 看到的是已经提交的 HEAD，
+# 那时唯一能修它的办法是重写历史——比一条措辞欠账贵得多，所以那一侧只报不拦（WARN）。
+# 这里消息还没进对象库，改一行就完事，所以判 ERROR。
+#
+# 判据不在本文件：check_commit.py 与 `commit` 域共用 `scopes/commit.py` 里同一份
+# `check_message`，两边不会漂成两套规矩。
+#
+# 不许用 --no-verify 绕；真要绕，把绕的理由写进 .harness/memory/lessons.md。
+set -e
+root=$(git rev-parse --show-toplevel)
+[ -f "$1" ] || { echo "commit-msg：拿不到消息文件（$1），判不了 = 不放行" >&2; exit 1; }
+exec python3 "$root/.harness/scripts/check_commit.py" --root "$root" --message-file "$1"

@@ -21,6 +21,7 @@
 | `make fix` | 只重建派生数据（codebase-guide），要求工作区干净 |
 | `make evidence` | 把一次全量校验的完整输出存进 `.harness/deliverables/evidence/` |
 | `make selftest` | 反向测试：每条断言都要真的会报 |
+| `make commit-msg` | 判最近一条提交信息（提交时钩子跑同一套判据） |
 | `make build` / `vet` / `fmt` / `test` | Go 工具链 |
 | `make go-all` | build + vet（等价于 check-all 里的慢域） |
 | `make guide` | 重新生成 `.harness/codebase-guide/`（派生，禁手改） |
@@ -65,6 +66,9 @@ web        前端构建产物（只入库结果，不入库源码）
     任务是否隔离在 worktree 里，脚本判不了别人的机器。
 11. 判不了就说判不了，不冒充通过。缺样本、缺工具链、缺上游 scope 的域一律登记
     `not_applicable`，输出里与「通过」分得很开。`scope=baseline`
+12. 一次提交说一件事：标题是动宾短语、不并列、不超长，正文不许出现「顺带 / 另外 / 同时 /
+    此外」。落笔时 `commit-msg` 钩子判 ERROR，复盘时 `scope=commit` 判 WARN——
+    HEAD 已经写进历史，改它比一条措辞欠账贵。
 
 ## 任务路由
 

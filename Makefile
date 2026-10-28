@@ -14,6 +14,7 @@ SCRIPTS := $(HARNESS)/scripts
 VERIFY := $(SCRIPTS)/verify.py
 REVERSE := $(SCRIPTS)/tests/reverse.py
 GEN_GUIDE := $(SCRIPTS)/gen_guide.py
+CHECK_COMMIT := $(SCRIPTS)/check_commit.py
 PY ?= python3
 
 export GOPATH := $(HOME)/.go
@@ -22,7 +23,7 @@ export GOPROXY := https://goproxy.cn,direct
 export GOFLAGS := -buildvcs=false
 
 .DEFAULT_GOAL := help
-.PHONY: help init check check-all check-json check-strict fix guide evidence selftest \
+.PHONY: help init check check-all check-json check-strict fix guide evidence selftest commit-msg \
 	build vet fmt test go-all up down clean
 
 help: ## 列出可用命令
@@ -36,7 +37,7 @@ init: ## 装 git 钩子、建状态目录、生成代码库索引
 	@git -C $(ROOT) config core.hooksPath .harness/git-hooks
 	@echo "hooksPath 写在 $$(git -C $(ROOT) config --show-origin --get core.hooksPath | cut -f1)" \
 		"——它是仓库级设置，同仓库的其它 worktree 一起受影响"
-	@chmod +x $(HARNESS)/git-hooks/pre-commit
+	@chmod +x $(HARNESS)/git-hooks/pre-commit $(HARNESS)/git-hooks/commit-msg
 	@mkdir -p $(HARNESS)/deliverables/evidence $(HARNESS)/tasks
 	@$(PY) $(GEN_GUIDE) --root $(ROOT)
 	@echo "init 完成：hooksPath=.harness/git-hooks，索引已重建"
@@ -76,6 +77,9 @@ evidence: ## 把一次全量校验的完整输出存成证据
 
 selftest: ## 反向测试：每条断言都要真的会报
 	@$(PY) $(REVERSE) --root $(ROOT)
+
+commit-msg: ## 判最近一条提交信息「一件事、动宾短语、不并列」（提交时的钩子跑同一套判据）
+	@$(PY) $(CHECK_COMMIT) --root $(ROOT)
 
 build: ## go build
 	@cd $(ROOT) && go build ./... > /tmp/vben-build.log 2>&1; rc=$$?; \
