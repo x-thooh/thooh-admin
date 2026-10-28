@@ -9,6 +9,9 @@ RUN mkdir -p "/data/app" \
 WORKDIR "/data/app"
 # 拷贝
 COPY main /data/app/main
+# 前端产物与模板：routers.createRender() 启动时要读 web/{admin,mobile}/index.html 与 web/template/protocol.tmpl
+# 缺一个就 panic: open web/admin/index.html: no such file or directory
+COPY web /data/app/web
 
 # docker run 时执行命令
 ENTRYPOINT ["./main"]

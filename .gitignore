@@ -24,3 +24,5 @@
 !.gitignore
 !.harness
 package-lock.json
+# Dockerfile 里 COPY 的那个二进制（go build -o main .），别混进提交
+/main
