@@ -22,7 +22,7 @@
 | --- | --- | --- | --- | --- |
 | 1 | 命令只从 `Makefile` 走 | 无断言（人判）。强度来源：`make help` 的清单与本文件「常用命令」表一一对应；第二期把它做成 `scripts` 域的断言（未注册脚本报错） | — | — |
 | 2 | 模块要在两处登记 | `scope=modules`：MOD001 未注册、MOD002 死引用、MOD003 只 import 不挂、MOD004 形状不完整、MOD005 样本为 0 | ERROR | `make selftest`：MOD001–MOD005、MOD003c（注释里的挂载不算）、MOD00n 正对照 |
-| 3 | 提交前 `make check` 退出码 0；合并前 `make check-all` | `scope=build`：BLD003 编译/vet 失败、BLD005 未 gofmt；BLD001/BLD002 证据缺失与过期为 WARN（留痕是流程账，不当提交门）。`.git/hooks` 由 `make init` 装 pre-commit 跑快域 | ERROR / WARN | BLD003、BLD005、BLD001、BLD002 + 两条正对照 |
+| 3 | 提交前 `make check` 退出码 0；合并前 `make check-all` | `scope=build`：BLD003 编译/vet 失败、BLD005 未 gofmt；BLD001/BLD002 证据缺失与过期为 WARN（留痕是流程账，不当提交门）。`.harness/git-hooks/pre-commit` 由 `make init` 通过 `core.hooksPath` 装上，跑快域 | ERROR / WARN | BLD003、BLD005、BLD001、BLD002 + 两条正对照 |
 | 4 | go 指令不低于 `go_version_min` | `scope=build`：BLD006 | ERROR | BLD006 + BLD006n |
 | 5 | 密钥与本地覆盖配置不入库 | `scope=secret`：SEC001 高熵、SEC002 弱默认（WARN）、SEC003 覆盖文件被跟踪、SEC004 样本为 0 | ERROR / WARN | SEC001–SEC004 + SEC00n（`${...}` 占位符不报） |
 | 6 | 生成物跟着源码走 | `scope=stale`：STL001 三方元数据一致、STL002 产物引用齐全、STL003 时效（限时）、STL004 paths 空（WARN）、STL005 样本为 0 | ERROR / WARN | STL001、STL002、STL004、STL005、STL00n。**STL003 无样本**：要跨天提交才造得出来，见下「判不了」 |
