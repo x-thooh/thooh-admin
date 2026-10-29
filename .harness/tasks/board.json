@@ -228,6 +228,15 @@
       "detail": "现场：容器一起来就在跑 ALTER TABLE sys_group / sys_group_cate / sys_group_actor（门记录 20261029T015228Z 的日志）。调用点 app/admin/router.go:118，藏在路由注册里，失败只 return 不打日志——私有化交付里这意味着「升级或回滚时客户库被应用悄悄改了形状，且没人写口径」。两条出路（要人判）：① 挪成显式动作（make migrate 或首次启动开关），路由注册不再改表；② 保持自动迁移，但在 README 部署段与 docs 里写清它会改哪些表、升级前要备份什么，并让失败可见。验收：任一条做完，且 /login 那套容器上实测一次。",
       "owner": "thooh",
       "scope": ""
+    },
+    {
+      "id": "T-25",
+      "title": "业务错误用 panic 传：每次失败打一整屏 goroutine dump",
+      "status": "open",
+      "priority": "medium",
+      "detail": "现场（门记录 20261029T020216Z）：/login 失败时日志是 `panic: {500 Error 1054: Unknown column 'config_key' … <nil>}` 加一段 runtime/debug.Stack()，栈指向 app/core/utils/error/Recover.go:24。Recover.go:19-30 用 recover 把 panic 变成 HTTP 200 + JSON，所以客户端的 msg 是对的，但错误是靠 panic 传上来的：真崩溃就埋在这堆噪声里。同一条路上还有第二处：它顺手写库时又炸 （Error 1146: Table 'thooh-go.sys_oper_log' doesn't exist，属 T-20 的列名/表名漂移）。要做：业务失败改为正常返回 Result（或由统一错误中间件收敛），Recover 只兜「意料之外的崩溃」并在那里保留栈。注意 D-21 记过同一族风险：`panic(R.Result)` 这种值有时只打印出地址，消息会整个消失——两种命运不可预期，正是不能拿 panic 当返回通道的原因。验收：/login 失败时 stdout 里是一条错误 + 至多一行上下文，不再出现 goroutine dump。",
+      "owner": "thooh",
+      "scope": ""
     }
   ]
 }
