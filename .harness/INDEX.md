@@ -5,11 +5,12 @@
 
 ## 下一步（看板）
 
-- 看板更新于 2026-10-29，共 25 条：open 15、blocked 1、done 9
+- 看板更新于 2026-10-29，共 26 条：open 16、blocked 1、done 9
 - 高优先级未完成（逐条点名，不写概括句）：
   - `T-1` sys_config 的 DDL 与 GORM 模型列名不一致
   - `T-17` make task-done 半途失败后没有出路：只读模块缓存让 worktree remove 卡住
   - `T-20` app/admin/model 的列名以 thooh-go.sql 为准重写
+  - `T-26` 钩子里跑门禁时 git 环境变量带进了别的工作树：同一磁盘态读得出读不出两个结果
 - `T-9` main.go 里 r.Static() 挂载的 ./static/images 目录不存在：blocked，等 使用者回答：静态资源是否入库
 
 ## 检查面：已注册的域
