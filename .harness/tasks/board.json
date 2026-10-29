@@ -154,6 +154,24 @@
       "detail": "wt.py 的 task_done 最后一句打印「分支 task/<id> 留在仓库里——git branch -d task/<id>」，但布局约定允许目录名即分支名（go125 这种人工树，WKT004 明明白白接受它）。撤这类树时提示里的分支不存在，照抄就跑错命令。改法：把消息里那个名字换成 rev-parse --abbrev-ref 读到的真分支，别再拿 task_id 拼第二次——拼字符串就是又开一份定义。现场：2026-10-29 撤 go125 时看到。",
       "owner": "thooh",
       "scope": "worktree"
+    },
+    {
+      "id": "T-17",
+      "title": "make task-done 半途失败后没有出路：只读模块缓存让 worktree remove 卡住",
+      "status": "open",
+      "priority": "high",
+      "detail": "2026-10-29 撤 go125 现场：树里 GOPATH 指向 .go/，Go 把 2516 个缓存目录建成 0555 只读，git worktree remove 删到一半撞 Permission denied 中止，而它已经先删掉 .git/worktrees/<id> 注册表。剩下的目录 git 不认识（rev-parse 报 not a git repository），task-done 再跑就回「这里没有树」，WKT001 反过来报 ERROR 说「判不了，先别撤树」，主树后续每一次提交都被这条钩子拦死——三条路没有一条走得通，最后靠人工 chmod -R u+rwX + rm -rf + git worktree prune（使用者批准）。做法：tree_state() 认这个态（.git 文件在但 admin 目录没了 = 孤儿树），task_done 失败时按「已经删了注册表」重新量一遍并打印真能跑的出路；顺带把 remove 之前先 chmod -R u+rwX 或改用 --force 之后立刻 prune 补一刀，别让注册表和磁盘各走一半。见 lessons L-11、门记录 20261028T171644Z 追计。",
+      "owner": "thooh",
+      "scope": "worktree"
+    },
+    {
+      "id": "T-18",
+      "title": "WKT001 的 WARN 消息把整段 git status 贴进一行报告",
+      "status": "open",
+      "priority": "low",
+      "detail": "tree_state() 原样返回 status --porcelain 的多行字符串，消息拼进「树里另有没提交的东西…：」之后，一条 WARN 在终端里散成 5 行，把下面几行的对齐全冲掉（现场：2026-10-29 收尾那次提交的钩子输出）。改法：只报条数与前 2–3 个路径，剩下的写「…共 N 条，去树里 git status 看」。同族缺陷见 T-16（消息里给人抄的名字要读，不要拼）。",
+      "owner": "thooh",
+      "scope": "worktree"
     }
   ]
 }

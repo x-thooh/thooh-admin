@@ -78,5 +78,64 @@ $ （任务树）T-2 → done + evidence，make index && make check-all
      WKT001 落在 WARN 档，消息点名「树里另有没提交的东西…：M .harness/INDEX.md」
 $ git commit（收尾）                                 钩子输出 0 ERROR, 6 WARN     exit 0
 $ git -C …/thooh-admin merge --ff-only go125        # 落进收尾提交                exit 0
-$ make task-done TASK=go125（主树）                                                     待跑
+$ make task-done TASK=go125（主树）                  删树失败：Permission denied   exit 2
 ```
+
+## 追计：撤树这一步真的炸了，而且是半途炸
+
+上面最后一行不是「待跑」，跑完了，结果是**这个脚本目前没有出路的一条路**：
+
+```text
+$ make task-done TASK=go125
+删树失败：error: failed to delete '/Users/…/thooh-admin-wt/go125': Permission denied
+make: *** [task-done] Error 1                                                  exit 2
+$ git worktree list
+/Users/…/thooh-admin  0e8d6fb [main]        # 注册表里已经没有这棵树
+$ ls -d /Users/…/thooh-admin-wt/go125
+/Users/…/thooh-admin-wt/go125               # 目录还在，304M
+$ git -C /Users/…/thooh-admin-wt/go125 status
+fatal: not a git repository: /Users/…/thooh-admin/.git/worktrees/go125
+$ make check-all（主树）
+ERROR worktree … WKT001  …这份工作有没有落地判不了（读不了 …：fatal: not a git repository…）：
+     证明不了它结束，先别撤树                                            1 ERROR, 7 WARN   exit 1
+```
+
+根因：`mise.toml` 把 GOPATH 指进树里的 `.go/`，Go 把模块缓存目录建成 **0555 只读**（实测 2516 个
+`-type d ! -perm -u+w`）。`git worktree remove` 一边删一遍撞进只读目录就中止，而它**已经先把
+`.git/worktrees/go125` 注册表删掉**——于是磁盘上留下一堆「和 `0e8d6fb` 逐字节相同、但 git 不再认识」
+的文件。这条状态没有任何一条命令能出去：`task-done` 要求它是工作树（已经不是），WKT001 反过来要求
+「先别撤树」（已经撤了一半），钩子因此把主树后续所有提交都拦死。
+
+现场核对（确认没有丢东西，才敢清）：`git rev-parse --short HEAD` 与 `refs/heads/go125` 都是
+`0e8d6fb`，`git diff --stat refs/heads/go125 HEAD` 输出 0 行，`git status --porcelain` 0 行；
+撤树前最后一次 `git status --short`（在任务树）只剩那 5 个已提交的文件。目录里独有的只有
+303M 可重新下载的 `.go/` 缓存和三个空的状态目录（`deliverables/{artifacts,ledgers}`、
+`memory/trace`，`find -type f` 为 0 行）。清法是人工两步 + 一条 prune，**这一步是使用者批准之后
+做的**（不可逆）：
+
+```text
+$ chmod -R u+rwX …/thooh-admin-wt/go125 && rm -rf …/thooh-admin-wt/go125   exit 0
+$ git worktree prune                                                        exit 0
+$ ls -a …/thooh-admin-wt/                                                   只剩 . 与 ..
+```
+
+撤干净之后的主树实测（这才是这套门禁真正的落点，见 lessons L-9）：
+
+```text
+$ make check-all   0 ERROR, 7 WARN，判不了（1）: stale:swagger 时效          exit 0
+                   WKT001 不再出现；7 条 WARN 与合回那一刻同（SEC005 一条、SEC002 四条、
+                   SEC001 基线内一条、STL004 一条）
+$ make selftest    违规样本 104 条、正对照 20 条、判不了 0 条
+                   覆盖：注册域 13 个、语料文件 13 个、缺口 0 条             exit 0
+$ make task-list   /Users/…/thooh-admin-wt 是空的                            exit 0
+$ git status --porcelain                                                              0 行
+```
+
+证据：`path:.harness/deliverables/evidence/verify-20261029T005554Z.txt`（主树、撤树之后、
+`# commit: 0e8d6fb`、工作区为空）。
+
+新欠：ERROR 0 条；WARN 与上表同一条不少（`worktree` 那条 transient 随撤树消失）。
+这条缺陷登记成看板 **T-17**（`make task-done` 半途失败后没有出路），坑写在 **lessons L-11**：
+「destructive 命令做到一半失败，比一开始就失败更糟——注册表与磁盘各走一半，脚本必须认这个态并给出
+能跑的出路」。批 E 那次按 merged 分档的改动救到了这里：fail-closed 报 ERROR 而不是冒充「安全那一档」，
+所以现场是被门禁发现的，不是被静默掩盖的。
