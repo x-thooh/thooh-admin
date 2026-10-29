@@ -1,7 +1,9 @@
+# 这份文件只写「形状」，不写值：凭据一律用 ${VAR} 从环境注入，没给就起不来并点名缺哪个。
+# 允许留默认的只有 host/port/dbname 这类环境坐标。语法：${NAME} 必填，${NAME:-默认} 可空。
 server:
-  port: 8080
-  runMode: debug # release debug
-  logLevel: debug # debug info warn error
+  port: ${THOOH_SERVER_PORT:-8080}
+  runMode: ${THOOH_RUN_MODE:-debug} # release debug；交付给客户要显式给 release
+  logLevel: ${THOOH_LOG_LEVEL:-debug} # debug info warn error
   enabledSwagger: false # 是否开启swagger
   openapiPath: "/swagger/doc.json"
   swaggerPath: "/swagger/index.html"
@@ -9,41 +11,41 @@ server:
 database:
   primary:
     type: mysql
-    host: 127.0.0.1
-    port: 3306
-    username: root
-    password: 123456
-    dbname: thooh-go
+    host: ${THOOH_DB_HOST:-127.0.0.1}
+    port: ${THOOH_DB_PORT:-3306}
+    username: ${THOOH_DB_USER:-root}
+    password: ${THOOH_DB_PW}
+    dbname: ${THOOH_DB_NAME:-thooh-go}
   secondary:
-    enabled: false
+    enabled: ${THOOH_DB2_ENABLED:-false}
     type: mysql
-    host: localhost
-    port: 3306
-    username: root
-    password: 123456
-    dbname: thooh-go2
+    host: ${THOOH_DB2_HOST:-localhost}
+    port: ${THOOH_DB2_PORT:-3306}
+    username: ${THOOH_DB2_USER:-root}
+    password: ${THOOH_DB2_PW:-}
+    dbname: ${THOOH_DB2_NAME:-thooh-go2}
   max_idle_conn: 10
   max_open_conn: 30
   conn_max_lifetime: 300
 
 redis:
-  host: 127.0.0.1
-  port: 6379
-  password:
-  db: 0
+  host: ${THOOH_REDIS_HOST:-127.0.0.1}
+  port: ${THOOH_REDIS_PORT:-6379}
+  password: ${THOOH_REDIS_PW:-}
+  db: ${THOOH_REDIS_DB:-0}
 
 jwt:
-  secret: 3Bde3BGEbYqtqyEUzW3ry8jKFcaPH17fRmTmqE7MDr05Lwj95uruRKrrkb44TJ4s
-  jwt_ttl: 43200 # 12 * 60 * 60 秒过期
+  secret: ${THOOH_JWT_SECRET}
+  jwt_ttl: ${THOOH_JWT_TTL:-43200} # 12 * 60 * 60 秒过期
 
 xxl-job:
   enabled: false
   env: dev
   admin_address: http://localhost:9100/xxl-job-admin
-  access_token: xxl-job
+  access_token: ${THOOH_XXL_TOKEN:-}
   app_name: xxl-job-executor
-  job_uname: admin
-  job_upass: admin
+  job_uname: ${THOOH_XXL_USER:-}
+  job_upass: ${THOOH_XXL_PW:-}
   address:
   ip:
   port: 9102
@@ -53,8 +55,8 @@ xxl-job:
 
 log:
   enabled: true    # 是开启
-  logMode: default # default mysql file es
-  filePath: D:\\ruoyi\\log # 日志本地的话存放地址
+  logMode: ${THOOH_LOG_MODE:-default} # default mysql file es
+  filePath: ${THOOH_LOG_PATH:-./log} # 日志本地时存放地址
   filterate:   # 日志过滤的接口
     - '/reg'
 

@@ -1,11 +1,1 @@
-[
-  {
-    "scope": "secret",
-    "path": "config.yaml",
-    "fingerprint": "SEC001:高熵密钥入库 jwt.secret",
-    "count": 1,
-    "reason": "bootstrap 当天存量：JWT 签名密钥随 config.yaml 入库，前端/服务端已按此值签发。轮换需前后端同时改并让现存 token 失效，属单独一轮，不在 harness 批次内做。",
-    "owner": "thooh",
-    "review_by": "2026-11-28"
-  }
-]
+[]

@@ -54,7 +54,7 @@
       "title": "config.yaml 的 4 条弱默认凭据与账本里的 jwt.secret",
       "status": "open",
       "priority": "medium",
-      "detail": "SEC002 三条（database.primary/secondary、xxl-job）+ SEC001 一条已盖章豁免。轮换属于单独一轮：改值要同步部署侧，不能只改仓库。",
+      "detail": "SEC002 三条弱默认凭据与 SEC001 那条高熵密钥都已经从 config.yaml 里拿出去（T-19a：值改走 ${THOOH_*}，见门记录 20261029T012600Z）。风险没有跟着消失：原来那个 jwt.secret 仍在 git 历史（156f892 及更早）里，客户现网与 .deploy/config.yaml 也还在用它。要做的是轮换 + 让现存 token 失效 + 部署侧同步，一件都不能少；断言只看工作树文件，看不到历史值，所以这条只能靠人管（standards「判不了」表）。",
       "owner": "thooh",
       "scope": "secret"
     },
