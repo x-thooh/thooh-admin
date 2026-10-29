@@ -309,3 +309,22 @@
   ③ 用 viper 的 `AutomaticEnv`（引入键名映射约定，与现有结构体 tag 两套口径并存）；
   ④ 为了留着豁免而保留文件里的高熵值（那正是这次要拿掉的东西）。
 - written_by: session 2026-10-29 / version: 1 / supersedes: — / status: active
+
+## D-22 依赖连不上 = 一次性退出；错误里给地址，不给密码
+
+- 决策：连接层（`connectMysql` / `connectRedis`）**返回 error**，只有取连接的入口
+  （`mysql.MysqlDb()` / `redis.Client()`）把 error 变成 `log.Fatalf("启动失败：%v", err)`。
+  消息口径固定为「角色 + `user@host:port/dbname` + 底层原因」，密码与完整 DSN 一律不进消息
+  （这行会进容器 stdout，可能被采集留档）。
+- 理由：`MysqlDb()` 实测有 260 个调用点、`redis.Client()` 5 个，且绝大多数本来就不检查错误。
+  逐个改成 `(x, err)` 是一轮独立重构，还会把「起不来的原因」拆成 260 种说法；而这一轮（D-20 的①②③）
+  要的是干净 clone 起不来时**一句话能定位**。
+- 被否：① 保持返回 nil 让调用点自己检查（现实是不会检查，等于现状）；② 启动时预连接、运行时容忍
+  （进程活着但每个请求 500，被 gin 的 Recovery 咽掉——比崩一次难查得多）；③ 消息里带完整 DSN
+  「方便排查」（就是把凭据写进日志）；④ 留着 `panic`（panic 在启动路径给的是运行时栈，
+  在请求路径被咽掉，两种都不是一条原因）。
+- 同一批修掉的相邻 bug：从库关闭时 `currentDB` 是 nil，`MysqlDb(true)` 用到才炸——现在默认「当前库=主库」。
+- 边界：连不上就退，`restart: always` 下会崩溃循环，这一层交给 compose 的 healthcheck 与重启策略（T-19c）；
+  `config.Database.ConnMaxLifetime` 被代码写死的 `time.Hour` 忽略，本批不动，别当成已修。
+- 实测与反向验证写在门记录 20261029T013600Z。
+- written_by: session 2026-10-29 / version: 1 / supersedes: — / status: active

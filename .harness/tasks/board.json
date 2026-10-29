@@ -178,7 +178,7 @@
       "title": "私有化交付：compose 提级进仓库、配置能用环境变量覆盖、起不来时给原因",
       "status": "doing",
       "priority": "high",
-      "detail": "客户要在自己内网一台机器上跑起来。三件事：① `.deploy/proof.yml`（webapp+mysql:8.0+redis:7-alpine、initdb 挂 dump、密码走 THOOH_MYSQL_PW）被 .gitignore 的 `.*` 排除在仓库外，仓库里那份 docker-compose.yml 只有 webapp、Dockerfile 不 COPY config.yaml，裸跑必 panic——把可用那份提级成仓库内容并让 `make up` 真能用；② 全仓没有环境变量覆盖（common/config/app_config.go:102 只吃 -f 一个 yaml），意味着密钥只能写进入库文件，要加 THOOH_* 覆盖并把默认值改成「不配就起不来」；③ pkg/mysql/mysql.go:108-115 连不上库只 log 后 return，下一行 nil panic，现场看不出原因——改成带 DSN 与错误的一次性退出。验收：干净 clone 起容器，mysql 与 redis 健康检查通过，/login 不再 nil panic 而是给出可读的 SQL 错误（列名漂移的证据，归 T-20 收）。这一条做完 /login 还通不了，这是刻意的顺序：先把依赖与启动失败的形状做对，否则下一轮改模型没有能对账的运行环境。收 T-3。",
+      "detail": "客户要在自己内网一台机器上跑起来。三件事：① `.deploy/proof.yml`（webapp+mysql:8.0+redis:7-alpine、initdb 挂 dump、密码走 THOOH_MYSQL_PW）被 .gitignore 的 `.*` 排除在仓库外，仓库里那份 docker-compose.yml 只有 webapp、Dockerfile 不 COPY config.yaml，裸跑必 panic——把可用那份提级成仓库内容并让 `make up` 真能用；② 全仓没有环境变量覆盖（common/config/app_config.go:102 只吃 -f 一个 yaml），意味着密钥只能写进入库文件，要加 THOOH_* 覆盖并把默认值改成「不配就起不来」；③ pkg/mysql/mysql.go:108-115 连不上库只 log 后 return，下一行 nil panic，现场看不出原因——改成带 DSN 与错误的一次性退出。验收：干净 clone 起容器，mysql 与 redis 健康检查通过，/login 不再 nil panic 而是给出可读的 SQL 错误（列名漂移的证据，归 T-20 收）。这一条做完 /login 还通不了，这是刻意的顺序：先把依赖与启动失败的形状做对，否则下一轮改模型没有能对账的运行环境。收 T-3。实测另发现一处：`main.go:23` 注册了 `-f` 却从不调 `flag.Parse()`（全仓没有一处调用），所以 `-f /别处/config.yaml` 是摆设，实测报错仍指向 `./config.yaml`；本地靠工作目录侥幸能用，容器里得靠 WORKDIR 撞上。配置路径的口径与 compose 一起在这条里定。",
       "owner": "thooh",
       "scope": "",
       "worktree": "T-19"
