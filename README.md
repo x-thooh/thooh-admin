@@ -18,22 +18,121 @@
 * 支持加载动态权限菜单，多方式轻松权限控制。
 
 
-# ⚡ 快速启动
+# ⚡ 快速启动（本机开发）
+
+需要 Go 1.26+。`config.yaml` 里只有**形状**，值一律从环境变量注入——所以本机跑之前要先给两条必填：
 
 ```bash
-# 拉取依赖
 go mod tidy
 
-# 配置环境
-在config.yaml文件中配置开发环境的数据库和redis
+# 两条必填（口令自己生成，别用示例值）
+export THOOH_DB_PW="$(openssl rand -base64 24 | tr -d '=+/')"
+export THOOH_JWT_SECRET="$(openssl rand -base64 48 | tr -d '\n/+=')"
 
-# 运行sql文件
-1.新建数据库thooh-go(默认，可修改)
-2.使用命令或数据库连接工具运行根目录下的thooh-go.sql
-
-# 运行后端
-go run main.go
+# 依赖：用你本机已有的 mysql(3306) 与 redis(6379)，或显式指到别处
+# 库表：新建数据库 thooh-go（默认名，可用 THOOH_DB_NAME 改），导入根目录的 thooh-go.sql
+go run main.go              # 默认读 ./config.yaml；-f 可指到别处
 ```
+
+没给必填变量时会直接退出并点名缺哪个，这是刻意的（不带着弱口令起服务）。
+
+`make up` 起的那套依赖**不发布宿主机端口**（见下面部署段），所以本机 `go run` 连不到它；
+要在容器里跑后端就走 `make up`。
+
+命令入口只有 `Makefile` 那张表，门禁与检查见 `AGENTS.md` 与 `.harness/`。
+
+# 🔒 私有化部署（一台机器起整套）
+
+`docker-compose.yml` 里是三件：`webapp` + `mysql:8.0`（自动导入 `thooh-go.sql`）+ `redis:7-alpine`。
+客户机**只需要 docker**，不需要 Go——编译在镜像里做（`Dockerfile` 的 build 段）。
+
+```bash
+# 1) 填凭据（.env 被 gitignore 排除，永远不入库）
+cp .env.example .env
+# 编辑 .env，至少填这两条：
+#   THOOH_DB_PW=<openssl rand -base64 24>
+#   THOOH_JWT_SECRET=<openssl rand -base64 48>
+
+# 2) 起整套（首次会构建镜像；mysql 与 redis 的 healthcheck 都过了才起 webapp）
+make up            # 没有 make 就用：docker compose -f docker-compose.yml up -d
+
+# 3) 验证：三个容器都在，webapp 活着
+docker compose ps
+make logs          # 起不来的原因就在这一屏里
+
+# 4) 停（数据留在卷 thooh-mysql 里）
+make down
+```
+
+## 需要哪些变量
+
+| 变量 | 必填 | 默认（compose 里） |
+| --- | --- | --- |
+| `THOOH_DB_PW` | 是 | 无——没给时 compose 拒绝启动并点名 |
+| `THOOH_JWT_SECRET` | 是 | 无，同上；换了它现存 token 全部失效 |
+| `THOOH_DB_HOST` / `THOOH_DB_PORT` | 否 | `mysql` / `3306`（compose 内网服务名） |
+| `THOOH_DB_NAME` / `THOOH_DB_USER` | 否 | `thooh-go` / `root` |
+| `THOOH_REDIS_HOST` / `THOOH_REDIS_PORT` / `THOOH_REDIS_PW` | 否 | `redis` / `6379` / 空 |
+| `THOOH_PUBLIC_PORT` | 否 | `8080`（只改宿主机端口，容器内仍是 8080） |
+| `THOOH_RUN_MODE` / `THOOH_LOG_LEVEL` | 否 | `release` / `info` |
+
+语法：`config.yaml` 里 `${NAME}` 必填、`${NAME:-默认}` 可空；注释里的 `${...}` 是文档，不会被当成引用。
+
+## 凭据在哪里
+
+- 仓库里的 `config.yaml` 只有形状，没有值。
+- 值只在 `.env`（被 `.gitignore` 排除）与容器环境变量里。
+- 镜像里**没有** `config.yaml`：它由 compose 以只读卷挂进去（`.dockerignore` 也把它排掉，
+  免得客户改过的配置被烘进镜像层）。
+- 健康检查用容器自己的 `$MYSQL_ROOT_PASSWORD`，不让 compose 插值——否则 `docker inspect` 上会留一份明文。
+
+## 数据、迁移与升级
+
+- `thooh-go.sql` 只在数据卷为空时执行。改了 dump 要先清卷（下面这条**会删库**，确认过再跑）：
+
+  ```bash
+  docker compose -f docker-compose.yml down -v
+  ```
+
+- 启动时 `app/admin/router.go` 会对 `sys_group`、`sys_group_cate`、`sys_group_actor` 三张表跑
+  `AutoMigrate`（每次 boot 都可能改表）。备份与升级口径见看板 T-24。
+
+## 离线交付（内网机器不能上网）
+
+在一台能上网的机器上构建，再把镜像搬进去：
+
+```bash
+docker compose -f docker-compose.yml build
+docker save thooh:1.0.0 mysql:8.0 redis:7-alpine -o thooh-images.tar   # 约 1.2GB（单独的 webapp 实测 22M）
+# 拷 thooh-images.tar 与仓库（含 .env）到内网机器
+docker load -i thooh-images.tar
+make up
+```
+
+镜像都在了，`make up` 不会再触发构建。Go 模块的离线来源（内网 GOPROXY 与校验库）见看板 T-4。
+
+## 起不来时先看这三条
+
+| 输出 | 意思 | 出路 |
+| --- | --- | --- |
+| `required variable THOOH_DB_PW is missing a value: 必填…` | `.env` 没填或没导出 | 填 `.env`；compose 与 `up` 都会点名同一个变量 |
+| `启动失败：这些环境变量没给值 → THOOH_DB_PW, THOOH_JWT_SECRET` | 本机 `go run` 前没给值 | 显式 `export`，清单见上表 |
+| `启动失败：主库 root@127.0.0.1:3306/thooh-go 连不上：dial tcp: connect: connection refused` | 依赖没起来或地址写错 | `docker compose ps` 看 health；`make logs` 看完整原因。消息里只有地址，不含口令 |
+
+## 现在已知的不通过
+
+按现状如实记（这些不是部署失败，是应用与库里对不上账）：
+
+```bash
+curl -X POST -H 'Content-Type: application/json' \
+  -d '{"username":"admin","password":"admin123"}' http://127.0.0.1:8080/login
+# {"code":500,"msg":"Error 1054: Unknown column 'config_key' in 'where clause'"}
+```
+
+HTTP 层通了、容器不再崩溃，但 `app/admin/model` 那套旧模型的列名与自带 dump 对不上，
+登录因此还拿不到 200 的业务结果——这一轮按「以 dump 为准」重写在看板 T-20。
+另两条噪音：`server.logLevel` 目前没接到 gorm 日志（每条 SQL 都打 stdout，T-23）、
+启动即 `AutoMigrate`（T-24）。
 
 
 # 🍖 详细功能
