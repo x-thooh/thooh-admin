@@ -121,11 +121,14 @@ test: ## go test
 
 go-all: build vet ## 编译 + 静态检查（慢域，等价于 check-all 里的 build scope）
 
-up: ## 起本地依赖（docker-compose）
+up: ## 起整套（webapp + mysql + redis；缺凭据时 compose 点名缺哪个）
 	@docker compose -f $(ROOT)/docker-compose.yml up -d
 
-down: ## 停本地依赖
+down: ## 停整套（mysql 数据留在卷 thooh-mysql 里；清库见 README 部署段）
 	@docker compose -f $(ROOT)/docker-compose.yml down
+
+logs: ## 跟 webapp 的日志（起不来的原因在这里）
+	@docker compose -f $(ROOT)/docker-compose.yml logs -f webapp
 
 clean: ## 清派生产物（不动状态目录）
 	@rm -rf $(HARNESS)/codebase-guide

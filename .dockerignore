@@ -1,0 +1,19 @@
+# 构建上下文里不要的东西。最要紧的是 .go/：GOPATH 一旦落进仓库（lessons L-1 踩过），
+# 一次 docker build 会把几百 MB 模块缓存全打进上下文，而 build 段自己会 go mod download。
+.go
+.git
+.harness
+.deploy
+.env
+.env.*
+!.env.example
+
+# 客户改过的配置带着真凭据，绝不该被烘进镜像层（配置由 compose 只读挂载进来）
+config.yaml
+/main
+*.exe
+*.log
+log
+storage
+tests
+home

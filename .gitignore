@@ -23,6 +23,9 @@
 .*
 !.gitignore
 !.harness
+# `.*` 会顺手吃掉这两个：它们只有形状、没有值，必须入库
+!.dockerignore
+!.env.example
 package-lock.json
-# Dockerfile 里 COPY 的那个二进制（go build -o main .），别混进提交
+# 本地产物（go build -o main .）；镜像里的编译在容器里做，见 Dockerfile 的 build 段
 /main

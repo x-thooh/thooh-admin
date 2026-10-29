@@ -210,6 +210,24 @@
       "detail": "T-21 修完仍有这半：mark_doing(root) 让主树 board.json 变 dirty，而这份 doing 不会自己提交（工具不代劳提交）。后果是任务期间主树不能提交看板改动，快进合回时工作区脏文件与分支版本内容不同会被 git 拒绝合入（本轮就要靠人工 discard 主树那份才能 ff）。可选做法：① task-new 之后明确提示「主树看板已改未提交，合回前 discard 或提交」；② 让主树那份根本不改（只在树里写 doing，主树读自己的看板时会看到 open → 主树报 WKT002，不可取）；③ 看板改成仓库级单一副本（.git 内部或环境变量指向），代价是每棵树看到的不再是自己分支的状态。选哪条要人判。",
       "owner": "thooh",
       "scope": "worktree"
+    },
+    {
+      "id": "T-23",
+      "title": "server.logLevel 是死配置：gorm 日志等级被硬编码，release 部署把每条 SQL 打在 stdout",
+      "status": "open",
+      "priority": "medium",
+      "detail": "现场：compose 起来后 webapp 日志里全是 information_schema 探查与 ALTER 语句（门记录 20261029T015228Z）。pkg/mysql/mysql.go:70 写死 logger.Info，全仓没有任何代码读 Server.LogLevel（common/config/app_config.go:39 只有字段），compose 传的 THOOH_LOG_LEVEL 因此也是没人接的值。要做：把 gorm 的 LogLevel 接到 config.Server.LogLevel（debug→Info、info/warn→Warn、error→Error 这类映射由人定），或者把 config.yaml 与 compose 里的这个键一起删掉——不许留「配了但不生效」的第三种。验收：THOOH_LOG_LEVEL=info 起容器，stdout 里不再出现逐条 SQL。",
+      "owner": "thooh",
+      "scope": ""
+    },
+    {
+      "id": "T-24",
+      "title": "app/admin/router.go 启动即 AutoMigrate：每次 boot 都可能改客户库的表结构",
+      "status": "open",
+      "priority": "medium",
+      "detail": "现场：容器一起来就在跑 ALTER TABLE sys_group / sys_group_cate / sys_group_actor（门记录 20261029T015228Z 的日志）。调用点 app/admin/router.go:118，藏在路由注册里，失败只 return 不打日志——私有化交付里这意味着「升级或回滚时客户库被应用悄悄改了形状，且没人写口径」。两条出路（要人判）：① 挪成显式动作（make migrate 或首次启动开关），路由注册不再改表；② 保持自动迁移，但在 README 部署段与 docs 里写清它会改哪些表、升级前要备份什么，并让失败可见。验收：任一条做完，且 /login 那套容器上实测一次。",
+      "owner": "thooh",
+      "scope": ""
     }
   ]
 }

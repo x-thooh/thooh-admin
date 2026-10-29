@@ -30,6 +30,9 @@ var configFile = flag.String("f", "./config.yaml", "")
 // @host 127.0.0.1:8080
 // @BasePath /
 func main() {
+	// 不调 Parse，-f 就是个摆设：注册的 flag 永远停在默认值（实测 -f /别处/x.yaml 的报错仍指向
+	// ./config.yaml）。容器里靠 WORKDIR 撞上，换个目录就找不到配置。
+	flag.Parse()
 	fmt.Println("hello thooh-go")
 	logs.Poster()
 	// 初始化配置文件

@@ -30,7 +30,8 @@
 | `make task-new TASK=<id>` | 给看板里已登记的任务开一棵工作树 |
 | `make task-done TASK=<id>` | 收尾一棵树：干净 + 看板 done + 已合并，三条都过才撤 |
 | `make task-list` | 列出已开的工作树 |
-| `make up` / `down` | 起停本地依赖（docker compose） |
+| `make up` / `down` | 起停整套（webapp + mysql + redis，docker compose） |
+| `make logs` | 跟 webapp 容器日志——起不来的原因在这里 |
 | `make clean` | 删派生目录与 go 构建缓存，不动状态目录 |
 
 这张表与 Makefile 的 target、磁盘上的脚本三方对账：`scope=cmd`。
