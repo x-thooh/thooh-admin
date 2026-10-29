@@ -176,11 +176,12 @@
     {
       "id": "T-19",
       "title": "私有化交付：compose 提级进仓库、配置能用环境变量覆盖、起不来时给原因",
-      "status": "open",
+      "status": "doing",
       "priority": "high",
       "detail": "客户要在自己内网一台机器上跑起来。三件事：① `.deploy/proof.yml`（webapp+mysql:8.0+redis:7-alpine、initdb 挂 dump、密码走 THOOH_MYSQL_PW）被 .gitignore 的 `.*` 排除在仓库外，仓库里那份 docker-compose.yml 只有 webapp、Dockerfile 不 COPY config.yaml，裸跑必 panic——把可用那份提级成仓库内容并让 `make up` 真能用；② 全仓没有环境变量覆盖（common/config/app_config.go:102 只吃 -f 一个 yaml），意味着密钥只能写进入库文件，要加 THOOH_* 覆盖并把默认值改成「不配就起不来」；③ pkg/mysql/mysql.go:108-115 连不上库只 log 后 return，下一行 nil panic，现场看不出原因——改成带 DSN 与错误的一次性退出。验收：干净 clone 起容器，mysql 与 redis 健康检查通过，/login 不再 nil panic 而是给出可读的 SQL 错误（列名漂移的证据，归 T-20 收）。这一条做完 /login 还通不了，这是刻意的顺序：先把依赖与启动失败的形状做对，否则下一轮改模型没有能对账的运行环境。收 T-3。",
       "owner": "thooh",
-      "scope": ""
+      "scope": "",
+      "worktree": "T-19"
     },
     {
       "id": "T-20",
@@ -190,6 +191,25 @@
       "detail": "决策 D-20：以 dump 为准（客户存量库不动，modules/ 那套短列名已是这个口径）。旧 RuoYi 模型与 dump 大面积漂移：sys_config 十列全不同（system/sysConfig.go:13-27 vs sql:390）、sys_job↔mon_job（monitor/sysJob.go:42,60 vs sql:153，RunSqlCron 启动即查不存在的表）、sys_dept↔sys_org、sys_dict_*↔tool_dict*、sys_oper_log↔mon_oper_log、sys_logininfor↔mon_login_log、gen_table*↔tool_code_*、sys_user/role/menu/post/notice/role_menu 各列名不同，sys_user_role/sys_user_post/sys_role_dept 在 dump 里无对应表（疑为 sys_rece/sys_post_actor，未定）。验收：跑在 T-19 起起来的那套容器上，/login 返回 200 且 sys_config/mon_job 相关接口不再报 Unknown column。依赖 T-19 提供能跑的环境（顺序不能反：先在能连库的环境里逐个模型对账，再谈打包）。",
       "owner": "thooh",
       "scope": ""
+    },
+    {
+      "id": "T-21",
+      "title": "make task-new 只写主树那份看板，新树检出 open 被 WKT002 拦住第一次提交",
+      "status": "done",
+      "priority": "high",
+      "detail": "board.json 是每个工作树各一份的磁盘状态：mark_doing(root) 写了主树，树里那份还是 base 的 open，而树跑门禁读自己那份 → WKT002 当场拦住这棵树的第一次提交（现场：2026-10-29 开 T-19，树内 make check = 1 ERROR / exit 2）。修法是 task_new 里对 target 再写一次（同一个事实两边都成立），并用真 git 夹具验证两份看板都翻成 doing。与 L-10 同族但机制不同：那条是档位判错，这条是写错副本，落成 L-12。",
+      "owner": "thooh",
+      "evidence": "path:.harness/deliverables/gates/20261029T012021Z-task-new-marks-both-boards.md",
+      "scope": "worktree"
+    },
+    {
+      "id": "T-22",
+      "title": "开树把主树看板写成未提交改动，主树在任务期间不能碰看板",
+      "status": "open",
+      "priority": "medium",
+      "detail": "T-21 修完仍有这半：mark_doing(root) 让主树 board.json 变 dirty，而这份 doing 不会自己提交（工具不代劳提交）。后果是任务期间主树不能提交看板改动，快进合回时工作区脏文件与分支版本内容不同会被 git 拒绝合入（本轮就要靠人工 discard 主树那份才能 ff）。可选做法：① task-new 之后明确提示「主树看板已改未提交，合回前 discard 或提交」；② 让主树那份根本不改（只在树里写 doing，主树读自己的看板时会看到 open → 主树报 WKT002，不可取）；③ 看板改成仓库级单一副本（.git 内部或环境变量指向），代价是每棵树看到的不再是自己分支的状态。选哪条要人判。",
+      "owner": "thooh",
+      "scope": "worktree"
     }
   ]
 }

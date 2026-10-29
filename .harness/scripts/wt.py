@@ -132,7 +132,11 @@ def task_new(root, task_id):
     if code != 0:
         return 1, f"开树失败：{err}"
     was = mark_doing(root, task_id)
-    note = f"看板里 {task_id}：{was} → doing，worktree 填 {task_id}"
+    # 树里那份看板一起写：`worktree add` 检出的是 base 的提交，那份看板上这条还挂 open，
+    # 而树跑门禁读的是它自己那份。只改主树 = 脚本造出「有树但看板 open」的态，
+    # 于是 WKT002 拦住这棵树的第一次提交（现场：2026-10-29 开 T-19）。
+    mark_doing(target, task_id)
+    note = f"两份看板（主树与树内）里 {task_id}：{was} → doing，worktree 填 {task_id}"
     if was == "blocked":
         note += "（这条原来标 blocked；还卡着就别开树，把 waiting_on 改回原状态）"
     return 0, f"已开：{target}（分支 {branch}，自 {base}）\n{note}"
