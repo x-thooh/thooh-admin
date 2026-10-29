@@ -260,3 +260,28 @@
 - 邻居缺陷（本批没动，挂 T-16）：`task_done` 撤完树打印「分支 task/<id> 留在仓库里——
   git branch -d task/<id>」，而目录名即分支名的人工树（go125 这种）根本没有那个分支。
 - written_by: session 2026-10-29 / version: 1 / supersedes: — / status: active
+
+## D-20 私有化交付以 dump 为准，并先修「起不来时的形状」再改模型
+
+- 现场：目标是「客户在自己内网一台机器上把这套后端跑起来」。盘点（2026-10-29）出三件事，都不是
+  业务代码问题：① 能用那份 compose 从来没入库——`.deploy/` 被 `.gitignore` 的 `.*` 整目录排除，
+  里面的 `proof.yml` 才有 mysql:8.0 + redis:7-alpine + initdb 挂 dump + 密码走 `THOOH_MYSQL_PW`，
+  而仓库里的 `docker-compose.yml` 只有 webapp、`Dockerfile` 不 COPY `config.yaml`（裸跑 panic）；
+  ② 配置没有环境变量入口（`common/config/app_config.go:102` 只认 `-f` 那一个 yaml），于是密钥
+  只能写进入库文件，与 SEC001/SEC002 的账同源；③ `pkg/mysql/mysql.go:108-115` 连不上库时 log 完
+  return，`_connect` 仍是 nil，下一行 panic——客户现场第一条错误信息就没有。
+- 决策一（口径）：**dump 为准**。`app/admin/model/` 那批旧 RuoYi 模型的 gorm tag 全部改成
+  `thooh-go.sql` 里的实际列名/表名（kenam/keval/crtim、mon_job、sys_org、tool_dict*、mon_oper_log…），
+  而不是重做 dump。理由：私有化意味着**客户可能已经有库**（从上一版或从对方系统迁来的数据），
+  改 dump 等于要求他们跑迁移；而 `modules/` 那一代模型本来就是按 dump 的短列名写的，改完两代归一。
+- 决策二（顺序）：先做 T-19（部署侧），后做 T-20（模型对齐），**即使 T-20 才是 `/login 200` 的真凶**。
+  判据是「改模型要有能对账的运行环境」：T-19 完成后容器能起、库能连，届时每个模型的漂移都会以
+  `Unknown column` 的形式现形，改一个验一个；反过来先改模型，验证只能靠静态比对 dump 文本，
+  而静态比对刚刚证明不可靠（盘点报告里「sys_rece / sys_post_actor 疑似对应」就是这么来的）。
+- 被否：① 以模型为准重做 dump（要客户跑迁移，且自带 dump 与文档、stale 断言一起跟改）；
+  ② 只做部署不修漂移（交付物是「部上了但调不通」，验收口径不成立）；③ 把 `.deploy/` 整目录
+  取消 ignore 直接入库（那里头是高熵真凭据，等于关掉门禁；提级只挑 `proof.yml` 的形状，
+  值一律走环境变量）；④ 先写一键脚本再起依赖（脚本没法验证自己， lessons L-3 的同一形状）。
+- 边界：`mise.toml` 的 `GOSUMDB = "off"`（T-4）是**安全决策**，不由这一轮代劳；私有化确实需要
+  离线模块源，但那是「内网 GOPROXY 地址由客户提供」的口径问题，留给人判。
+- written_by: session 2026-10-29 / version: 1 / supersedes: — / status: active
