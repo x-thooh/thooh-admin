@@ -107,7 +107,7 @@ func findUser(param system.LoginParam, context *gin.Context) {
 	userAgent := context.Request.Header.Get("User-Agent")
 	os := useragent.GetOsName(userAgent)
 	browser := useragent.GetBrowserName(userAgent)
-	tokenString, err := jwt.CreateToken(user.UserName, user.UserId, user.DeptId, newUUID.String())
+	tokenString, err := jwt.CreateToken(user.UserName, strconv.Itoa(user.UserId), strconv.Itoa(user.DeptId), newUUID.String())
 	if err != nil {
 		monitor.LoginInfoAdd(context, param, "登录失败，"+err.Error(), false)
 		context.JSON(http.StatusOK, R.ReturnFailMsg("登录失败"))

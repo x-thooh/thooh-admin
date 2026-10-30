@@ -42,11 +42,11 @@ func Routers(e *gin.Engine) {
 	handlerFunc := cache.CacheByRequestURI(memoryStore, 2*time.Second)
 
 	e.GET("/index", api.IndexHandler)
-	e.GET("/captchaImage", api.CaptchaImageHandler)
-	// 登录
-	e.POST("/login", api.LoginHandler)
-	// 退出
-	e.POST("/logout", api.LogoutHandler)
+	// 登录三件套改挂 modules（dump 口径：sys_user.id 是 varchar(36)）。
+	// 旧那套的 LoginHandler 先留着不删，等 T-20e 按目录退役时一起清。
+	e.GET("/captchaImage", auth.Code)
+	e.POST("/login", auth.Login)
+	e.POST("/logout", auth.Logout)
 	v1 := e.Group("/")
 	{
 		auth := v1.Group("")

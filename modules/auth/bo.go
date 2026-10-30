@@ -1,9 +1,8 @@
 package auth
 
 type LoginBo struct {
-	ClientId  string
-	GrantType string
-	TenantId  string
-	Code      string
-	Uuid      string
+	UserName string `json:"username"`
+	Password string `json:"password"`
+	Code     string `json:"code"`
+	Uuid     string `json:"uuid"`
 }

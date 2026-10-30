@@ -12,7 +12,9 @@ import (
 	"github.com/golang-jwt/jwt"
 )
 
-func CreateToken(UserName string, UserId int, DeptId int, uuid string) (string, error) {
+// CreateToken 的两个 id 是字符串：dump 里 sys_user.id 与 sys_org.id 都是 varchar(36)，
+// claim 换成 int 会在每一棵子树上取不到用户。
+func CreateToken(UserName string, UserId string, DeptId string, uuid string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user_name": UserName,
 		"user_id":   UserId,
