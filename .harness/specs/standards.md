@@ -58,6 +58,7 @@
 | 「哪些 `.go` 算本仓库的源码」只有一份实现：`scripts/go_files.py`（先 `is_file()` 再按整条路径段排除）。Makefile 的 `fmt` 与 `build` scope 都调它——一条命令和一个门禁各算一遍，漂移的形态就是「`make fmt` 红了但 `make check` 绿」 | `scope=build`：BLD004（清单为空 = 判不了，不沉默）、BLD005（未格式化） | ERROR / WARN | BLD005c（`nested.go/` 目录里那个文件只报一次：目录本身没混进清单）、BLD004 + BLD005n/BLD005b 正对照 |
 | 「这条路径 git 会不会带走」只有一份答案：`scripts/tracked.py`（问 `git ls-files --others --ignored --exclude-standard --directory`）。派生索引与被排除文件的密钥判定都问它；读不到 ignore 规则（没有 git）时一律当会入库，并登记 `secret:gitignore 判定` 为判不了 | `scope=entry`：ENT007 判两台机器看到的磁盘是否同一张；`scope=secret`：SEC005 把「不入库但本地是真凭据」点名而不是沉默 | ERROR / WARN | ENT007c（带 gitignore 本地目录的树上生成索引，没有它的检出也认它新鲜）、SEC005 + SEC001b（未跟踪但没被排除的仍算入库） |
 | 「这份工作落地了没有」只有一处判定：`wt.py` 的 `tree_state()`（工作区干净吗、HEAD 已合进主树吗）。`make task-done` 两条都要（脏就不许撤），WKT001 只按第二条分档——CLI 与门禁各算一遍的漂移形态就是「脚本说可以撤、门禁说这是欠账」，本批现场是撤树这一步在门禁里根本走不通（lessons L-10）。读不出来时两个布尔给 `None`，门禁按 ERROR 走，不许冒充已落地那一档 | `scope=worktree`：WKT001 按「已合并」分档，「还有没提交的」只写进消息 | ERROR / WARN | WKT001（已合并 → WARN）、WKT001b（已合并但没提交 → 仍 WARN 且消息点名那笔改动）、WKT001c（未合并 → ERROR）；把档位钉死成单一档、或假装 `tree_state` 永远返回「干净 + 已合并」，对应样本立刻变红 |
+| 「跨树读 git」只有一份环境：`scripts/gitenv.py` 的 `clean()` 剥掉 `GIT_DIR`/`GIT_INDEX_FILE`/`GIT_WORK_TREE`/`GIT_COMMON_DIR`/`GIT_OBJECT_DIRECTORY`/`GIT_ALTERNATE_OBJECT_DIRECTORIES`/`GIT_NAMESPACE`。`wt.git()`（worktree 域与 `make task-new`/`task-done` 唯一的 git 入口）带上它；`wt.git_raw()` 保留不 scrub 的原样，只给反向样本用（T-26、lessons L-15 的两次命中分别是「判不了」与「假阳性 WKT004」） | selftest 语料钉住：`WKT004e` 证明不 scrub 时读到的是主树的分支，`WKT00n4` 证明钩子环境下读兄弟树一条不报；把 `wt.git()` 的 `env=` 摘掉，`WKT00n4` 当场变红（2026-10-30 实测） | ERROR（拦提交） | WKT004e（泄漏是真的）、WKT00n4（正对照：scrub 在位时一条不报） |
 
 code 的命名本身也是一条规矩：**3–6 个大写字母 + 三位数字**（`hooks` 的 `CODE_RE` 就按这个匹配）。
 两字母前缀（试过 `WF001`）不会被源码扫描看见——登记了、源码里也有，但对账那头是瞎的，
@@ -76,6 +77,7 @@ code 的命名本身也是一条规矩：**3–6 个大写字母 + 三位数字*
 | 一条门禁给出的出路到底走不走得通 | 判不了：机器能判「消息里有没有 code」，判不了「照着消息做能不能做完」。本批就是靠这条人判抓出来的——WKT001 让人「撤树或改回 doing」，而那两步各自被别的门禁挡住。做法写进 lessons L-10：新加或收紧断言时，把它给的两条出路真走一遍 |
 | 已经提交进历史里的凭据 | 判不了：`secret` 扫的是工作树里的文件，看不到 `git log` 里被删掉的旧版本。`config.yaml` 的 `jwt.secret` 在 T-19a 换成 `${THOOH_JWT_SECRET}` 之后，SEC001 那条发现就消失了——**发现消失不等于风险消失**，那个值仍在历史与客户现网里。做法是轮换 + 让现存 token 失效，账挂看板 T-6；不拿「文件干净了」当「密钥安全了」 |
 | `wt.py` 的写路径（`task_new` 有没有把状态写到被读取的那一份） | 判不了：`tests/cases/` 喂的是 scope 的 `run(ctx, findings)`，不是命令级夹具；给 `wt.py` 建一套端到端夹具的成本不抵收益。落法是当场用真 git 仓库跑一遍并把输出写进门记录（现场：T-21），靠 lessons L-12 那条人判规矩 |
+| 新写一处 `subprocess` 直接调 `git -C` 而没走 `gitenv.clean()` | 判不了：现在的语料钉的是 `wt.git()` 这一个入口，钉不住「别人另写一个」。做法登记成 T-35（拟一条静态断言扫 `.harness/scripts/**/*.py` 里带 `"git", "-C"` 的调用，要求同一语句里有 `env=gitenv.clean()`，或在紧邻注释里写明这是单仓库内的调用） |
 | 排除本地产物目录后没有 .go 可判 | BLD004 报 WARN 并登记 `build:gofmt`；「扫到 0 个文件」与「格式全对」长得一模一样 |
 | 慢域被跳过 | 打印「已跳过慢域（N）：build——不是通过」，退出码不受影响 |
 | `make help` 里每条命令是否真的跑得通 | `cmd` 域只判 target 与命令表一一对应，不执行命令——判不了。做法是人逐条跑（改清单或改工具层之后必跑，lessons L-8 的现场就是 `make fmt` 炸而门禁全绿）；不拿「有 target」当「能跑」 |

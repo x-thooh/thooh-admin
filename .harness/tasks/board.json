@@ -243,20 +243,22 @@
     {
       "id": "T-26",
       "title": "钩子里跑门禁时 git 环境变量带进了别的工作树：同一磁盘态读得出读不出两个结果",
-      "status": "open",
+      "status": "doing",
       "priority": "high",
       "detail": "现场：2026-10-29 在主树提交 T-19 收尾，pre-commit 跑 make check 报 「读不了 …/thooh-admin-wt/T-19 的工作区：fatal: .git/index: index file open failed: Not a directory」，而同一个磁盘态在 shell 里跑 make check 读得干干净净（只报 WKT001 WARN）。已在最小夹具上复现并定位：git 的 pre-commit 钩子导出 GIT_INDEX_FILE=.git（相对路径），wt.py:29 git() 只换 -C 目录不清环境，相对路径在新 cwd 下解析到那棵树的 .git 文件上，于是报 index file open failed: Not a directory（GIT_DIR 绝对路径复现不出，只 GIT_INDEX_FILE 复现得出）。后果不止一条：任务树存在时主树的每次提交都被这个假 ERROR 拦住，等于门禁在自己造的工作流上堵死收尾；而它报的又是「判不了」，读的人以为是磁盘态问题。做法：wt.py 的 git() 用 env 显式剥掉 GIT_INDEX_FILE/GIT_DIR/GIT_WORK_TREE/GIT_COMMON_DIR/GIT_OBJECT_PREFIX 再跑，并给 selftest 补一个夹具——树存在 + 钩子环境变量 + 期望读得到树。见 lessons L-15。",
       "owner": "thooh",
-      "scope": "worktree"
+      "scope": "worktree",
+      "worktree": "T-26"
     },
     {
       "id": "T-27",
       "title": "modules 的路由全挂在鉴权外",
-      "status": "open",
+      "status": "doing",
       "priority": "high",
       "detail": "实测：grep -rn \"Use(\" --include=*.go modules/ 零命中，即 sys/user、sys/config、sys/role、tool/* 等所有 modules 端点都不需要 token 就能 CRUD；而 app/admin/router.go 只给 getInfo/getRouters 包了 jwt.JWTAuthMiddleware()。对私有化交付这是硬伤：客户内网里任何人可直接 POST /sys/user 建用户、改 /sys/config。做法：modules 各组统一挂鉴权，公开面（登录、验证码、pub 下的免鉴权项）显式列白名单，别靠「没挂」来放行。见 lessons L-16。",
       "owner": "thooh",
-      "scope": "modules"
+      "scope": "modules",
+      "worktree": "T-27"
     },
     {
       "id": "T-28",
@@ -284,6 +286,24 @@
       "detail": "Recover 中间件（app/core/utils/error/Recover.go:24）调旧的 monitor.SysOperLog.AddSysOperLog 写 sys_oper_log，dump 里没这张表（mon_oper_log 才是），于是「一次业务报错」变成「报错 + 写日志再 panic + 一整屏 goroutine dump」，客户端拿不到 msg。这属 T-25 那条错误传递链的落库一半。做法：Recover 改调 modules/mon/oper 的写入口（列名对 opmod/reurl/reway/opuna/ermsg/sutag 等），并按 T-25 把 panic 从错误传递里拆出来。",
       "owner": "thooh",
       "scope": "modules"
+    },
+    {
+      "id": "T-35",
+      "title": "跨树 git 调用要不要 scrub 只钉住了 wt.git() 一个入口",
+      "status": "open",
+      "priority": "medium",
+      "detail": "T-26 把钩子环境串台修在 `wt.git()` 上（`.harness/scripts/gitenv.py` 的 `clean()`），selftest 用 WKT004e/WKT00n4 钉住这一个入口。但仓库里还有四处直接 `subprocess.run([\"git\",\"-C\",root,…])`：`scopes/common.py` 的 `git_clean`、`scopes/commit.py` 的 `head_message`、`scopes/state.py` 的 `has_commit`、`tracked.py` 的 ignore 清单。这四处现在都以**被检的那棵树**为 target（钩子环境指的也是它），所以不串台——问题在于「以后有人拿它去读别的树」时没有任何东西会响。做法：加一条静态断言（拟 GTE001，域 entry 或新建 git 域），扫 `.harness/scripts/**/*.py` 里出现 `\"git\", \"-C\"` 的调用，要求同一语句带 `env=gitenv.clean()`，或紧邻注释写明「目标就是本仓库」；先在 standards.md 对照表占一行。",
+      "owner": "thooh",
+      "scope": "entry"
+    },
+    {
+      "id": "T-36",
+      "title": "开一棵新树时，兄弟树看不到主树那份未提交的看板",
+      "status": "open",
+      "priority": "medium",
+      "detail": "实测（2026-10-30，T-26 树里 `make check-all`）：`WKT002 任务 T-27 还是 open，树 T-27 却已经开起来`。T-27 的 doing 是真写过的——写在主树工作区与 T-27 自己那份里，但主树那次写没提交，而 T-26 是从 `main` 的 HEAD 检出的。L-12 修的是「写没写到被读取的那一份拷贝」，这条是「那份拷贝的哪个版本」。今天的落法是人工在 T-26 树里把 T-27 对齐成 doing（见 lessons L-17）。做法二选一：①`make task-new` 结尾把主树看板的这条改动提交进 main（或主树看板脏着就拒绝开树），让开树这个动作对兄弟树可见；②把「哪棵树开着」从被版本控制的 board.json 挪走，改由 `git worktree list` 现算，看板只留计划与证据——②更干净但要重写 WKT002 的判据，别顺手做。",
+      "owner": "thooh",
+      "scope": "worktree"
     }
   ]
 }
