@@ -1,0 +1,11 @@
+# 命令：make check-all
+# UTC：2026-10-30T01:14:36Z
+# commit: 6017673e5831db7bb587666d8fcec2bb977e7724
+# 工作区：dirty
+# 首条未提交改动：?? .harness/deliverables/gates/20261030T011406Z-login-returns-real-token.md
+# 退出码契约：0 = 无 ERROR，1 = 有 ERROR，2 = 前置条件不满足
+
+WARN  stale        docs/swagger.json:1  STL004   swagger paths 为空：文档里没有一条接口，多半是注解缺失或没跑 swag init
+判不了（1）: stale:swagger 时效——这不是通过：先把它被依赖的那些 scope 一起跑
+0 ERROR, 1 WARN  (scopes: entry, commit, cmd, workflow, hooks, budget, modules, secret, stale, state, worktree, build, baseline; mode: normal)  无断言项见 AGENTS.md「硬规则」与 .harness/specs/standards.md
+exit=0
