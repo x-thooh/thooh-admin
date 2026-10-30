@@ -406,6 +406,7 @@ CREATE TABLE `sys_config`  (
 -- ----------------------------
 INSERT INTO `sys_config` VALUES (1, b'1', '2026-01-20 15:03:01.374000', b'1', 'sys.user.initPassword', '123456', '用户管理-账号初始密码', NULL, NULL, '2026-01-20 15:03:01.374000');
 INSERT INTO `sys_config` VALUES (2, b'1', '2026-01-20 15:03:01.374000', b'1', 'sys.account.registerUser', 'false', '账号自助-是否开启用户注册功能', NULL, NULL, '2026-01-20 15:03:01.374000');
+INSERT INTO `sys_config` VALUES (3, b'1', '2026-01-20 15:03:01.374000', b'1', 'sys.account.captchaEnabled', 'false', '账号自助-是否开启登录验证码', NULL, NULL, '2026-01-20 15:03:01.374000');
 
 -- ----------------------------
 -- Table structure for sys_corp
