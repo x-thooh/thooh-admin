@@ -7,6 +7,7 @@ import (
 	"github.com/x-thooh/thooh-admin/app/admin"
 	"github.com/x-thooh/thooh-admin/app/core/utils"
 	error2 "github.com/x-thooh/thooh-admin/app/core/utils/error"
+	"github.com/x-thooh/thooh-admin/app/core/utils/jwt"
 	"github.com/x-thooh/thooh-admin/app/html"
 	"github.com/x-thooh/thooh-admin/common/config"
 	_ "github.com/x-thooh/thooh-admin/docs"
@@ -36,6 +37,9 @@ func Init() *gin.Engine {
 	_ = r.SetTrustedProxies(nil)
 
 	r.Use(utils.Core())
+	// 全局鉴权门：默认要 token，登录前需要可达的面在 gate.go 里显式列出。
+	// 放在这里（而不是每个模块自己挂）是刻意的——新增模块不会自动变成免鉴权。
+	r.Use(jwt.Gate())
 	r.HTMLRender = createRender()
 
 	r.Static("/profile", "./static/images")

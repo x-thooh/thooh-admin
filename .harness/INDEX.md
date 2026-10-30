@@ -5,13 +5,15 @@
 
 ## 下一步（看板）
 
-- 看板更新于 2026-10-29，共 32 条：open 19、doing 2、blocked 1、done 10
+- 看板更新于 2026-10-30，共 36 条：open 23、doing 2、blocked 1、done 10
 - 高优先级未完成（逐条点名，不写概括句）：
   - `T-1` sys_config 的 DDL 与 GORM 模型列名不一致
   - `T-17` make task-done 半途失败后没有出路：只读模块缓存让 worktree remove 卡住
   - `T-20` app/admin/model 的列名以 thooh-go.sql 为准重写
   - `T-27` modules 的路由全挂在鉴权外
   - `T-28` getInfo 与 getRouters 仍走旧实现，真 token 过了中间件却在新模型外 panic
+  - `T-31` 用户列表响应体里带着 password（口令散列直接出站）
+  - `T-33` pub 下的接口不认当前用户：身份写死 admin、菜单不看角色
 - `T-9` main.go 里 r.Static() 挂载的 ./static/images 目录不存在：blocked，等 使用者回答：静态资源是否入库
 
 ## 检查面：已注册的域
