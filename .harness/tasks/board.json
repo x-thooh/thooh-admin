@@ -254,12 +254,13 @@
     {
       "id": "T-27",
       "title": "modules 的路由全挂在鉴权外",
-      "status": "doing",
+      "status": "done",
       "priority": "high",
-      "detail": "实测：grep -rn \"Use(\" --include=*.go modules/ 零命中，即 sys/user、sys/config、sys/role、tool/* 等所有 modules 端点都不需要 token 就能 CRUD；而 app/admin/router.go 只给 getInfo/getRouters 包了 jwt.JWTAuthMiddleware()。对私有化交付这是硬伤：客户内网里任何人可直接 POST /sys/user 建用户、改 /sys/config。做法：modules 各组统一挂鉴权，公开面（登录、验证码、pub 下的免鉴权项）显式列白名单，别靠「没挂」来放行。见 lessons L-16。 落地方式（2026-10-30 实测）：不逐个模块挂，改在 app/core/routers/routers.go 全局挂 jwt.Gate()——默认要 token，登录前需可达的面在 app/core/utils/jwt/gate.go 里显式列白名单；JWTAuthMiddleware 收敛成 Gate 的别名，app/admin/router.go 里按组挂的那处删掉。",
+      "detail": "实测：grep -rn \"Use(\" --include=*.go modules/ 零命中，即 sys/user、sys/config、sys/role、tool/* 等所有 modules 端点都不需要 token 就能 CRUD；而 app/admin/router.go 只给 getInfo/getRouters 包了 jwt.JWTAuthMiddleware()。对私有化交付这是硬伤：客户内网里任何人可直接 POST /sys/user 建用户、改 /sys/config。做法：modules 各组统一挂鉴权，公开面（登录、验证码、pub 下的免鉴权项）显式列白名单，别靠「没挂」来放行。见 lessons L-16。 落地方式（2026-10-30 实测）：不逐个模块挂，改在 app/core/routers/routers.go 全局挂 jwt.Gate()——默认要 token，登录前需可达的面在 app/core/utils/jwt/gate.go 里显式列白名单；JWTAuthMiddleware 收敛成 Gate 的别名，app/admin/router.go 里按组挂的那处删掉。 收尾（2026-10-30，合进 main 后在主树实测）：免 token 打 /sys/user、/pub/user、/sys/config、/mon/login、/tool/dict 全是 {\"code\":401,\"msg\":\"令牌不能为空\"}；/ 与 /index 仍可达；`Accept: text/html` 打 /dashboard 回落 SPA 页、打已注册的 /sys/user 仍是 401；登录后 /sys/user 带 token 返回 9 条真数据，假 token 401。启动日志里 Go 源码级的报错只剩 T-29 那条 sys_job。",
       "owner": "thooh",
       "scope": "modules",
-      "worktree": "T-27"
+      "worktree": "T-27",
+      "evidence": "commit:343dc62"
     },
     {
       "id": "T-28",
