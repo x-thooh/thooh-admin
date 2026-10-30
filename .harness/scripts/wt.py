@@ -23,10 +23,26 @@ HERE = Path(__file__).resolve().parent
 if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 
+import gitenv  # noqa: E402
+
 BOARD_REL = ".harness/tasks/board.json"
 
 
 def git(root, *argv):
+    # 目标路径是**别的树**，所以环境要摘干净：钩子导出的 GIT_DIR/GIT_INDEX_FILE 会让
+    # `git -C <别的树>` 读回调用方这棵树的 HEAD（看板 T-26、lessons L-15）
+    proc = subprocess.run(
+        ["git", "-C", str(root), *argv], check=False, capture_output=True, text=True, env=gitenv.clean()
+    )
+    return proc.returncode, (proc.stdout or "").strip(), (proc.stderr or "").strip()
+
+
+def git_raw(root, *argv):
+    """T-26 之前的读法：环境照抄，不 scrub。
+
+    只给反向样本用——它的作用是证明「正对照」不是空转：同一棵树、同一条命令，环境里带着
+    钩子传下来的 GIT_DIR 就会读回别人的 HEAD。生产代码不许调这个。
+    """
     proc = subprocess.run(["git", "-C", str(root), *argv], check=False, capture_output=True, text=True)
     return proc.returncode, (proc.stdout or "").strip(), (proc.stderr or "").strip()
 
