@@ -20,6 +20,7 @@ if str(SCRIPTS) not in sys.path:
     sys.path.insert(0, str(SCRIPTS))
 
 from registry import SCOPES as REGISTERED  # noqa: E402
+import gitenv  # noqa: E402
 
 # 清单从 registry 取，不在语料里再抄一份：抄的那份在别人加一个 scope 的当场就过期。
 # 上一版把 6 个名字写死在 reverse.py 里，后来加了 hooks 与 budget 两个域，selftest 一声没吭。
