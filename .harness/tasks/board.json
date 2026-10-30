@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-29",
+  "updated": "2026-10-30",
   "note": "还没做什么。done 必须带可核验证据（commit:<sha> 或 path:<存在的文件>），否则 STATE005/STATE006 报。开了任务树的条目要填 worktree 与 doing，否则 WKT002 报「先建树后记账」。",
   "tasks": [
     {
@@ -256,7 +256,7 @@
       "title": "modules 的路由全挂在鉴权外",
       "status": "doing",
       "priority": "high",
-      "detail": "实测：grep -rn \"Use(\" --include=*.go modules/ 零命中，即 sys/user、sys/config、sys/role、tool/* 等所有 modules 端点都不需要 token 就能 CRUD；而 app/admin/router.go 只给 getInfo/getRouters 包了 jwt.JWTAuthMiddleware()。对私有化交付这是硬伤：客户内网里任何人可直接 POST /sys/user 建用户、改 /sys/config。做法：modules 各组统一挂鉴权，公开面（登录、验证码、pub 下的免鉴权项）显式列白名单，别靠「没挂」来放行。见 lessons L-16。",
+      "detail": "实测：grep -rn \"Use(\" --include=*.go modules/ 零命中，即 sys/user、sys/config、sys/role、tool/* 等所有 modules 端点都不需要 token 就能 CRUD；而 app/admin/router.go 只给 getInfo/getRouters 包了 jwt.JWTAuthMiddleware()。对私有化交付这是硬伤：客户内网里任何人可直接 POST /sys/user 建用户、改 /sys/config。做法：modules 各组统一挂鉴权，公开面（登录、验证码、pub 下的免鉴权项）显式列白名单，别靠「没挂」来放行。见 lessons L-16。 落地方式（2026-10-30 实测）：不逐个模块挂，改在 app/core/routers/routers.go 全局挂 jwt.Gate()——默认要 token，登录前需可达的面在 app/core/utils/jwt/gate.go 里显式列白名单；JWTAuthMiddleware 收敛成 Gate 的别名，app/admin/router.go 里按组挂的那处删掉。",
       "owner": "thooh",
       "scope": "modules",
       "worktree": "T-27"
@@ -305,6 +305,42 @@
       "detail": "实测（2026-10-30，T-26 树里 `make check-all`）：`WKT002 任务 T-27 还是 open，树 T-27 却已经开起来`。T-27 的 doing 是真写过的——写在主树工作区与 T-27 自己那份里，但主树那次写没提交，而 T-26 是从 `main` 的 HEAD 检出的。L-12 修的是「写没写到被读取的那一份拷贝」，这条是「那份拷贝的哪个版本」。今天的落法是人工在 T-26 树里把 T-27 对齐成 doing（见 lessons L-17）。做法二选一：①`make task-new` 结尾把主树看板的这条改动提交进 main（或主树看板脏着就拒绝开树），让开树这个动作对兄弟树可见；②把「哪棵树开着」从被版本控制的 board.json 挪走，改由 `git worktree list` 现算，看板只留计划与证据——②更干净但要重写 WKT002 的判据，别顺手做。",
       "owner": "thooh",
       "scope": "worktree"
+    },
+    {
+      "id": "T-31",
+      "title": "用户列表响应体里带着 password（口令散列直接出站）",
+      "status": "open",
+      "priority": "high",
+      "detail": "实测（2026-10-30，带 token 打 /sys/user?pageNum=1&pageSize=2）：返回 rows[0] 含 \"password\":\"$2a$10$...\"，即 bcrypt 散列原样发给前端。modules/sys/user 的 model 没把 password 从 JSON 输出里摘掉，列表与详情都会带。对私有化交付这是可离线破解的素材，且不因「在内网」而变轻。做法：VO 层不带 password（modules/sys/user 的返回改走显式 vo，或 model 里 password 标 json:\"-\"），改完实测一次列表响应体里搜不到 $2。",
+      "owner": "thooh",
+      "scope": "modules"
+    },
+    {
+      "id": "T-32",
+      "title": "全局鉴权门没有断言守着，删掉 r.Use(jwt.Gate()) 编译照过",
+      "status": "open",
+      "priority": "medium",
+      "detail": "T-27 的修法是把鉴权从「每个模块自己挂」改成「routers.go 里全局挂一次」。这个改动的价值恰恰在于它脆弱：以后谁把这行删了或挪到 NoRoute 之后，go build 不报错、make check 不报错，整套 modules CRUD 静默回到免鉴权——就是 T-27 的成因重演。做法：在 .harness/scripts/registry.py 注册一条断言（拟 GTE001，域 modules），断言 app/core/routers/routers.go 里存在 r.Use(jwt.Gate()) 且在 html.Routers/admin.Routers 之前；先在 .harness/specs/standards.md 对照表占一行，再补 selftest 的违规样本与正对照（缺样本按规则 11 记 not_applicable，不许当通过）。 顺带一条同源欠账（本轮实测抓到）：门的放行判据里凡是只看请求头的，都能被伪造该头的脚本绕过——规矩写进 lessons L-18，验收要拿被保护端点伪造成公开请求的形状打一次。",
+      "owner": "thooh",
+      "scope": "modules"
+    },
+    {
+      "id": "T-33",
+      "title": "pub 下的接口不认当前用户：身份写死 admin、菜单不看角色",
+      "status": "open",
+      "priority": "high",
+      "detail": "实测（读代码 + 2026-10-30 容器）：modules/pub/api.go:40 GetUser 直接 user.Useid=\"u1\" / Usena=\"admin\" / Orgid=\"o1000\" 写死，谁登录拿到的都是 admin 的身份；GetMenus（同文件 60 行）SQL 是 select ... from sys_menu where m.avtag=1，没有按角色/机构过滤，全量菜单出站；GetActor 同理无过滤。T-27 的全局门把 /pub/* 纳入了要 token 的范围（免登录打是 401），但「有 token」不等于「按 token 里那个人来答」——私有化交付里这等于任何账号登录后都是管理员界面。做法：GetUser/GetMenus/GetActor 从 ctx 取 userId（Gate 已放进上下文），菜单走 sys_rece/sys_role_actor 关联过滤；改完实测两个不同角色的账号，拿到的菜单集合必须不同。",
+      "owner": "thooh",
+      "scope": "modules"
+    },
+    {
+      "id": "T-34",
+      "title": "鉴权白名单里 /auth/* 三项没有对应路由，确认移动端后再裁",
+      "status": "open",
+      "priority": "low",
+      "detail": "T-27 建的门（app/core/utils/jwt/gate.go:21,35）把 /auth/login、/auth/code、/auth/logout 列为免鉴权，实测 grep -rn '\"/auth' app/ modules/ 只有 gate.go 自己命中，web/ 里也没有调用——是 RuoYi 血统的抄件。默认拒绝的门里留着死条目本身不构成漏洞（没有注册路由，请求只会走 NoRoute），但它让「白名单=公开面」这张表说谎。故意没在本轮删：移动端接口约定不在仓库里，删错了是装好的 App 白屏。做法：跟移动端确认调用面（或看网关访问日志里有没有 /auth/* 命中），没有就删这三项并重跑登录-刷新矩阵。",
+      "owner": "thooh",
+      "scope": "modules"
     }
   ]
 }
