@@ -9,7 +9,6 @@ import (
 	"github.com/x-thooh/thooh-admin/app/admin/router/monitor"
 	"github.com/x-thooh/thooh-admin/app/admin/router/system"
 	"github.com/x-thooh/thooh-admin/app/admin/router/tools"
-	"github.com/x-thooh/thooh-admin/app/core/utils/jwt"
 	"github.com/x-thooh/thooh-admin/common/utils"
 	"github.com/x-thooh/thooh-admin/modules/auth"
 	lolog "github.com/x-thooh/thooh-admin/modules/mon/login"
@@ -47,16 +46,9 @@ func Routers(e *gin.Engine) {
 	e.GET("/captchaImage", auth.Code)
 	e.POST("/login", auth.Login)
 	e.POST("/logout", auth.Logout)
-	v1 := e.Group("/")
-	{
-		auth := v1.Group("")
-		auth.Use(jwt.JWTAuthMiddleware())
-		{
-			auth.GET("getInfo", handlerFunc, api.GetInfoHandler)
-			/*获取用户授权菜单*/
-			auth.GET("getRouters", handlerFunc, api.GetRoutersHandler)
-		}
-	}
+	// getInfo / getRouters 的鉴权交给全局门（app/core/utils/jwt/gate.go），不再按组挂一次。
+	e.GET("getInfo", handlerFunc, api.GetInfoHandler)
+	e.GET("getRouters", handlerFunc, api.GetRoutersHandler)
 	/*system*/
 	system.InitProfile(e)
 	system.InitDict(e)
