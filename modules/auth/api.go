@@ -91,6 +91,58 @@ func Login(c *gin.Context) {
 	})
 }
 
+// GetInfo 的响应是平铺的 user / roles / permissions：web/admin 的 GetInfo action 与
+// web/mobile 的 Info store 都直接读这三个顶层键，包一层 data 两边一起白屏。
+// user 里逐个字段点名取，不把手上的 SysUser 整个 Marshal 出去——口令列就在结构体里（T-31）。
+func GetInfo(c *gin.Context) {
+	userId := c.GetString("userId")
+	u, err := findUserById(userId)
+	if err != nil {
+		c.JSON(http.StatusOK, R.ReturnFailMsg(err.Error()))
+		return
+	}
+	roles, err := roleNames(userId)
+	if err != nil {
+		c.JSON(http.StatusOK, R.ReturnFailMsg(err.Error()))
+		return
+	}
+	permissions, err := permissionCodes(userId)
+	if err != nil {
+		c.JSON(http.StatusOK, R.ReturnFailMsg(err.Error()))
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"msg":  "获取成功",
+		"code": http.StatusOK,
+		"user": UserVo{
+			UserId:      u.Id,
+			UserName:    u.Username,
+			NickName:    u.Name,
+			Phonenumber: u.Monum,
+			Email:       u.Email,
+			Avatar:      u.Avatar,
+			Sex:         u.Gender,
+			CreateTime:  u.Crtim,
+			Dept:        findOrg(u.Orgid),
+		},
+		"roles":       roles,
+		"permissions": permissions,
+	})
+}
+
+func GetRouters(c *gin.Context) {
+	granted, err := grantedMenus(c.GetString("userId"))
+	if err != nil {
+		c.JSON(http.StatusOK, R.ReturnFailMsg(err.Error()))
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"msg":  "获取成功",
+		"code": http.StatusOK,
+		"data": buildRouters(granted),
+	})
+}
+
 func Logout(c *gin.Context) {
 	jwtUuid, err := jwt.GetJwtUuid(c)
 	if err == nil && len(jwtUuid) > 0 {

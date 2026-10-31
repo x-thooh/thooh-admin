@@ -1,8 +1,6 @@
 package admin
 
 import (
-	"time"
-
 	singlec "github.com/x-thooh/thooh-admin/admin/demo/single/cate"
 	single "github.com/x-thooh/thooh-admin/admin/demo/single/main"
 	api "github.com/x-thooh/thooh-admin/app/admin/api/system"
@@ -30,15 +28,10 @@ import (
 	"github.com/x-thooh/thooh-admin/modules/tool/num"
 	"github.com/x-thooh/thooh-admin/pkg/mysql"
 
-	cache "github.com/chenyahui/gin-cache"
-	"github.com/chenyahui/gin-cache/persist"
 	"github.com/gin-gonic/gin"
 )
 
 func Routers(e *gin.Engine) {
-
-	memoryStore := persist.NewMemoryStore(1 * time.Minute)
-	handlerFunc := cache.CacheByRequestURI(memoryStore, 2*time.Second)
 
 	e.GET("/index", api.IndexHandler)
 	// 登录三件套改挂 modules（dump 口径：sys_user.id 是 varchar(36)）。
@@ -47,8 +40,10 @@ func Routers(e *gin.Engine) {
 	e.POST("/login", auth.Login)
 	e.POST("/logout", auth.Logout)
 	// getInfo / getRouters 的鉴权交给全局门（app/core/utils/jwt/gate.go），不再按组挂一次。
-	e.GET("getInfo", handlerFunc, api.GetInfoHandler)
-	e.GET("getRouters", handlerFunc, api.GetRoutersHandler)
+	// 这两条原来还套了一层按 URI 缓存 2 秒的中间件：响应是「这个人是谁、能进哪些页」，
+	// 键里却不分用户，同窗口内第二个登录的人会拿到第一个人的身份。改挂 modules 时不带上它。
+	e.GET("/getInfo", auth.GetInfo)
+	e.GET("/getRouters", auth.GetRouters)
 	/*system*/
 	system.InitProfile(e)
 	system.InitDict(e)
