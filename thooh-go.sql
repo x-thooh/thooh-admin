@@ -812,6 +812,10 @@ CREATE TABLE `sys_role_actor`  (
 -- ----------------------------
 -- Records of sys_role_actor
 -- ----------------------------
+-- u1 是内置超管（sys_user.notes 写着「管理员不给修改」），原来这个角色一行都没绑：
+-- token 拿得到，但 getInfo 回来 roles/permissions 全空、getRouters 一棵树也没有。
+-- 权限从数据走，所以补的是这一行，而不是在 Go 里写死「id 等于 u1 就给全部」。
+INSERT INTO `sys_role_actor` VALUES (1, 'u1');
 INSERT INTO `sys_role_actor` VALUES (1, 'u2');
 INSERT INTO `sys_role_actor` VALUES (1, 'u3');
 INSERT INTO `sys_role_actor` VALUES (1, 'u4');
