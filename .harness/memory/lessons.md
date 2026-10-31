@@ -284,3 +284,22 @@
   本轮实测留档：`/sys/user` 带 `Accept: text/html` 仍是 401，`/dashboard` 带它仍回落页面。
 - 同族的一条留给下一轮：`/pub/user`、`/pub/menus` 现在要 token 了，但 handler 里身份写死 u1/admin、
   菜单不带角色过滤（登记成 T-33）。「谁能进来」和「进来看什么」是两道门，装上第一道容易让人以为装完了。
+
+## L-19 接口 200 只证明后端认了，不证明前端起得来：契约验收的终点是页面，不是响应体
+
+- 现象：T-28 把 getInfo/getRouters 改挂到 dump 口径后，curl 矩阵全对——u1 回 57 条权限、
+  树 4 棵 34 个子页、无 token 401、换 u6 只剩 /bpm。浏览器真登录一次才看见第二类账：
+  Vuex 里 `user.id=u1`、侧边栏四条都出来了（这些确实过了），但点进 `/admin/sys/user` 控制台报
+  `Cannot find module './sys/user/index'`；再 grep 前端产物，`v-hasPermi` 要的是
+  `system:user:edit`，`sys_api.perm` 给的是 `sys:user:edit`——57 条权限一条也匹配不上，按钮全隐。
+  两处都是数据/产物对不上，接口侧一个错都不报。
+- 根因：契约有两端。curl 只能证明「我发的形状前端读得了」这一半（顶层 user/roles/permissions 读到了），
+  证明不了「前端拿着这份数据下一步要做什么」——它拿 `comp` 去查自己的模块表，拿 `permissions` 去比硬编码
+  在 bundle 里的字符串。这两个查找目标都不在我改的代码里，所以在我的验收口径外面。
+- 断言：**无机器断言**。`scope=modules` 判目录形状，`scope=stale` 判 docs/web 跟着源码走，
+  没有一条断言能把「`sys_menu.comp` 里的值在 web/admin 产物的模块表里存在」钉住——产物是压缩后的
+  单行 js，判得了但要写解析器。人判的规矩：改任何「前端要读」的接口，验收里必须有一条**浏览器实测**
+  （真登录、真点进去、读一次 store 落值），并把这次这类账登记成任务
+  （本轮留 T-37 模块名、T-38 权限字符、T-39 角色覆盖）。只给 curl 表不说页面状态的交付，算没说完成。
+- 可复用的正面写法：把「前端读什么」先 grep 出来再决定返回什么形状（本轮 `dept` 就因此不包装成
+  `deptId/deptName`——产物里 `deptName` 出现 0 次，没有读取点就不发明键名）。
