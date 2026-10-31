@@ -265,12 +265,13 @@
     {
       "id": "T-28",
       "title": "getInfo 与 getRouters 仍走旧实现，真 token 过了中间件却在新模型外 panic",
-      "status": "doing",
+      "status": "done",
       "priority": "high",
       "detail": "做完（2026-10-30，门记录见 evidence）：modules/auth 里加 GetInfo/GetRouters，入口从 app/admin/router.go 的旧 handler 改挂过来。形状不是照旧实现抄字段，是先读产物里的读取点：web/admin 的 GetInfo 读顶层 user.userName/user.userId/user.nickName/user.avatar 与 roles/permissions，GenerateRoutes 读 data 当路由数组，mobile 个人中心读 user.{nickName,sex,email,phonenumber}。口径纠正一条：这条链不走 sys_rece（那是最近访问记录），角色绑定在 sys_role_actor(rid,aid)，aid 就是用户 id；权限 sys_role_api→sys_api.perm，菜单 sys_role_menu。超管不写在 Go 里：u1 在 sys_role_actor 一行都没有（旧实现靠 userId==1 特判），补的是 dump 那一行 INSERT (1,'u1')，现库与「dump 当空库重建」（41 张表、exit 0）两边都验。实测：u1 → roles=[管理员] permissions=57 树 4 棵（sys11/mon7/tool7/bpm9）；u6 → roles=[普通用户] perms=3 只剩 /bpm，证明按人给不是写死；无 token 401；浏览器真登录一次，Vuex 里 user.id=u1 落到了（旧实现这个键压根没有）。顺带摘掉这两条上按 URI 缓存 2 秒的中间件：键里不分用户，同窗口第二个人会拿到第一个人的身份。剩的三笔另立 T-37/T-38/T-39，旧 handler 留着等 T-20e 按目录退役。",
       "owner": "thooh",
       "scope": "modules",
-      "worktree": "T-28"
+      "worktree": "T-28",
+      "evidence": "path:.harness/deliverables/gates/20261030T020814Z-getinfo-getrouters-on-modules.md"
     },
     {
       "id": "T-29",
