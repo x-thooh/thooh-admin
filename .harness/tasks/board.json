@@ -243,11 +243,12 @@
     {
       "id": "T-24",
       "title": "app/admin/router.go 启动即 AutoMigrate：每次 boot 都可能改客户库的表结构",
-      "status": "open",
+      "status": "doing",
       "priority": "medium",
       "detail": "现场：容器一起来就在跑 ALTER TABLE sys_group / sys_group_cate / sys_group_actor（门记录 20261029T015228Z 的日志）。调用点 app/admin/router.go:118，藏在路由注册里，失败只 return 不打日志——私有化交付里这意味着「升级或回滚时客户库被应用悄悄改了形状，且没人写口径」。两条出路（要人判）：① 挪成显式动作（make migrate 或首次启动开关），路由注册不再改表；② 保持自动迁移，但在 README 部署段与 docs 里写清它会改哪些表、升级前要备份什么，并让失败可见。验收：任一条做完，且 /login 那套容器上实测一次。",
       "owner": "thooh",
-      "scope": ""
+      "scope": "",
+      "worktree": "T-24"
     },
     {
       "id": "T-25",
