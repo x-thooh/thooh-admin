@@ -328,3 +328,11 @@
   `config.Database.ConnMaxLifetime` 被代码写死的 `time.Hour` 忽略，本批不动，别当成已修。
 - 实测与反向验证写在门记录 20261029T013600Z。
 - written_by: session 2026-10-29 / version: 1 / supersedes: — / status: active
+
+## D-23 GOSUMDB 改回 sum.golang.org，GOPROXY 不动
+
+- 决策：`mise.toml` 的 `GOSUMDB = "off"` 改为 `"sum.golang.org"`；Makefile 与 mise 里的 `GOPROXY=https://goproxy.cn,direct` 保持不变。
+- 理由：关掉校验和库 = 首次下载的依赖没人背书，供应链完整性只剩 go.sum 的「首次信任」。goproxy.cn 会代理 sum.golang.org 的校验查询，国内网络下保持可用。
+- 被否：只在本文件说明「为什么必须关」——没有已知必须关的理由，写理由等于给风险盖章。
+- 边界：完全离线/内网环境需另设公司代理或 `GONOSUMDB` 仅限私有模块，不要再整体关闭。
+- written_by: agent T-4 / version: 1 / supersedes: — / status: active
