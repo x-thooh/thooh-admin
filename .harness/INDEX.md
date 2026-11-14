@@ -5,7 +5,7 @@
 
 ## 下一步（看板）
 
-- 看板更新于 2026-10-30，共 39 条：open 8、doing 2、blocked 1、done 28
+- 看板更新于 2026-10-30，共 39 条：open 7、doing 3、blocked 1、done 28
 - 高优先级未完成（逐条点名，不写概括句）：
   - `T-1` sys_config 的 DDL 与 GORM 模型列名不一致
   - `T-20` app/admin/model 的列名以 thooh-go.sql 为准重写
