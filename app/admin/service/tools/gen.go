@@ -268,70 +268,11 @@ func DirExistAndDel(autoPath string) error {
 	return nil
 }
 
+// SelectGenTableByName 按表名查询生成配置（未实现）。
+// tool_code_table/tool_code_field 为短列名结构，缺少 java_field、column_type、is_pk、
+// class_name 等模板所需字段，无法映射 RuoYi 的 gen_table 口径，故显式拒绝而不是运行时 1146。
 func SelectGenTableByName(tableName string) tools.GenTableVO {
-	const sql = "SELECT t.table_id as TableId, t.table_name, t.table_comment, t.sub_table_name, t.sub_table_fk_name, t.class_name, t.tpl_category, t.package_name, t.module_name, t.business_name," +
-		" t.function_name, t.function_author, t.gen_type, t.gen_path, t.options, t.remark, c.column_id, c.column_name, c.column_comment, c.column_type, c.java_type, c.java_field, c.is_pk, " +
-		" c.is_increment, c.is_required, c.is_insert, c.is_edit, c.is_list, c.is_query, c.query_type, c.html_type, c.dict_type, c.sort " +
-		" FROM gen_table t " +
-		" LEFT JOIN gen_table_column c ON t.table_id = c.table_id" +
-		" where t.table_name = ? order by c.sort"
-	var rows []tools.GenTableColumnVO
-
-	err := mysql.MysqlDb().Model(&tools.GenTableColumnVO{}).Raw(sql, tableName).Scan(&rows).Error
-	if err != nil {
-		panic(R.ReturnFailMsg(err.Error()))
-	}
-	var tab tools.GenTableVO
-
-	if rows != nil {
-		body := rows[0]
-		tab.Table_Name = body.Table_Name
-		tab.TableComment = body.TableComment
-		tab.SubTableName = body.SubTableName
-		tab.SubTableFkName = body.SubTableFkName
-		tab.ClassName = body.ClassName
-		tab.TplCategory = body.TplCategory
-		tab.PackageName = body.PackageName
-		tab.ModuleName = body.ModuleName
-		tab.BusinessName = body.BusinessName
-		tab.FunctionName = body.FunctionName
-		tab.FunctionAuthor = body.FunctionAuthor
-		tab.GenType = body.GenType
-		tab.GenPath = body.GenPath
-		tab.Options = body.Options
-	}
-
-	list := make([]tools.GenTableColumnVO, 0, len(rows))
-
-	for _, row := range rows {
-		row.FieldName = utils2.FirstUpper(row.JavaField)
-		javaType := row.JavaType
-		if javaType == "String" {
-			row.JavaType = "string"
-		} else if javaType == "Long" {
-			row.JavaType = "int64"
-		} else if javaType == "Date" {
-			row.JavaType = "utils.JsonTime"
-		} else if javaType == "int" {
-			row.JavaType = "int"
-		} else if javaType == "string" {
-			row.JavaType = "string"
-		} else if javaType == "int64" {
-			row.JavaType = "int64"
-		} else if javaType == "utils.JsonTime" {
-			row.JavaType = "utils.JsonTime"
-		} else if javaType == "time.Time" {
-			row.JavaType = "time.Time"
-		} else if javaType == "float64" {
-			row.JavaType = "float64"
-		} else {
-			row.JavaType = "string"
-		}
-		list = append(list, row)
-	}
-
-	tab.Fields = list
-	return tab
+	panic(R.ReturnFailMsg("代码生成器未实现：tool_code_* 表缺少模板所需字段"))
 }
 
 func SelectDbTableListByNames(tableName []string) []tools.GenTable {
