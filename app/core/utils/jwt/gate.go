@@ -18,7 +18,7 @@ var publicExact = []string{"/", "/old", "/protocol.html", "/index", "/login", "/
 
 // publicPrefix 是静态资源与免鉴权前缀。边界靠末尾的 "/" 或整段匹配把
 // /staticx 这类误放行挡住。
-var publicPrefix = []string{"/admin/", "/static/", "/profile/", "/favicon.ico", "/auth/login", "/auth/code", "/swagger/"}
+var publicPrefix = []string{"/admin/", "/static/", "/profile/", "/favicon.ico", "/swagger/"}
 
 func isPublic(path string) bool {
 	for _, p := range publicExact {
@@ -32,7 +32,7 @@ func isPublic(path string) bool {
 		}
 	}
 	// /admin、/static 这两个挂载点自身（不带斜杠）也要放行，否则前端拿不到入口页
-	return path == "/admin" || path == "/static" || path == "/profile" || path == "/auth/logout"
+	return path == "/admin" || path == "/static" || path == "/profile"
 }
 
 // isPageNavigation 认的是「浏览器地址栏刷新」这一类请求：GET + Accept: text/html +
