@@ -27,6 +27,7 @@ import ageing  # noqa: E402
 import gitenv  # noqa: E402
 
 BOARD_REL = ".harness/tasks/board.json"
+INDEX_REL = ".harness/INDEX.md"
 
 
 def git(root, *argv):
@@ -191,7 +192,15 @@ def task_new(root, task_id):
     # 于是 WKT002 拦住这棵树的第一次提交（现场：2026-10-29 开 T-19）。
     mark_doing(target, task_id)
     # 主树这份 doing 若不提交，之后从 main 开的兄弟树检出时看不到它，门禁报 WKT002（T-36）
-    code, _out, err = git(root, "commit", "-m", f"开树 {task_id}：看板划 doing", "--", BOARD_REL)
+    # 提交前先重建 INDEX：board.json 变了 INDEX 就过期，pre-commit 的 STATE007 会拦
+    #（现场：2026-11-14 连开 7 棵树全失败）。
+    proc = subprocess.run(
+        [sys.executable, str(HERE / "discovery.py"), "--root", str(root)],
+        check=False, capture_output=True, text=True, env=gitenv.clean(),
+    )
+    if proc.returncode != 0:
+        return 1, f"树已开（{target}），但主树 INDEX 重建失败：{(proc.stderr or proc.stdout).strip()}"
+    code, _out, err = git(root, "commit", "-m", f"开树 {task_id}：看板划 doing", "--", BOARD_REL, INDEX_REL)
     if code != 0:
         return 1, f"树已开（{target}），但主树看板提交失败：{err}"
     note = f"两份看板（主树与树内）里 {task_id}：{was} → doing，worktree 填 {task_id}"
