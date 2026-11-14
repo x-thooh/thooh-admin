@@ -421,22 +421,24 @@
     {
       "id": "T-40",
       "title": "app/admin/model/system 旧表名旧列名全面对账到 dump 口径",
-      "status": "doing",
+      "status": "done",
       "priority": "high",
       "owner": "thooh",
       "scope": "modules",
       "detail": "上一轮 T-20 只改了 gorm tag，原生/联表 SQL 里的旧表名没动。对账基线（dump 为准）：sys_user_role→sys_role_actor(rid/aid)（sysRoles.go 联表多处、sysMenu.go:74/105/340、sysUserRole.go TableName）、sys_user_post→sys_post_actor（sysPosts.go:35/103/135、sysUserPost.go TableName）、sys_dept→sys_org（sysRoles.go、sysUserRole.go:35）、旧列名 user_id/role_id/dept_id/post_id/status→dump 短列名（id/rid/aid/porid/avtag 等）。sys_role_dept 在 dump 无对应表：sysRoleDept.go 整个文件与 sysRoles.go:263 调用、sysRoles.go:618 联表一并摘掉（数据权限功能删除，用户已拍板）。",
-      "worktree": "T-40"
+      "worktree": "T-40",
+      "evidence": "commit:dd1de69"
     },
     {
       "id": "T-41",
       "title": "gen.go 原生 SQL 对账到 tool_code 口径",
-      "status": "doing",
+      "status": "done",
       "priority": "medium",
       "owner": "thooh",
       "scope": "modules",
       "detail": "app/admin/service/tools/gen.go 的原生 SQL 引用 gen_table/gen_table_column（RuoYi 长列名 table_id/table_name/table_comment/class_name/column_id 等），dump 是 tool_code_table/tool_code_field（短列名 id/name/notes/ornum/pmeid 等）。做法：逐字段对账 tool_code 表结构；对不上的字段若 tool_code 确实没有就标注未实现或摘掉代码生成器功能，并记 decisions；不许瞎猜映射。",
-      "worktree": "T-41"
+      "worktree": "T-41",
+      "evidence": "commit:39dc2be"
     }
   ]
 }
