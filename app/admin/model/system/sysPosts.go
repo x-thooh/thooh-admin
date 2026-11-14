@@ -32,9 +32,9 @@ func SelectUserPostGroup(userName string) string {
 	var result = ""
 	mysql.MysqlDb().Raw("select p.id as post_id, p.name as post_name, p.label as post_code "+
 		"from sys_post p "+
-		"left join sys_user_post up on up.post_id = p.id "+
-		"left join sys_user u on u.user_id = up.user_id "+
-		"where u.user_name = ?", userName).Scan(&posts)
+		"left join sys_post_actor up on up.pid = p.id "+
+		"left join sys_user u on u.id = up.aid "+
+		"where u.username = ?", userName).Scan(&posts)
 	if posts != nil {
 		for i := range posts {
 			sysPost := posts[i]
@@ -100,9 +100,9 @@ func SelectPostListByUserId(userId int) []int {
 	var result []int
 	mysql.MysqlDb().Raw("select p.id "+
 		"from sys_post p "+
-		"left join sys_user_post up on up.post_id = p.id "+
-		"left join sys_user u on u.user_id = up.user_id "+
-		"where u.user_id = ? ", userId).Find(&result)
+		"left join sys_post_actor up on up.pid = p.id "+
+		"left join sys_user u on u.id = up.aid "+
+		"where u.id = ? ", userId).Find(&result)
 	return result
 }
 
@@ -132,7 +132,7 @@ func AddPostListByUser(postIds []int, userId int) {
 
 // 删除关联用户
 func DeletePostByUser(userIds []int) {
-	err := mysql.MysqlDb().Exec("delete from sys_user_post where user_id in (?) ", userIds).Error
+	err := mysql.MysqlDb().Exec("delete from sys_post_actor where aid in (?) ", userIds).Error
 	if err != nil {
 		panic(R.ReturnFailMsg("删除部门关联用户失败"))
 	}

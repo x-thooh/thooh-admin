@@ -7,13 +7,13 @@ import (
 
 // SysUserRole model：数据库字段
 type SysUserRole struct {
-	UserId int `json:"userId" gorm:"column:user_id"` //表示主键
-	RoleId int `json:"roleId" gorm:"column:role_id"`
+	UserId int `json:"userId" gorm:"column:aid"` //表示主键
+	RoleId int `json:"roleId" gorm:"column:rid"`
 }
 
 // TableName 指定数据库表名称
 func (SysUserRole) TableName() string {
-	return "sys_user_role"
+	return "sys_role_actor"
 }
 
 type SysUserRolesParam struct {
@@ -32,13 +32,13 @@ func SelectSysUserRoleList(params tools.SearchTableDataParam, isPage bool) tools
 	var rows []SysUserRole
 
 	var db = mysql.MysqlDb().Model(&SysUserRole{}).
-		Joins("left join sys_dept d on d.dept_id = dept_id").
-		Select("*, d.dept_name, d.leader")
+		Joins("left join sys_org d on d.id = id").
+		Select("*, d.name")
 
-	db.Where("del_flag = '0'")
+	db.Where("1 = 1")
 	var userId = sysUserRole.UserId
 	if userId != 0 {
-		db.Where("user_id = ?", userId)
+		db.Where("aid = ?", userId)
 	}
 	if err := db.Count(&total).Error; err != nil {
 		return tools.Fail()
