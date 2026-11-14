@@ -28,6 +28,7 @@ def ignored(root):
     条目以 `/` 结尾，这里去掉，交给 `is_ignored` 按前缀逐段比对。
     """
     try:
+        # 目标就是本仓库：root 即被检的那棵树
         p = subprocess.run(["git", "-C", str(root), *GIT_ARGS],
                            capture_output=True, text=True, check=False)
     except (OSError, subprocess.SubprocessError) as exc:

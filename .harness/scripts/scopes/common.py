@@ -396,7 +396,7 @@ def git_clean(root, targets=()):
     """
 
     def git(*args):
-        return subprocess.run(["git", "-C", str(root), *args], check=False, capture_output=True, text=True)
+        return subprocess.run(["git", "-C", str(root), *args], check=False, capture_output=True, text=True)  # 目标就是本仓库
 
     inside = git("rev-parse", "--is-inside-work-tree")
     if inside.returncode != 0 or inside.stdout.strip() != "true":

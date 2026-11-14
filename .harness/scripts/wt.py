@@ -43,6 +43,7 @@ def git_raw(root, *argv):
     只给反向样本用——它的作用是证明「正对照」不是空转：同一棵树、同一条命令，环境里带着
     钩子传下来的 GIT_DIR 就会读回别人的 HEAD。生产代码不许调这个。
     """
+    # 目标就是本仓库：root 即被检的那棵树
     proc = subprocess.run(["git", "-C", str(root), *argv], check=False, capture_output=True, text=True)
     return proc.returncode, (proc.stdout or "").strip(), (proc.stderr or "").strip()
 

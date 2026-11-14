@@ -5,7 +5,7 @@
 
 ## 下一步（看板）
 
-- 看板更新于 2026-10-30，共 39 条：open 16、doing 1、blocked 1、done 21
+- 看板更新于 2026-10-30，共 39 条：open 9、doing 8、blocked 1、done 21
 - 高优先级未完成（逐条点名，不写概括句）：
   - `T-1` sys_config 的 DDL 与 GORM 模型列名不一致
   - `T-20` app/admin/model 的列名以 thooh-go.sql 为准重写
@@ -16,6 +16,7 @@
 | 域 | 管什么（PLAN） | code |
 | --- | --- | --- |
 | `entry` | 入口文件（根与各目录 AGENTS.md）自己站得住：头部 scope/parent、目录地图与磁盘双向比对、每条规则指向真存在的 code、派生索引不过期 | ENT001, ENT002, ENT003, ENT004, ENT005, ENT006, ENT007, ENT008 |
+| `git` | 直接 `git -C` 的调用要么摘掉钩子环境（env=gitenv.clean()），要么注明目标就是本仓库 | GTE001 |
 | `commit` | 一次提交一件事：标题是动宾短语、不并列、不超长；正文出现「顺带/另外/同时」就是该拆的信号 | MSG001, MSG002, MSG003, MSG004, MSG005 |
 | `cmd` | 入口的命令表、Makefile 的 target、磁盘上的脚本三方一一对应：表里没有的不算命令，Makefile 里没有的不算文档 | CMD001, CMD002, CMD003, CMD004, CMD005 |
 | `workflow` | 一次修改的五段循环有唯一事实源（flow.json：阶段、门径、转移），可安装流程的声明与磁盘双向对账 | FLOW001, FLOW002, FLOW003, FLOW004, FLOW005, FLOW006, FLOW007, FLOW008, FLOW009, FLOW010 |

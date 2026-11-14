@@ -53,10 +53,12 @@ def parse_day(value):
 
 def has_commit(root, sha):
     """True/False = 有没有这个提交对象；None = 判不了（这里没有 git 可问）。"""
+    # 目标就是本仓库：root 即被检的那棵树
     inside = subprocess.run(["git", "-C", str(root), "rev-parse", "--git-dir"],
                             check=False, capture_output=True, text=True)
     if inside.returncode != 0:
         return None
+    # 目标就是本仓库：root 即被检的那棵树
     probe = subprocess.run(["git", "-C", str(root), "cat-file", "-e", f"{sha}^{{commit}}"],
                            check=False, capture_output=True, text=True)
     return probe.returncode == 0
