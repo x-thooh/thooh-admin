@@ -218,6 +218,7 @@ def task_done(root, task_id):
                    "先合并再删树，顺序反了就把没落地的工作删了")
     if is_orphan(target):
         return 1, orphan_exit(root, target)
+    _c, branch, _e = git(target, "rev-parse", "--abbrev-ref", "HEAD")
     # 先把只读的 `.go/` 模块缓存（0555）放开，否则 remove 删到一半中止、注册表却已先没了
     subprocess.run(["chmod", "-R", "u+rwX", str(target / ".go")], check=False, capture_output=True)
     code, _out, err = git(root, "worktree", "remove", str(target))
@@ -229,8 +230,10 @@ def task_done(root, task_id):
                    f"仍不行就把残骸挪出被扫描的目录（只挪不删）：\n"
                    f"  mv '{target}' '{park}' && git -C '{main}' worktree prune")
     git(root, "worktree", "prune")
-    return 0, (f"已收尾：{target} 已移除。分支 task/{task_id} 留在仓库里——"
-               f"删分支是单独的决定：git branch -d task/{task_id}")
+    if not branch or branch == "HEAD":
+        return 0, f"已收尾：{target} 已移除。树是游离 HEAD，没有分支要处理"
+    return 0, (f"已收尾：{target} 已移除。分支 {branch} 留在仓库里——"
+               f"删分支是单独的决定：git branch -d {branch}")
 
 
 def list_trees(root):
