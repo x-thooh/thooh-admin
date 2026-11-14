@@ -390,11 +390,12 @@
     {
       "id": "T-38",
       "title": "前端按钮权限字符是 system:user:edit 这一套，dump 给的是 sys:user:edit",
-      "status": "open",
+      "status": "doing",
       "priority": "medium",
       "owner": "thooh",
       "scope": "modules",
-      "detail": "实测（2026-10-30）：web/admin 产物里的 v-hasPermi 串是 system:user:edit / system:role:edit / system:dict:list，sys_api.perm 是 sys:user:edit、sys:dept:query 这一套短前缀，且没有 *:*:* 那行。结果 getInfo 回 57 条权限、前端一条也匹配不上，增删改按钮全隐（不报错，只是看不见——私有化现场最难查的一类）。做法与 T-37 同源：要么改 perm 字符对齐前端，要么随前端重建改读取侧。先与 T-37 一起定方向，两边一次改，别一边改完按钮还是全隐。"
+      "detail": "实测（2026-10-30）：web/admin 产物里的 v-hasPermi 串是 system:user:edit / system:role:edit / system:dict:list，sys_api.perm 是 sys:user:edit、sys:dept:query 这一套短前缀，且没有 *:*:* 那行。结果 getInfo 回 57 条权限、前端一条也匹配不上，增删改按钮全隐（不报错，只是看不见——私有化现场最难查的一类）。做法与 T-37 同源：要么改 perm 字符对齐前端，要么随前端重建改读取侧。先与 T-37 一起定方向，两边一次改，别一边改完按钮还是全隐。",
+      "worktree": "T-38"
     },
     {
       "id": "T-39",
