@@ -36,7 +36,8 @@ func GetInfo(c *gin.Context) {
 	var main ToolNum
 	mysql.MysqlDb().First(&main, "id = ?", id)
 	if main.Id == "" {
-		panic(R.ReturnFailMsg("未找到记录"))
+		c.JSON(http.StatusOK, R.ReturnFailMsg("未找到记录"))
+		return
 	}
 	c.JSON(http.StatusOK, r.Ok(main))
 }
@@ -52,7 +53,8 @@ func Post(c *gin.Context) {
 	main.Uptim = main.Crtim
 	err := mysql.MysqlDb().Create(&main).Error
 	if err != nil {
-		panic(R.ReturnFailMsg(err.Error()))
+		c.JSON(http.StatusOK, R.ReturnFailMsg(err.Error()))
+		return
 	}
 	c.JSON(http.StatusOK, r.Ok(main.Id))
 
@@ -67,7 +69,8 @@ func Put(c *gin.Context) {
 	main.Uptim = timex.Time(time.Now())
 	err := mysql.MysqlDb().Select("*").Omit("crtim,cruid").Updates(&main).Error
 	if err != nil {
-		panic(R.ReturnFailMsg(err.Error()))
+		c.JSON(http.StatusOK, R.ReturnFailMsg(err.Error()))
+		return
 	}
 	c.JSON(http.StatusOK, r.Ok(main.Id))
 }
@@ -78,7 +81,8 @@ func Delete(c *gin.Context) {
 	for i := 0; i < len(arr); i++ {
 		err := mysql.MysqlDb().Where("id = ?", arr[i]).Delete(&ToolNum{}).Error
 		if err != nil {
-			panic(R.ReturnFailMsg(err.Error()))
+			c.JSON(http.StatusOK, R.ReturnFailMsg(err.Error()))
+			return
 		}
 	}
 	c.JSON(http.StatusOK, r.Ok(len(arr)))

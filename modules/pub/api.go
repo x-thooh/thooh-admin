@@ -17,9 +17,14 @@ func GetActor(c *gin.Context) {
 	//typ := c.Param("type")
 	//pid := c.Param("pid")
 	var list []IdNameAvatarVo
-	err := mysql.MysqlDb().Raw(userActorSQL, currentUserId(c)).Scan(&list).Error
+	uid, ok := currentUserId(c)
+	if !ok {
+		return
+	}
+	err := mysql.MysqlDb().Raw(userActorSQL, uid).Scan(&list).Error
 	if err != nil {
-		panic(R.ReturnFailMsg(err.Error()))
+		c.JSON(http.StatusOK, R.ReturnFailMsg(err.Error()))
+		return
 	}
 	c.JSON(http.StatusOK, r.Ok(list))
 }
@@ -39,12 +44,13 @@ func PostRece(c *gin.Context) {
 }
 
 // currentUserId 取 Gate 中间件放进 gin.Context 的 userId，缺失即未登录。
-func currentUserId(c *gin.Context) string {
+func currentUserId(c *gin.Context) (string, bool) {
 	id, ok := c.Get("userId")
 	if !ok {
-		panic(R.ReturnFailMsg("未登录"))
+		c.JSON(http.StatusOK, R.ReturnFailMsg("未登录"))
+		return "", false
 	}
-	return fmt.Sprint(id)
+	return fmt.Sprint(id), true
 }
 
 // 用户→角色(sys_role_actor.aid=用户ID)→菜单(sys_role_menu)
@@ -57,20 +63,26 @@ const userActorSQL = "select distinct a.id,a.name from sys_actor a join sys_role
 	"where ra.rid in (select rid from sys_role_actor where aid=?)"
 
 func GetUser(c *gin.Context) {
-	uid := currentUserId(c)
+	uid, ok := currentUserId(c)
+	if !ok {
+		return
+	}
 	db := mysql.MysqlDb()
 	var user User
 	err := db.Raw("select u.id useid,u.name nicna,u.orgid,u.email,u.monum,u.gender,u.avatar from sys_user u where u.id=?", uid).Scan(&user).Error
 	if err != nil {
-		panic(R.ReturnFailMsg(err.Error()))
+		c.JSON(http.StatusOK, R.ReturnFailMsg(err.Error()))
+		return
 	}
 	if user.Useid == "" {
-		panic(R.ReturnFailMsg("用户不存在"))
+		c.JSON(http.StatusOK, R.ReturnFailMsg("用户不存在"))
+		return
 	}
 	user.Usena = user.Nicna
 	var rids []int64
 	if err = db.Raw("select rid from sys_role_actor where aid=?", uid).Scan(&rids).Error; err != nil {
-		panic(R.ReturnFailMsg(err.Error()))
+		c.JSON(http.StatusOK, R.ReturnFailMsg(err.Error()))
+		return
 	}
 	var vo UserInfoVo
 	vo.User = user
@@ -90,9 +102,14 @@ func GetUser(c *gin.Context) {
 
 func GetMenus(c *gin.Context) {
 	var menuList []menu.SysMenu
-	err := mysql.MysqlDb().Raw(userMenuSQL, currentUserId(c)).Scan(&menuList).Error
+	uid, ok := currentUserId(c)
+	if !ok {
+		return
+	}
+	err := mysql.MysqlDb().Raw(userMenuSQL, uid).Scan(&menuList).Error
 	if err != nil {
-		panic(R.ReturnFailMsg(err.Error()))
+		c.JSON(http.StatusOK, R.ReturnFailMsg(err.Error()))
+		return
 	}
 	menuList = GetChildPerms(menuList, 0)
 	menuVoList := buildMenus(menuList)

@@ -43,7 +43,8 @@ func GetTree(c *gin.Context) {
 	var list []r.Ltree
 	err := mysql.MysqlDb().Raw(sql).Scan(&list).Error
 	if err != nil {
-		panic(R.ReturnFailMsg(err.Error()))
+		c.JSON(http.StatusOK, R.ReturnFailMsg(err.Error()))
+		return
 	}
 	tree := r.BuildLtree(list)
 	c.JSON(http.StatusOK, r.Ok(tree))
@@ -54,7 +55,8 @@ func GetInfo(c *gin.Context) {
 	var main SysGroupCate
 	mysql.MysqlDb().First(&main, "id = ?", id)
 	if main.Id == "" {
-		panic(R.ReturnFailMsg("未找到记录"))
+		c.JSON(http.StatusOK, R.ReturnFailMsg("未找到记录"))
+		return
 	}
 	c.JSON(http.StatusOK, r.Ok(main))
 }
@@ -68,7 +70,8 @@ func Post(c *gin.Context) {
 	main.Id = utils.NextIdStr()
 	err := mysql.MysqlDb().Create(&main).Error
 	if err != nil {
-		panic(R.ReturnFailMsg(err.Error()))
+		c.JSON(http.StatusOK, R.ReturnFailMsg(err.Error()))
+		return
 	}
 	c.JSON(http.StatusOK, r.Ok(main.Id))
 
@@ -82,7 +85,8 @@ func Put(c *gin.Context) {
 	}
 	err := mysql.MysqlDb().Select("*").Omit("crtim,cruid").Updates(&main).Error
 	if err != nil {
-		panic(R.ReturnFailMsg(err.Error()))
+		c.JSON(http.StatusOK, R.ReturnFailMsg(err.Error()))
+		return
 	}
 	c.JSON(http.StatusOK, r.Ok(main.Id))
 
@@ -94,7 +98,8 @@ func Delete(c *gin.Context) {
 	for i := 0; i < len(arr); i++ {
 		err := mysql.MysqlDb().Where("id = ?", arr[i]).Delete(&SysGroupCate{}).Error
 		if err != nil {
-			panic(R.ReturnFailMsg(err.Error()))
+			c.JSON(http.StatusOK, R.ReturnFailMsg(err.Error()))
+			return
 		}
 	}
 	c.JSON(http.StatusOK, r.Ok(len(arr)))

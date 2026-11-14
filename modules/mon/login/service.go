@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"time"
 
-	"github.com/x-thooh/thooh-admin/app/core/utils/R"
 	"github.com/x-thooh/thooh-admin/common/json/boolx"
 	"github.com/x-thooh/thooh-admin/common/json/timex"
 	"github.com/x-thooh/thooh-admin/common/utils"
@@ -24,7 +24,7 @@ func Insert(c *gin.Context, username string, message string, loginSucess bool) {
 	userAgent := c.Request.Header.Get("User-Agent")
 	Os := useragent.GetOsName(userAgent)
 	browser := useragent.GetBrowserName(userAgent)
-	var log = MonLoginLog{
+	var entry = MonLoginLog{
 		Id:       utils.NextId(),
 		Username: username,
 		//Tenid:    "0000",
@@ -40,11 +40,11 @@ func Insert(c *gin.Context, username string, message string, loginSucess bool) {
 	//Clkey    string     `json:"clkey" gorm:"type:varchar(32)"`    //客户端key
 	//Detyp    string     `json:"detyp" gorm:"type:varchar(8)"`     //设备类型
 
-	err := mysql.MysqlDb().Create(&log).Error
+	err := mysql.MysqlDb().Create(&entry).Error
 	if err != nil {
-		panic(R.ReturnFailMsg(err.Error()))
+		// 登录日志写失败不应影响登录结果，只记一行
+		log.Printf("登录日志写入失败: %v", err)
 	}
-
 }
 
 type Tunit struct {

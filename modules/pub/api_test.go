@@ -1,6 +1,7 @@
 package pub
 
 import (
+	"net/http/httptest"
 	"strings"
 	"testing"
 
@@ -8,21 +9,24 @@ import (
 )
 
 func TestCurrentUserId(t *testing.T) {
-	c, _ := gin.CreateTestContext(nil)
+	c, _ := gin.CreateTestContext(httptest.NewRecorder())
 	c.Set("userId", "u2")
-	if got := currentUserId(c); got != "u2" {
-		t.Fatalf("got %q", got)
+	got, ok := currentUserId(c)
+	if !ok || got != "u2" {
+		t.Fatalf("got %q ok=%v", got, ok)
 	}
 }
 
-func TestCurrentUserIdMissingPanics(t *testing.T) {
-	defer func() {
-		if recover() == nil {
-			t.Fatal("expected panic")
-		}
-	}()
-	c, _ := gin.CreateTestContext(nil)
-	currentUserId(c)
+// 未登录：正常返回失败 JSON，不 panic。
+func TestCurrentUserIdMissingReturnsFail(t *testing.T) {
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	if _, ok := currentUserId(c); ok {
+		t.Fatal("expected !ok")
+	}
+	if !strings.Contains(w.Body.String(), "未登录") {
+		t.Fatalf("body: %s", w.Body.String())
+	}
 }
 
 // 菜单与参与者 SQL 必须按用户的角色关联过滤，不同角色才会拿到不同集合。
