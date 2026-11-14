@@ -90,7 +90,7 @@
       "title": "main.go 里 r.Static() 挂载的 ./static/images 目录不存在",
       "status": "blocked",
       "priority": "low",
-      "detail": "目录不存在时静态挂载是死路由，但「上传文件到底落在仓库里还是对象存储」是使用者的决定。",
+      "detail": "目录不存在时静态挂载是死路由，但「上传文件到底落在仓库里还是对象存储」是使用者的决定。 推荐方案：选①本地磁盘（单实例、体量小时）。挂载点实为 app/core/routers/routers.go:45 r.Static(\"/profile\",\"./static/images\")，不在 main.go；上传(app/admin/api/tools/common.go SaveUploadedFile→config.FileProfile)、下载/资源读取(common.go:41,156)都读写该目录，gate.go 的 publicPrefix 也放行 /profile/，所以它不是死路由，只是目录缺失。理由：代码已按本地盘实现，改对象存储要重写上传/读取/鉴权三处。选①要补：static/images/.gitkeep 或启动时 MkdirAll；config 的 FileProfile 与该路径对齐；生产以挂卷方式持久化(容器重建不丢)；把该卷纳入备份口径；目录内容 .gitignore 不入库(只入 .gitkeep)；多实例需共享卷。代价：不能横向扩展、备份与 CDN 要自管。若选②(多实例/大文件/要 CDN)：删 routers.go:45 这行，改写 common.go 上传与读取为 OSS SDK，gate.go 的 /profile/ 放行同步调整；现网迁移注意：存量文件批量同步到桶并保持原 URL 路径(或库中引用的 /profile/xxx 做批量改写/302 兼容)，切换期双写，核对后再下线本地目录。",
       "owner": "thooh",
       "waiting_on": "使用者回答：静态资源是否入库",
       "scope": ""
