@@ -421,11 +421,12 @@
     {
       "id": "T-40",
       "title": "app/admin/model/system 旧表名旧列名全面对账到 dump 口径",
-      "status": "open",
+      "status": "doing",
       "priority": "high",
       "owner": "thooh",
       "scope": "modules",
-      "detail": "上一轮 T-20 只改了 gorm tag，原生/联表 SQL 里的旧表名没动。对账基线（dump 为准）：sys_user_role→sys_role_actor(rid/aid)（sysRoles.go 联表多处、sysMenu.go:74/105/340、sysUserRole.go TableName）、sys_user_post→sys_post_actor（sysPosts.go:35/103/135、sysUserPost.go TableName）、sys_dept→sys_org（sysRoles.go、sysUserRole.go:35）、旧列名 user_id/role_id/dept_id/post_id/status→dump 短列名（id/rid/aid/porid/avtag 等）。sys_role_dept 在 dump 无对应表：sysRoleDept.go 整个文件与 sysRoles.go:263 调用、sysRoles.go:618 联表一并摘掉（数据权限功能删除，用户已拍板）。"
+      "detail": "上一轮 T-20 只改了 gorm tag，原生/联表 SQL 里的旧表名没动。对账基线（dump 为准）：sys_user_role→sys_role_actor(rid/aid)（sysRoles.go 联表多处、sysMenu.go:74/105/340、sysUserRole.go TableName）、sys_user_post→sys_post_actor（sysPosts.go:35/103/135、sysUserPost.go TableName）、sys_dept→sys_org（sysRoles.go、sysUserRole.go:35）、旧列名 user_id/role_id/dept_id/post_id/status→dump 短列名（id/rid/aid/porid/avtag 等）。sys_role_dept 在 dump 无对应表：sysRoleDept.go 整个文件与 sysRoles.go:263 调用、sysRoles.go:618 联表一并摘掉（数据权限功能删除，用户已拍板）。",
+      "worktree": "T-40"
     },
     {
       "id": "T-41",
