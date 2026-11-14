@@ -33,7 +33,7 @@ func (GenTable) TableName() string {
 }
 
 type GenTableColumn struct {
-	ColumnId      int64          `json:"columnId" gorm:"primaryKey;column:column_id"`
+	ColumnId      int64          `json:"columnId" gorm:"primaryKey;column:id"`
 	TableId       int64          `json:"tableId" gorm:"column:tabid"`
 	ColumnName    string         `json:"columnName" gorm:"column:name"`
 	ColumnComment string         `json:"columnComment" gorm:"column:notes"`
@@ -63,7 +63,7 @@ func (GenTableColumn) TableName() string {
 }
 
 type GenTableVO struct {
-	TableId        string             `json:"tableId" gorm:"table_id"`
+	TableId        string             `json:"tableId" gorm:"-"`
 	Table_Name     string             `json:"tableName,omitempty" gorm:"table_name"`
 	TableComment   string             `json:"tableComment" gorm:"table_comment"`
 	SubTableName   string             `json:"subTableName" gorm:"sub_table_name"`
@@ -82,7 +82,7 @@ type GenTableVO struct {
 }
 
 type GenTableColumnVO struct {
-	TableId        string `json:"tableId" gorm:"table_id"`
+	TableId        string `json:"tableId" gorm:"-"`
 	Table_Name     string `json:"tableName,omitempty" gorm:"table_name"`
 	TableComment   string `json:"tableComment" gorm:"table_comment"`
 	SubTableName   string `json:"subTableName" gorm:"sub_table_name"`
@@ -97,7 +97,7 @@ type GenTableColumnVO struct {
 	GenType        string `json:"genType" gorm:"gen_type"`
 	GenPath        string `json:"genPath" gorm:"gen_path"`
 	Options        string `json:"options" gorm:"options"`
-	ColumnId       string `json:"columnId" gorm:"column_id"`
+	ColumnId       string `json:"columnId" gorm:"-"`
 	ColumnName     string `json:"columnName" gorm:"column_name"`
 	ColumnComment  string `json:"columnComment" gorm:"column_comment"`
 	ColumnType     string `json:"columnType" gorm:"column_type"`
