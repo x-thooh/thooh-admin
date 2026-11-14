@@ -26,7 +26,6 @@ import (
 	dict "github.com/x-thooh/thooh-admin/modules/tool/dict/main"
 	"github.com/x-thooh/thooh-admin/modules/tool/form"
 	"github.com/x-thooh/thooh-admin/modules/tool/num"
-	"github.com/x-thooh/thooh-admin/pkg/mysql"
 
 	"github.com/gin-gonic/gin"
 )
@@ -101,10 +100,5 @@ func Routers(e *gin.Engine) {
 	/*admin*/
 	single.Init(e)
 	singlec.Init(e)
-
-	err := mysql.MysqlDb().AutoMigrate(&group.SysGroup{}, &groupc.SysGroupCate{}, &group.SysGroupActor{})
-	if err != nil {
-		return
-	}
 
 }

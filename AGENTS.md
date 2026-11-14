@@ -23,6 +23,7 @@
 | `make retro` | 复盘事实底板：只算数字（ERROR 环比、看板、手册行数），不写结论 |
 | `make selftest` | 反向测试：每条断言都要真的会报 |
 | `make commit-msg` | 判最近一条提交信息（提交时钩子跑同一套判据） |
+| `make migrate` | 显式迁移表结构（服务启动不再改表；升级前跑） |
 | `make build` / `vet` / `fmt` / `test` | Go 工具链 |
 | `make go-all` | build + vet（等价于 check-all 里的慢域） |
 | `make guide` | 重新生成 `.harness/codebase-guide/`（派生，禁手改） |
@@ -45,6 +46,7 @@
 ```text
 admin      业务模块（admin/demo/...），形状同 modules
 app        框架层：admin/{api,router,service}、core（启动与中间件）
+cmd        独立入口（cmd/migrate：显式 AutoMigrate）
 common     config 结构体、全局变量，被 app 与 modules 共用
 docs       swagger 生成物（swag init 产出，禁手改）
 modules    业务模块，一个目录 = api.go + model.go + router.go + func Init(e *gin.Engine)
