@@ -319,3 +319,24 @@
   开干前不做覆盖关账，就会在已修好的地方重做一遍、甚至双写冲突。
 - 人判的规矩：清看板前先按「改动文件域」聚类，对每条 open 问一句「它改的文件，最近有没有别的提交已经动过」；
   动过就先看那个提交是否已覆盖本任务，覆盖了就划 done 并引证据，别机械地每条都开一棵树。
+
+## L-21 用 subagent 批量清看板：覆盖关账、同域串行、残留另立账
+
+- 现象：一轮 subagent 并行清掉 18 条 open，全过程拦到 5 类问题，都是「并行 + 自动」才暴露的。
+- 拦到了什么（复盘三问①）：
+  - SEC001 拦真实散列进测试（T-31 回归测试写了 dump 里的 bcrypt，被 pre-commit 拦，改假 fixture）。
+  - WKT002 拦并行开树（后开的树看不到先开树的 doing），根因是 task-new 没提交主树看板（T-36），
+    补修后 task-new 提交前又漏 make index（STATE007 拦 7 次），再补。
+  - STL001/STL003 拦 swagger 重新生成的提交：yaml_meta 正则误读 definitions 的 description；
+    STL003 用 git log 时间，docs 未提交时永远是旧的——两者都是 stale.py 缺陷，本轮修掉。
+  - T-34 误删白名单：grep `"/auth` 匹配不到 `e.Group("auth")` + `g.POST("/login")` 的拼接路由，
+    agent 据此删了 /auth/* 三项。实际 /login（app/admin/router.go:39）是真实入口且白名单里有，
+    所以没出事——但「凭拼接 grep 判断路由调用面」本身就是不可靠的判据。
+- 漏了什么（②）：T-5（swagger paths 空）第一轮排批次时漏掉，只剩 4 条 open 时才发现；
+  两个 subagent 反复卡在「请切换 goal 焦点」的误解上（worker 对 goal 系统的内置反应），T-5 最后主线程直接做完。
+- 该加哪条断言（③）：无。这些是流程与静态检查的边界，靠人判。但 T-34 的教训值得一条人判规矩：
+  「删鉴权白名单条目」前必须用**真实路由表**（router 注册后的 gin.Routes() 或 grep `Group(`+`POST/GET(` 的拼接）
+  核对，不许只用 `grep "/路径"` 就说没有调用面。
+- 残留另立账：gen.go 原生 SQL 仍引用 gen_table/gen_table_column（dump 是 tool_code_*，短列名对账没做）；
+  sys_user_role/sys_user_post/sys_role_dept 在 dump 无对应表（未定）；modules/mon 缺 job 模块
+  （定时任务未注册，只有表名对齐了）。这三笔留在看板 open 或另开任务，不在本轮 T-20 范围。
