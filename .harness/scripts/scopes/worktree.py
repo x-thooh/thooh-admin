@@ -33,6 +33,13 @@ OPEN_STATUSES = ("open", "blocked")
 TERMINAL_STATUS = "done"
 
 
+def _dirty_brief(dirty, shown=3):
+    """`git status --porcelain` 多行折成一行：前几个路径加总条数。"""
+    lines = dirty.splitlines()
+    paths = "、".join(line[3:] for line in lines[:shown])
+    return f"{paths}…共 {len(lines)} 条，去树里 git status 看"
+
+
 def trees_of(root):
     """返回 (任务树目录清单, 判不了的原因)。
 
@@ -84,7 +91,7 @@ def run(ctx, findings):
                     f"任务 {tid} 已经 done，树 {name} 还在，而这份工作有没有落地判不了"
                     f"（{state_problem}）：证明不了它结束，先别撤树")
             elif merged:
-                extra = "" if clean else f"；树里另有没提交的东西，task-done 会先拒绝：{dirty}"
+                extra = "" if clean else f"；树里另有没提交的东西，task-done 会先拒绝：{_dirty_brief(dirty)}"
                 add(findings, "WARN", NAME, rel_to(root, path), 1, "WKT001",
                     f"任务 {tid} 已 done，这份工作已经合进主树，树 {name} 还挂着：只差最后一步"
                     f" make task-done TASK={name}{extra}。这一档按 WARN 记——提交途中的树"
