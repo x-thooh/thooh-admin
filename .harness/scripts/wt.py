@@ -182,6 +182,10 @@ def task_new(root, task_id):
     # 而树跑门禁读的是它自己那份。只改主树 = 脚本造出「有树但看板 open」的态，
     # 于是 WKT002 拦住这棵树的第一次提交（现场：2026-10-29 开 T-19）。
     mark_doing(target, task_id)
+    # 主树这份 doing 若不提交，之后从 main 开的兄弟树检出时看不到它，门禁报 WKT002（T-36）
+    code, _out, err = git(root, "commit", "-m", f"开树 {task_id}：看板划 doing", "--", BOARD_REL)
+    if code != 0:
+        return 1, f"树已开（{target}），但主树看板提交失败：{err}"
     note = f"两份看板（主树与树内）里 {task_id}：{was} → doing，worktree 填 {task_id}"
     if was == "blocked":
         note += "（这条原来标 blocked；还卡着就别开树，把 waiting_on 改回原状态）"

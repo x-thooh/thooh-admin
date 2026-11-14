@@ -218,11 +218,12 @@
     {
       "id": "T-23",
       "title": "server.logLevel 是死配置：gorm 日志等级被硬编码，release 部署把每条 SQL 打在 stdout",
-      "status": "open",
+      "status": "doing",
       "priority": "medium",
       "detail": "现场：compose 起来后 webapp 日志里全是 information_schema 探查与 ALTER 语句（门记录 20261029T015228Z）。pkg/mysql/mysql.go:70 写死 logger.Info，全仓没有任何代码读 Server.LogLevel（common/config/app_config.go:39 只有字段），compose 传的 THOOH_LOG_LEVEL 因此也是没人接的值。要做：把 gorm 的 LogLevel 接到 config.Server.LogLevel（debug→Info、info/warn→Warn、error→Error 这类映射由人定），或者把 config.yaml 与 compose 里的这个键一起删掉——不许留「配了但不生效」的第三种。验收：THOOH_LOG_LEVEL=info 起容器，stdout 里不再出现逐条 SQL。",
       "owner": "thooh",
-      "scope": ""
+      "scope": "",
+      "worktree": "T-23"
     },
     {
       "id": "T-24",
@@ -305,11 +306,12 @@
     {
       "id": "T-36",
       "title": "开一棵新树时，兄弟树看不到主树那份未提交的看板",
-      "status": "open",
+      "status": "doing",
       "priority": "medium",
       "detail": "实测（2026-10-30，T-26 树里 `make check-all`）：`WKT002 任务 T-27 还是 open，树 T-27 却已经开起来`。T-27 的 doing 是真写过的——写在主树工作区与 T-27 自己那份里，但主树那次写没提交，而 T-26 是从 `main` 的 HEAD 检出的。L-12 修的是「写没写到被读取的那一份拷贝」，这条是「那份拷贝的哪个版本」。今天的落法是人工在 T-26 树里把 T-27 对齐成 doing（见 lessons L-17）。做法二选一：①`make task-new` 结尾把主树看板的这条改动提交进 main（或主树看板脏着就拒绝开树），让开树这个动作对兄弟树可见；②把「哪棵树开着」从被版本控制的 board.json 挪走，改由 `git worktree list` 现算，看板只留计划与证据——②更干净但要重写 WKT002 的判据，别顺手做。",
       "owner": "thooh",
-      "scope": "worktree"
+      "scope": "worktree",
+      "worktree": "T-36"
     },
     {
       "id": "T-31",
@@ -325,11 +327,12 @@
     {
       "id": "T-32",
       "title": "全局鉴权门没有断言守着，删掉 r.Use(jwt.Gate()) 编译照过",
-      "status": "open",
+      "status": "doing",
       "priority": "medium",
       "detail": "T-27 的修法是把鉴权从「每个模块自己挂」改成「routers.go 里全局挂一次」。这个改动的价值恰恰在于它脆弱：以后谁把这行删了或挪到 NoRoute 之后，go build 不报错、make check 不报错，整套 modules CRUD 静默回到免鉴权——就是 T-27 的成因重演。做法：在 .harness/scripts/registry.py 注册一条断言（拟 GTE001，域 modules），断言 app/core/routers/routers.go 里存在 r.Use(jwt.Gate()) 且在 html.Routers/admin.Routers 之前；先在 .harness/specs/standards.md 对照表占一行，再补 selftest 的违规样本与正对照（缺样本按规则 11 记 not_applicable，不许当通过）。 顺带一条同源欠账（本轮实测抓到）：门的放行判据里凡是只看请求头的，都能被伪造该头的脚本绕过——规矩写进 lessons L-18，验收要拿被保护端点伪造成公开请求的形状打一次。",
       "owner": "thooh",
-      "scope": "modules"
+      "scope": "modules",
+      "worktree": "T-32"
     },
     {
       "id": "T-33",
