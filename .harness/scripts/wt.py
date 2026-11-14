@@ -80,6 +80,34 @@ def board_tasks(root):
     return [t for t in (data.get("tasks") or []) if isinstance(t, dict)], None
 
 
+def is_orphan(target):
+    """孤儿树：`.git` 指针文件还在，但注册表（gitdir）与树内容（admin/）都没了。
+
+    现场是 `git worktree remove` 删到一半撞上 0555 的 `.go/` 中止：注册表先被删、目录没删完。
+    这种残骸里没有任何可丢的工作，是可清理的残骸，不是「判不了」（lessons L-11）。
+    """
+    dotgit = Path(target) / ".git"
+    if not dotgit.is_file() or (Path(target) / "admin").exists():
+        return False
+    try:
+        line = dotgit.read_text(encoding="utf-8").strip()
+    except OSError:
+        return False
+    if not line.startswith("gitdir:"):
+        return False
+    return not Path(line[len("gitdir:"):].strip()).exists()
+
+
+def orphan_exit(root, target):
+    """残骸的出路：先挪出被扫描的 `-wt/` 父目录（解除拦提交、不删文件），再 prune 失效注册表。"""
+    git(root, "worktree", "prune")
+    main, _problem = main_worktree(root)
+    park = (main.parent if main else Path(target).parent.parent) / f"{Path(target).name}.orphan"
+    return (f"{target} 是半途删除留下的残骸（注册表已没、树内容已没）。已 git worktree prune。\n"
+            f"出路（只挪不删，事后取证；挪走后 WKT 扫描就看不到它）：\n"
+            f"  mv '{target}' '{park}' && git -C '{main or root}' worktree prune")
+
+
 def tree_state(target, main):
     """量一棵树的收尾条件：返回 (干净吗, 已合进主树吗, 未提交清单, HEAD, 判不了的原因)。
 
@@ -87,6 +115,8 @@ def tree_state(target, main):
     落地，撤它就是丢活儿（ERROR）；两者都过了，剩下的只是忘撤一棵空树（WARN）。读不出来时
     前两项给 None——判不了不许冒充「安全的那一档」。
     """
+    if is_orphan(target):
+        return True, True, "", "", None
     code, dirty, err = git(target, "status", "--porcelain")
     if code != 0:
         return None, None, "", "", f"读不了 {target} 的工作区：{err or '这里不是 git 工作树'}"
@@ -182,9 +212,19 @@ def task_done(root, task_id):
     if not merged:
         return 1, (f"{target} 的提交（{sha[:8]}）还没合进主树 {main}："
                    "先合并再删树，顺序反了就把没落地的工作删了")
+    if is_orphan(target):
+        return 1, orphan_exit(root, target)
+    # 先把只读的 `.go/` 模块缓存（0555）放开，否则 remove 删到一半中止、注册表却已先没了
+    subprocess.run(["chmod", "-R", "u+rwX", str(target / ".go")], check=False, capture_output=True)
     code, _out, err = git(root, "worktree", "remove", str(target))
     if code != 0:
-        return 1, f"删树失败：{err}"
+        subprocess.run(["chmod", "-R", "u+rwX", str(target)], check=False, capture_output=True)
+        git(root, "worktree", "prune")
+        park = main.parent / f"{target.name}.orphan"
+        return 1, (f"删树失败：{err}\n已补 chmod 并 git worktree prune。重跑 make task-done TASK={task_id}，"
+                   f"仍不行就把残骸挪出被扫描的目录（只挪不删）：\n"
+                   f"  mv '{target}' '{park}' && git -C '{main}' worktree prune")
+    git(root, "worktree", "prune")
     return 0, (f"已收尾：{target} 已移除。分支 task/{task_id} 留在仓库里——"
                f"删分支是单独的决定：git branch -d task/{task_id}")
 
