@@ -1,7 +1,9 @@
 package pub
 
 import (
+	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/x-thooh/thooh-admin/app/core/utils/R"
 	"github.com/x-thooh/thooh-admin/common/r"
@@ -14,9 +16,8 @@ import (
 func GetActor(c *gin.Context) {
 	//typ := c.Param("type")
 	//pid := c.Param("pid")
-	var sql = "select id,name from sys_actor"
 	var list []IdNameAvatarVo
-	err := mysql.MysqlDb().Raw(sql).Scan(&list).Error
+	err := mysql.MysqlDb().Raw(userActorSQL, currentUserId(c)).Scan(&list).Error
 	if err != nil {
 		panic(R.ReturnFailMsg(err.Error()))
 	}
@@ -37,19 +38,49 @@ func PostRece(c *gin.Context) {
 	c.JSON(http.StatusOK, r.Ok(0))
 }
 
+// currentUserId 取 Gate 中间件放进 gin.Context 的 userId，缺失即未登录。
+func currentUserId(c *gin.Context) string {
+	id, ok := c.Get("userId")
+	if !ok {
+		panic(R.ReturnFailMsg("未登录"))
+	}
+	return fmt.Sprint(id)
+}
+
+// 用户→角色(sys_role_actor.aid=用户ID)→菜单(sys_role_menu)
+const userMenuSQL = "select distinct m.shtag,m.type,m.name,m.path,m.icon,m.comp,m.ornum,m.id,m.pid,m.outag,m.catag from sys_menu m " +
+	"join sys_role_menu rm on rm.mid=m.id join sys_role_actor ra on ra.rid=rm.rid " +
+	"where m.avtag=1 and ra.aid=? order by m.pid,m.ornum"
+
+// 与当前用户同角色的参与者
+const userActorSQL = "select distinct a.id,a.name from sys_actor a join sys_role_actor ra on ra.aid=a.id " +
+	"where ra.rid in (select rid from sys_role_actor where aid=?)"
+
 func GetUser(c *gin.Context) {
-	var vo UserInfoVo
+	uid := currentUserId(c)
+	db := mysql.MysqlDb()
 	var user User
-	user.Useid = "u1"
-	user.Usena = "admin"
-	user.Orgid = "o1000"
-	user.Orgna = "XX科技"
-	user.Nicna = "管理员"
-	user.Monum = "13812345678"
-	user.Avatar = "https://unpkg.com/@vbenjs/static-source@0.1.7/source/avatar-v1.webp"
+	err := db.Raw("select u.id useid,u.name nicna,u.orgid,u.email,u.monum,u.gender,u.avatar from sys_user u where u.id=?", uid).Scan(&user).Error
+	if err != nil {
+		panic(R.ReturnFailMsg(err.Error()))
+	}
+	if user.Useid == "" {
+		panic(R.ReturnFailMsg("用户不存在"))
+	}
+	user.Usena = user.Nicna
+	var rids []int64
+	if err = db.Raw("select rid from sys_role_actor where aid=?", uid).Scan(&rids).Error; err != nil {
+		panic(R.ReturnFailMsg(err.Error()))
+	}
+	var vo UserInfoVo
 	vo.User = user
-	vo.Roles = append(vo.Roles, "superadmin")
-	vo.Perms = append(vo.Perms, "*:*:*")
+	for _, rid := range rids {
+		vo.Roles = append(vo.Roles, strconv.FormatInt(rid, 10))
+		if rid == 1 {
+			vo.Roles = append(vo.Roles, "superadmin")
+			vo.Perms = append(vo.Perms, "*:*:*")
+		}
+	}
 	c.JSON(http.StatusOK, gin.H{
 		"msg":  "操作成功",
 		"code": http.StatusOK,
@@ -59,8 +90,7 @@ func GetUser(c *gin.Context) {
 
 func GetMenus(c *gin.Context) {
 	var menuList []menu.SysMenu
-	var sql = "select m.shtag,m.type,m.name,m.path,m.icon,m.comp,m.ornum,m.id,m.pid,m.outag,m.catag from sys_menu m where m.avtag=1 order by m.pid,m.ornum"
-	err := mysql.MysqlDb().Raw(sql).Scan(&menuList).Error
+	err := mysql.MysqlDb().Raw(userMenuSQL, currentUserId(c)).Scan(&menuList).Error
 	if err != nil {
 		panic(R.ReturnFailMsg(err.Error()))
 	}
