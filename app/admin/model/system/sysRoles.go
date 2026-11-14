@@ -100,12 +100,11 @@ func GetMenuPermission(user SysUser) []string {
 		return []string{"*:*:*"}
 	} else {
 		var permissions []string
-		err := mysql.MysqlDb().Raw("select distinct m.perms "+
-			"from sys_menu m "+
-			"left join sys_role_menu rm on m.menu_id = rm.menu_id "+
-			"left join sys_role_actor ur on rm.rid = ur.rid "+
-			"left join sys_role r on r.id = ur.rid "+
-			"where m.avtag = 0 and r.avtag = 0 and ur.aid = ?", user.UserId).
+		err := mysql.MysqlDb().Raw(`select distinct a.perm from sys_role_actor ra
+			join sys_role r on r.id = ra.rid and r.avtag = 1
+			join sys_role_api rpa on rpa.rid = r.id
+			join sys_api a on a.id = rpa.aid and a.avtag = 1
+			where ra.aid = ? and a.perm is not null order by a.perm`, strconv.Itoa(user.UserId)).
 			Scan(&permissions).Error
 		if err != nil {
 			panic(R.ReturnFailMsg(err.Error()))
@@ -164,7 +163,7 @@ func SelectRoleList(params tools.SearchTableDataParam, isPage bool) tools.TableD
 
 	var roleName = sysRoles.RoleName
 	if roleName != "" {
-		db.Where("`sys_role`.role_name like ?", "%"+roleName+"%")
+		db.Where("`sys_role`.name like ?", "%"+roleName+"%")
 	}
 
 	var status = sysRoles.Status
@@ -181,10 +180,10 @@ func SelectRoleList(params tools.SearchTableDataParam, isPage bool) tools.TableD
 		//endTime = endTime + " 23:59:59"
 		//endTime1, _ := time.ParseInLocation(constants.TimeFormat, endTime, Loc)
 		startTime1, endTime1 := utils2.GetBeginAndEndTime(beginTime, endTime)
-		db.Where("`sys_role`.create_time >= ?", startTime1)
-		db.Where("`sys_role`.create_time <= ?", endTime1)
+		db.Where("`sys_role`.crtim >= ?", startTime1)
+		db.Where("`sys_role`.crtim <= ?", endTime1)
 	}
-	db.Order("`sys_role`.role_sort")
+	db.Order("`sys_role`.ornum")
 
 	if err := db.Count(&total).Error; err != nil {
 		return tools.Fail()
@@ -476,15 +475,15 @@ func GetAllocatedList(params tools.SearchTableDataParam) tools.TableDataInfo {
 	}
 	var phonenumber = sysUser.Phonenumber
 	if phonenumber != "" {
-		sql += "AND u.phonenumber like concat('%', " + phonenumber + ", '%')"
+		sql += "AND u.monum like concat('%', " + phonenumber + ", '%')"
 	}
 	var beginTime = params.Params.BeginTime
 	var endTime = params.Params.EndTime
 
 	if beginTime != "" {
 		startTime1, endTime1 := utils2.GetBeginAndEndTime(beginTime, endTime)
-		sql += "u.create_time >= " + startTime1.String()
-		sql += "u.create_time <= " + endTime1.String()
+		sql += "AND u.crtim >= " + startTime1.String()
+		sql += "AND u.crtim <= " + endTime1.String()
 	}
 	var db = mysql.MysqlDb().Model(&rows)
 	if err := db.Count(&total).Error; err != nil {
@@ -523,15 +522,15 @@ func GetUnAllocatedList(params tools.SearchTableDataParam) tools.TableDataInfo {
 	}
 	var phonenumber = sysUser.Phonenumber
 	if phonenumber != "" {
-		sql += "AND u.phonenumber like concat('%', " + phonenumber + ", '%')"
+		sql += "AND u.monum like concat('%', " + phonenumber + ", '%')"
 	}
 	var beginTime = params.Params.BeginTime
 	var endTime = params.Params.EndTime
 
 	if beginTime != "" {
 		startTime1, endTime1 := utils2.GetBeginAndEndTime(beginTime, endTime)
-		sql += "u.create_time >= " + startTime1.String()
-		sql += "u.create_time <= " + endTime1.String()
+		sql += "AND u.crtim >= " + startTime1.String()
+		sql += "AND u.crtim <= " + endTime1.String()
 	}
 	var db = mysql.MysqlDb().Model(&rows)
 	if err := db.Count(&total).Error; err != nil {
