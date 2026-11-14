@@ -46,11 +46,12 @@
     {
       "id": "T-5",
       "title": "docs/swagger.json 的 paths 为空",
-      "status": "open",
+      "status": "doing",
       "priority": "medium",
       "detail": "STL004 已报 WARN：文档里没有一条接口，多半是注解缺失或没跑 swag init。跑一次 swag init 并把生成物纳入提交，同时把 STL003（时效）的 0 样本解除。",
       "owner": "thooh",
-      "scope": "stale"
+      "scope": "stale",
+      "worktree": "T-5"
     },
     {
       "id": "T-6",
