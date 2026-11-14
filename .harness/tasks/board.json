@@ -25,11 +25,12 @@
     {
       "id": "T-3",
       "title": "docker-compose.yml 只有 webapp，缺 mysql 与 redis",
-      "status": "open",
+      "status": "done",
       "priority": "medium",
       "detail": "容器一起来就找不到依赖；config.yaml 指向的库端口也没人监听。补齐服务、健康检查与卷，或明确「依赖由外部提供」并写进 README。",
       "owner": "thooh",
-      "scope": ""
+      "scope": "",
+      "evidence": "commit:ce57b94"
     },
     {
       "id": "T-4",
@@ -209,11 +210,12 @@
     {
       "id": "T-22",
       "title": "开树把主树看板写成未提交改动，主树在任务期间不能碰看板",
-      "status": "open",
+      "status": "done",
       "priority": "medium",
       "detail": "T-21 修完仍有这半：mark_doing(root) 让主树 board.json 变 dirty，而这份 doing 不会自己提交（工具不代劳提交）。后果是任务期间主树不能提交看板改动，快进合回时工作区脏文件与分支版本内容不同会被 git 拒绝合入（本轮就要靠人工 discard 主树那份才能 ff）。可选做法：① task-new 之后明确提示「主树看板已改未提交，合回前 discard 或提交」；② 让主树那份根本不改（只在树里写 doing，主树读自己的看板时会看到 open → 主树报 WKT002，不可取）；③ 看板改成仓库级单一副本（.git 内部或环境变量指向），代价是每棵树看到的不再是自己分支的状态。选哪条要人判。",
       "owner": "thooh",
-      "scope": "worktree"
+      "scope": "worktree",
+      "evidence": "commit:ba40fee"
     },
     {
       "id": "T-23",
