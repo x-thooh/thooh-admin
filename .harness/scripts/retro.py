@@ -31,8 +31,9 @@ def main():
 
     ev = sorted((h / "deliverables" / "evidence").glob("verify-*.txt"))
     out.append(f"evidence 份数: {len(ev)}")
-    counts = [(p.name, evidence_errors(p)) for p in ev]
-    counts = [c for c in counts if c[1]]
+    counts: list[tuple[str, tuple[int, int]]] = [
+        (p.name, errs) for p in ev if (errs := evidence_errors(p)) is not None
+    ]
     if counts:
         last = counts[-1]
         out.append(f"最近 evidence: {last[0]}  ERROR={last[1][0]} WARN={last[1][1]}")

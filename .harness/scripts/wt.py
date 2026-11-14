@@ -157,7 +157,10 @@ def mark_doing(root, task_id):
     这里写的不是判断（不做「这条算完成」那种事），是脚本刚刚做出来的事实。
     """
     path = Path(root) / BOARD_REL
-    data = json.loads(path.read_text(encoding="utf-8"))
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return f"读不了看板 {BOARD_REL}：{exc}"
     entry = find_task(data.get("tasks") or [], task_id)
     assert entry is not None
     was = str(entry.get("status"))
