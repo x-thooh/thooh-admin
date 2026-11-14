@@ -73,11 +73,11 @@ func SelectGenList(params tools.SearchTableDataParam, isPage bool) tools.TableDa
 
 	var tableName = genTable.Table_Name
 	if tableName != "" {
-		db.Where("table_name like concat('%', ?, '%')", tableName)
+		db.Where("name like concat('%', ?, '%')", tableName)
 	}
 	var tableComment = genTable.TableComment
 	if tableComment != "" {
-		db.Where("table_comment like concat('%', ?, '%')", tableComment)
+		db.Where("notes like concat('%', ?, '%')", tableComment)
 	}
 
 	var beginTime = params.Params.BeginTime
@@ -85,8 +85,8 @@ func SelectGenList(params tools.SearchTableDataParam, isPage bool) tools.TableDa
 
 	if beginTime != "" {
 		startTime1, endTime1 := utils2.GetBeginAndEndTime(beginTime, endTime)
-		db.Where("create_time >= ?", startTime1)
-		db.Where("create_time <= ?", endTime1)
+		db.Where("crtim >= ?", startTime1)
+		db.Where("crtim <= ?", endTime1)
 	}
 
 	if err := db.Count(&total).Error; err != nil {
@@ -384,7 +384,7 @@ func ImportGenTable(genTables []tools.GenTable, userId int) {
 }
 
 func DeleteGenTableByIds(tableIds string) R.Result {
-	if err := mysql.MysqlDb().Model(&tools.GenTable{}).Delete("table_id in (?)", tableIds).Error; err != nil {
+	if err := mysql.MysqlDb().Model(&tools.GenTable{}).Delete("id in (?)", tableIds).Error; err != nil {
 		return R.ReturnFailMsg(err.Error())
 	}
 	return R.ReturnSuccess("操作成功")
@@ -463,7 +463,7 @@ func GenInfoService(tableId string) map[string]any {
 	m := make(map[string]any)
 	genTableVO := selectGenTableInfoById(tableId)
 	var rows []tools.GenTableColumn
-	mysql.MysqlDb().Order("sort").Where(" table_id = ?", tableId).Model(&tools.GenTableColumn{}).Find(&rows)
+	mysql.MysqlDb().Order("ornum").Where(" tabid = ?", tableId).Model(&tools.GenTableColumn{}).Find(&rows)
 	m["info"] = genTableVO
 	m["rows"] = rows
 	m["tables"] = selectGenTableAllInfoById()
@@ -475,7 +475,7 @@ func selectGenTableInfoById(tableId string) tools.EditGenTableVO {
 	var editGenTableVO tools.EditGenTableVO
 	var genTable tools.GenTable
 
-	err := mysql.MysqlDb().Model(&tools.GenTable{}).Where("table_id = ?", tableId).First(&genTable).Error
+	err := mysql.MysqlDb().Model(&tools.GenTable{}).Where("id = ?", tableId).First(&genTable).Error
 	if err != nil {
 		panic(R.ReturnFailMsg(err.Error()))
 	}
@@ -532,7 +532,7 @@ func UpdateGenTableService(tableParam tools.EditGenTableVO) R.Result {
 	}
 
 	genTable.UpdateTime = utils2.JsonTime{Time: time.Now()}
-	err = tx.Model(&tools.GenTable{}).Where("table_id = ?", genTable.TableId).Updates(&genTable).Error
+	err = tx.Model(&tools.GenTable{}).Where("id = ?", genTable.TableId).Updates(&genTable).Error
 	if err != nil {
 		tx.Rollback()
 		return R.ReturnFailMsg(err.Error())
@@ -546,7 +546,7 @@ func UpdateGenTableService(tableParam tools.EditGenTableVO) R.Result {
 			return R.ReturnFailMsg(err.Error())
 		}
 		genTableColumn.UpdateTime = utils2.JsonTime{Time: time.Now()}
-		err = tx.Model(&tools.GenTableColumn{}).Where("column_id = ?", genTableColumnVO.ColumnId).Updates(&genTableColumn).Error
+		err = tx.Model(&tools.GenTableColumn{}).Where("id = ?", genTableColumnVO.ColumnId).Updates(&genTableColumn).Error
 		if err != nil {
 			tx.Rollback()
 			return R.ReturnFailMsg(err.Error())
