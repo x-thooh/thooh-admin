@@ -316,7 +316,7 @@ func SelectRoleAll(context *gin.Context) {
 }
 
 func GetDeptTreeRole(context *gin.Context) {
-	checkedKeys := []int{} // 数据权限(sys_role_dept)已摘除
+	checkedKeys := []int{} // 数据权限功能已摘除
 	depts := system.SelectDeptTreeList()
 	context.JSON(http.StatusOK, gin.H{
 		"msg":         "操作成功",

@@ -270,7 +270,7 @@ func DirExistAndDel(autoPath string) error {
 
 // SelectGenTableByName 按表名查询生成配置（未实现）。
 // tool_code_table/tool_code_field 为短列名结构，缺少 java_field、column_type、is_pk、
-// class_name 等模板所需字段，无法映射 RuoYi 的 gen_table 口径，故显式拒绝而不是运行时 1146。
+// class_name 等模板所需字段，无法映射 RuoYi 代码生成器的口径，故显式拒绝而不是运行时 1146。
 func SelectGenTableByName(tableName string) tools.GenTableVO {
 	panic(R.ReturnFailMsg("代码生成器未实现：tool_code_* 表缺少模板所需字段"))
 }
