@@ -1,6 +1,7 @@
 package system
 
 import (
+	"github.com/x-thooh/thooh-admin/common/json/bitx"
 	"time"
 
 	"github.com/x-thooh/thooh-admin/app/admin/model/tools"
@@ -14,7 +15,7 @@ type SysDictType struct {
 	DictId     int       `json:"dictId" gorm:"column:id;primaryKey"` //表示主键
 	DictName   string    `json:"dictName" gorm:"column:name"`
 	DictType   string    `json:"dictType" gorm:"column:code"`
-	Status     string    `json:"status" gorm:"column:avtag"`
+	Status     bitx.Str  `json:"status" gorm:"column:avtag"`
 	CreateBy   string    `json:"createBy" gorm:"-"`
 	CreateTime time.Time `json:"createTime" gorm:"column:crtim;type:datetime;autoCreateTime"`
 	UpdateBy   string    `json:"updateBy" gorm:"-"`

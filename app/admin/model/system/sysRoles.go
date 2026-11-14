@@ -5,6 +5,7 @@ import (
 	"github.com/x-thooh/thooh-admin/app/admin/model/tools"
 	utils2 "github.com/x-thooh/thooh-admin/app/core/utils"
 	"github.com/x-thooh/thooh-admin/app/core/utils/R"
+	"github.com/x-thooh/thooh-admin/common/json/bitx"
 	"github.com/x-thooh/thooh-admin/pkg/mysql"
 	"strconv"
 	"time"
@@ -17,7 +18,7 @@ type SysRoles struct {
 	RoleKey           string    `json:"roleKey" gorm:"-"`
 	RoleSort          int       `json:"roleSort" gorm:"column:ornum"`
 	DataScope         string    `json:"dataScope" gorm:"column:scope"`
-	Status            string    `json:"status" gorm:"column:avtag"`
+	Status            bitx.Str  `json:"status" gorm:"column:avtag"`
 	MenuCheckStrictly bool      `json:"menuCheckStrictly" gorm:"-"`
 	DeptCheckStrictly bool      `json:"deptCheckStrictly" gorm:"-"`
 	DelFlag           string    `json:"delFlag" gorm:"-"`
@@ -34,7 +35,7 @@ type SysRolesParam struct {
 	RoleKey           string    `json:"roleKey" gorm:"-"`
 	RoleSort          int       `json:"roleSort" gorm:"column:ornum"`
 	DataScope         string    `json:"dataScope" gorm:"column:scope"`
-	Status            string    `json:"status" gorm:"column:avtag"`
+	Status            bitx.Str  `json:"status" gorm:"column:avtag"`
 	MenuCheckStrictly bool      `json:"menuCheckStrictly" gorm:"-"`
 	DeptCheckStrictly bool      `json:"deptCheckStrictly" gorm:"-"`
 	DelFlag           string    `json:"delFlag" gorm:"-"`
@@ -155,7 +156,8 @@ func SelectRoleList(params tools.SearchTableDataParam, isPage bool) tools.TableD
 		Joins("left join sys_user u on u.id = ur.aid").
 		Joins("left join sys_org d on u.orgid = d.id")
 
-	db.Where("1 = 1")
+	// 软删口径：DeleteRolesById 把行写成 avtag=0，列表默认要排掉（浏览器删角色实测）
+	db.Where("`sys_role`.avtag = 1")
 	var roleId = sysRoles.RoleId
 	if roleId != 0 {
 		db.Where("`sys_role`.id = ?", roleId)
@@ -358,6 +360,11 @@ func SaveRole(roles SysRolesParam) R.Result {
 	//数据范围（1：全部数据权限 2：自定数据权限 3：本部门数据权限 4：本部门及以下数据权限）
 	roles.DataScope = "2"
 	roles.DelFlag = "0"
+	// WHY: sys_role.id 是 bigint 且无自增，不给值就 1364（浏览器新增角色实测）
+	roles.RoleId = int(newRoleId())
+	if roles.Status == "" {
+		roles.Status = "0" // RuoYi 口径 0=正常
+	}
 	err := mysql.MysqlDb().Model(&SysRoles{}).Create(&roles).Error
 	if err != nil {
 		return R.ReturnFailMsg(err.Error())
@@ -408,14 +415,24 @@ func UploadRole(rolesParam SysRolesParam, userId string) R.Result {
 		return R.ReturnFailMsg(err.Error())
 	}
 
-	err = mysql.MysqlDb().Model(&SysRoles{}).
-		Where("rid = ?", roles.RoleId).
-		Updates(&roles).Error
-	if err != nil {
-		return R.ReturnFailMsg(err.Error())
+	if roles.RoleId == 0 {
+		// WHY: sys_role.id 是 bigint 且无自增；原来一律走 Updates(where rid=0) 更新 0 行，
+		// 新增角色静默不落库（浏览器新增角色实测报 1364 id 无默认值）。
+		roles.RoleId = int(newRoleId())
+		roles.Status = "0" // RuoYi 口径 0=正常，bitx.Str 会翻成 bit 1
+		if err := mysql.MysqlDb().Create(&roles).Error; err != nil {
+			return R.ReturnFailMsg(err.Error())
+		}
+	} else {
+		err = mysql.MysqlDb().Model(&SysRoles{}).
+			Where("id = ?", roles.RoleId).
+			Updates(&roles).Error
+		if err != nil {
+			return R.ReturnFailMsg(err.Error())
+		}
 	}
 	// 删除角色与菜单关联
-	DeleteRoleMenuByRoleId(strconv.Itoa(rolesParam.RoleId))
+	DeleteRoleMenuByRoleId(strconv.Itoa(roles.RoleId))
 	//新增角色菜单信息
 	insertRoleMenu(rolesParam)
 	// 更新缓存用户权限
@@ -582,4 +599,10 @@ func SelectRoleAll(roleId string, userIdStr string, userId string) R.Result {
 		panic(R.ReturnFailMsg(err.Error()))
 	}
 	return R.ReturnSuccess("操作成功")
+}
+
+// newRoleId 给 sys_role 造主键。WHY: 该表 id 是 bigint 且没有 auto_increment，
+// 不自己给值就会报 1364 Field 'id' doesn't have a default value（浏览器新增角色实测）。
+func newRoleId() int64 {
+	return time.Now().UnixNano() / 1000
 }

@@ -4,6 +4,7 @@ import (
 	"github.com/x-thooh/thooh-admin/app/admin/model/tools"
 	utils2 "github.com/x-thooh/thooh-admin/app/core/utils"
 	"github.com/x-thooh/thooh-admin/app/core/utils/R"
+	"github.com/x-thooh/thooh-admin/common/json/bitx"
 	"github.com/x-thooh/thooh-admin/pkg/mysql"
 	"time"
 )
@@ -13,7 +14,7 @@ type SysNotice struct {
 	NoticeTitle   string    `json:"noticeTitle" gorm:"column:name"`
 	NoticeType    string    `json:"noticeType" gorm:"column:type"`
 	NoticeContent string    `json:"noticeContent" gorm:"column:cont"`
-	Status        string    `json:"status" gorm:"column:avtag"`
+	Status        bitx.Str  `json:"status" gorm:"column:avtag"`
 	CreateBy      string    `json:"createBy" gorm:"-"`
 	CreateTime    time.Time `json:"createTime" gorm:"column:crtim;type:datetime;autoCreateTime"`
 	UpdateBy      string    `json:"updateBy" gorm:"-"`

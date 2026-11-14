@@ -1,6 +1,7 @@
 package system
 
 import (
+	"github.com/x-thooh/thooh-admin/common/json/bitx"
 	"sort"
 	"time"
 
@@ -20,7 +21,7 @@ type SysDictData struct {
 	CssClass   string    `json:"CssClass" gorm:"-"`
 	ListClass  string    `json:"listClass" gorm:"column:shsty"`
 	IsDefault  string    `json:"isDefault" gorm:"column:detag"`
-	Status     string    `json:"status" gorm:"column:avtag"`
+	Status     bitx.Str  `json:"status" gorm:"column:avtag"`
 	CreateBy   string    `json:"createBy" gorm:"-"`
 	CreateTime time.Time `json:"createTime" gorm:"column:crtim;type:datetime;autoCreateTime"`
 	UpdateBy   string    `json:"updateBy" gorm:"-"`

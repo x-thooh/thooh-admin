@@ -1,6 +1,7 @@
 package system
 
 import (
+	"github.com/x-thooh/thooh-admin/common/json/bitx"
 	"time"
 
 	"github.com/x-thooh/thooh-admin/app/admin/model/tools"
@@ -18,7 +19,7 @@ type SysDept struct {
 	Leader     string    `json:"leader" gorm:"-"`
 	Phone      string    `json:"phone" gorm:"-"`
 	Email      string    `json:"email" gorm:"-"`
-	Status     string    `json:"status" gorm:"column:avtag"`
+	Status     bitx.Str  `json:"status" gorm:"column:avtag"`
 	DelFlag    string    `json:"delFlag" gorm:"-"`
 	CreateBy   string    `json:"createBy" gorm:"-"`
 	CreateTime time.Time `json:"createTime" gorm:"column:crtim;type:datetime;autoCreateTime"`
@@ -35,7 +36,7 @@ type SysDeptResult struct {
 	Leader     string          `json:"leader" gorm:"-"`
 	Phone      string          `json:"phone" gorm:"-"`
 	Email      string          `json:"email" gorm:"-"`
-	Status     string          `json:"status" gorm:"column:avtag"`
+	Status     bitx.Str        `json:"status" gorm:"column:avtag"`
 	ParentName string          `json:"parentName" gorm:"-"`
 	Children   []SysDeptResult `json:"children"`
 	CreateBy   string          `json:"createBy" gorm:"-"`

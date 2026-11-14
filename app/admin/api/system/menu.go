@@ -10,6 +10,7 @@ import (
 	"github.com/x-thooh/thooh-admin/app/admin/model/tools"
 	"github.com/x-thooh/thooh-admin/app/core/utils"
 	"github.com/x-thooh/thooh-admin/app/core/utils/R"
+	"github.com/x-thooh/thooh-admin/common/json/bitx"
 	"github.com/x-thooh/thooh-admin/pkg/mysql"
 )
 
@@ -44,7 +45,7 @@ func ListMenu(context *gin.Context) {
 	var param = tools.SearchTableDataParam{
 		Other: system.SysMenu{
 			MenuName: menuName,
-			Status:   status,
+			Status:   bitx.Str(status),
 		},
 		Params: tools.Params{},
 	}

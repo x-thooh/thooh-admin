@@ -9,6 +9,7 @@ import (
 	"github.com/x-thooh/thooh-admin/app/admin/model/system"
 	"github.com/x-thooh/thooh-admin/app/admin/model/tools"
 	"github.com/x-thooh/thooh-admin/app/core/utils/R"
+	"github.com/x-thooh/thooh-admin/common/json/bitx"
 )
 
 func ListPost(context *gin.Context) {
@@ -28,7 +29,7 @@ func ListPost(context *gin.Context) {
 		Other: system.SysPost{
 			PostName: postName,
 			PostCode: postCode,
-			Status:   status,
+			Status:   bitx.Str(status),
 		},
 		Params: tools.Params{
 			BeginTime: beginTime,
@@ -55,7 +56,7 @@ func ExportPost(context *gin.Context) {
 		Other: system.SysPost{
 			PostName: postName,
 			PostCode: postCode,
-			Status:   status,
+			Status:   bitx.Str(status),
 		},
 		Params: tools.Params{
 			BeginTime: beginTime,

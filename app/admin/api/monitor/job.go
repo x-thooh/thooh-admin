@@ -8,6 +8,7 @@ import (
 	"github.com/x-thooh/thooh-admin/app/admin/model/monitor"
 	"github.com/x-thooh/thooh-admin/app/admin/model/tools"
 	"github.com/x-thooh/thooh-admin/app/core/utils/R"
+	"github.com/x-thooh/thooh-admin/common/json/bitx"
 )
 
 func ListJob(context *gin.Context) {
@@ -35,7 +36,7 @@ func getListJob(context *gin.Context, isPage bool) ([]monitor.SysJob, int64) {
 		Other: monitor.SysJob{
 			JobName:      jobName,
 			JobGroup:     jobGroup,
-			Status:       status,
+			Status:       bitx.Str(status),
 			InvokeTarget: invokeTarget,
 		},
 	}

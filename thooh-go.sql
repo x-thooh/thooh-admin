@@ -542,7 +542,7 @@ CREATE TABLE `sys_menu`  (
 -- Records of sys_menu
 -- ----------------------------
 INSERT INTO `sys_menu` VALUES (1000, b'1', b'0', 'Layout', '2026-01-20 15:03:01.104000', NULL, 'tdesign:system-setting', '系统管理', NULL, 1000, b'0', NULL, 'sys', 0, b'1', '1', '2026-01-20 15:03:01.104000', NULL);
-INSERT INTO `sys_menu` VALUES (1010, b'1', b'0', 'sys/org/index', '2026-01-20 15:03:01.104000', NULL, 'mingcute:department-line', '组织管理', NULL, 1010, b'0', NULL, 'org', 1000, b'1', '2', '2026-01-20 15:03:01.104000', NULL);
+INSERT INTO `sys_menu` VALUES (1010, b'1', b'0', 'system/dept/index', '2026-01-20 15:03:01.104000', NULL, 'mingcute:department-line', '组织管理', NULL, 1010, b'0', NULL, 'org', 1000, b'1', '2', '2026-01-20 15:03:01.104000', NULL);
 INSERT INTO `sys_menu` VALUES (1020, b'1', b'0', 'system/user/index', '2026-01-20 15:03:01.104000', NULL, 'ant-design:user-outlined', '用户管理', NULL, 1020, b'0', NULL, 'user', 1000, b'1', '2', '2026-01-20 15:03:01.104000', NULL);
 INSERT INTO `sys_menu` VALUES (1021, b'1', b'1', 'sys/user/tedit', '2026-01-20 15:03:01.104000', NULL, 'mingcute:user-edit-line', '用户编辑', NULL, 1021, b'0', NULL, 'user/edit', 1000, b'0', '2', '2026-01-20 15:03:01.104000', NULL);
 INSERT INTO `sys_menu` VALUES (1030, b'1', b'0', 'system/post/index', '2026-01-20 15:03:01.104000', NULL, 'icon-park-outline:appointment', '岗位管理', NULL, 1030, b'0', NULL, 'post', 1000, b'1', '2', '2026-01-20 15:03:01.104000', NULL);

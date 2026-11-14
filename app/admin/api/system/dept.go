@@ -7,6 +7,7 @@ import (
 	"github.com/x-thooh/thooh-admin/app/admin/model/tools"
 	"github.com/x-thooh/thooh-admin/app/core/utils"
 	"github.com/x-thooh/thooh-admin/app/core/utils/R"
+	"github.com/x-thooh/thooh-admin/common/json/bitx"
 	"net/http"
 	"strconv"
 )
@@ -26,7 +27,7 @@ func ListDept(context *gin.Context) {
 		PageSize: pageSize,
 		Other: system.SysDept{
 			DeptName: deptName,
-			Status:   status,
+			Status:   bitx.Str(status),
 		},
 		Params: tools.Params{
 			BeginTime: beginTime,

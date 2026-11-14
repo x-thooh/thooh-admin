@@ -1,6 +1,7 @@
 package system
 
 import (
+	"github.com/x-thooh/thooh-admin/common/json/bitx"
 	"strconv"
 	"strings"
 	"time"
@@ -17,14 +18,14 @@ type SysMenu struct {
 	ParentId   int       `json:"parentId" gorm:"column:pid"`
 	OrderNum   int       `json:"orderNum" gorm:"column:ornum"`
 	MenuType   string    `json:"menuType" gorm:"column:type"`
-	Visible    string    `json:"visible" gorm:"column:shtag"`
+	Visible    bitx.Str  `json:"visible" gorm:"column:shtag"`
 	Perms      string    `json:"perms" gorm:"-"`
 	Query      string    `json:"query" gorm:"column:param"`
-	IsFrame    string    `json:"isFrame" gorm:"column:outag"`
+	IsFrame    bitx.Str  `json:"isFrame" gorm:"column:outag"`
 	Icon       string    `json:"icon" gorm:"column:icon"`
 	Path       string    `json:"path" gorm:"column:path"`
-	Status     string    `json:"status" gorm:"column:avtag"`
-	IsCache    string    `json:"isCache" gorm:"column:catag"`
+	Status     bitx.Str  `json:"status" gorm:"column:avtag"`
+	IsCache    bitx.Str  `json:"isCache" gorm:"column:catag"`
 	Component  string    `json:"component" gorm:"column:comp"`
 	CreateBy   string    `json:"createBy" gorm:"-"`
 	CreateTime time.Time `json:"createTime" gorm:"column:crtim;type:datetime;autoCreateTime"`
@@ -90,11 +91,11 @@ func SelectMenuTree(userId string, menu SysMenu) []SysMenu {
 		}
 		var visible = menu.Visible
 		if visible != "" {
-			sql += "AND m.shtag = " + visible
+			sql += "AND m.shtag = " + bitOf(visible)
 		}
 		var status = menu.Status
 		if status != "" {
-			sql += "AND m.avtag = " + status
+			sql += "AND m.avtag = " + bitOf(status)
 		}
 		err := mysql.MysqlDb().Raw(sql).Scan(&menus).Error
 		if err != nil {
@@ -111,11 +112,11 @@ func SelectMenuTree(userId string, menu SysMenu) []SysMenu {
 		}
 		var visible = menu.Visible
 		if visible != "" {
-			sql += "AND m.shtag = " + visible
+			sql += "AND m.shtag = " + bitOf(visible)
 		}
 		var status = menu.Status
 		if status != "" {
-			sql += "AND m.avtag = " + status
+			sql += "AND m.avtag = " + bitOf(status)
 		}
 		err := mysql.MysqlDb().Raw(sql).Scan(&menus).Error
 		if err != nil {
@@ -296,18 +297,18 @@ func SelectSysMenuList(params tools.SearchTableDataParam) []SysMenu {
 	sysMenu := params.Other.(SysMenu)
 	var rows []SysMenu
 	var sql = "select id, name, pid, ornum, path, comp, param, outag, catag, type, shtag, " +
-		"avtag, '' as perms, icon, crtim from sys_menu where 1 = 1 "
+		"avtag, '' as perms, icon, crtim from sys_menu where avtag = 1 "
 	var name = sysMenu.MenuName
 	if name != "" {
 		sql += " AND name LIKE CONCAT('%', '" + name + "', '%')"
 	}
 	var visible = sysMenu.Visible
 	if visible != "" {
-		sql += " AND shtag = " + visible
+		sql += " AND shtag = " + bitOf(visible)
 	}
 	var status = sysMenu.Status
 	if status != "" {
-		sql += " AND avtag = " + status
+		sql += " AND avtag = " + bitOf(status)
 	}
 	err := mysql.MysqlDb().Raw(sql).Find(&rows).Error
 	if err != nil {
@@ -348,11 +349,11 @@ func SelectSysMenuListByUserId(userId string, params tools.SearchTableDataParam)
 	var visible = sysMenu.Visible
 
 	if visible != "" {
-		sql += "AND m.shtag = " + visible + " "
+		sql += "AND m.shtag = " + bitOf(visible) + " "
 	}
 	var status = sysMenu.Status
 	if status != "" {
-		sql += "AND m.avtag = " + status + " "
+		sql += "AND m.avtag = " + bitOf(status) + " "
 	}
 
 	sql += "order by m.pid, m.ornum"
@@ -394,7 +395,8 @@ func hasChildCountByMenuId(menuId string) int {
 
 func checkMenuExistRole(menuId string) int {
 	var menuCount int
-	err := mysql.MysqlDb().Raw("select count(1) from sys_role_menu where id = " + menuId).Scan(&menuCount).Error
+	// WHY: sys_role_menu 的列是 rid/mid，没有 id（浏览器删菜单实测 1054）
+	err := mysql.MysqlDb().Raw("select count(1) from sys_role_menu where mid = " + menuId).Scan(&menuCount).Error
 	if err != nil {
 		panic(R.ReturnFailMsg(err.Error()))
 	}
@@ -412,7 +414,7 @@ func DeleteMenu(menuIds string) R.Result {
 		return R.ReturnFailMsg("菜单已分配,不允许删除")
 	}
 
-	err := mysql.MysqlDb().Exec("delete from sys_menu where id in (?) ", menuIds).Error
+	err := mysql.MysqlDb().Exec("update sys_menu set avtag = 0 where id in (?) ", menuIds).Error
 	if err == nil {
 		R.ReturnFailMsg("删除部门关联用户失败")
 	}
@@ -438,6 +440,10 @@ func AddMenu(sysMenu SysMenu) R.Result {
 	isPath := isInnerLink(menuPath)
 	if isFrame == "true" && !isPath {
 		return R.ReturnFailMsg("新增菜单" + sysMenu.MenuName + "失败，地址必须以http(s)://开头")
+	}
+	// WHY: sys_menu.id 是 bigint 且无自增，不给值就 1364（浏览器新增菜单实测）
+	if sysMenu.MenuId == 0 {
+		sysMenu.MenuId = int(newMenuId())
 	}
 	err := mysql.MysqlDb().Create(&sysMenu).Error
 	if err != nil {
@@ -468,4 +474,18 @@ func UpdateMenu(sysMenu SysMenu) R.Result {
 		panic(R.ReturnFailMsg(err.Error()))
 	}
 	return R.ReturnSuccess("操作成功")
+}
+
+// bitOf 把 RuoYi 口径的 "0/1" 翻成 dump 里 bit(1) 的实际值。
+// WHY: dump 存 b'1' 表示「显示 / 可用」，RuoYi 用 "0" 表示同一件事；直接拼进 SQL 会查反。
+func bitOf(v bitx.Str) string {
+	if v == "0" {
+		return "1"
+	}
+	return "0"
+}
+
+// newMenuId 给 sys_menu 造主键。WHY: 该表 id 是 bigint 且没有 auto_increment。
+func newMenuId() int64 {
+	return time.Now().UnixNano() / 1000
 }

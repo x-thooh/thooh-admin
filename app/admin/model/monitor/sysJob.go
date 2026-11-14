@@ -1,6 +1,7 @@
 package monitor
 
 import (
+	"github.com/x-thooh/thooh-admin/common/json/bitx"
 	"time"
 
 	"github.com/jinzhu/copier"
@@ -29,7 +30,7 @@ type SysJob struct {
 	CronExpression string    `json:"cronExpression" gorm:"column:cron"`
 	MisfirePolicy  int       `json:"misfirePolicy" gorm:"column:retyp"`
 	Concurrent     int       `json:"concurrent" gorm:"-"` // dump 无此列
-	Status         string    `json:"status" gorm:"column:avtag"`
+	Status         bitx.Str  `json:"status" gorm:"column:avtag"`
 	CreateBy       string    `json:"createBy" gorm:"-"` // dump 无此列
 	CreateTime     time.Time `json:"createTime" gorm:"column:crtim;type:datetime"`
 	UpdateBy       string    `json:"updateBy" gorm:"-"`   // dump 无此列

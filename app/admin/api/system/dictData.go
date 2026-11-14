@@ -6,6 +6,7 @@ import (
 	"github.com/x-thooh/thooh-admin/app/admin/model/tools"
 	"github.com/x-thooh/thooh-admin/app/core/utils"
 	"github.com/x-thooh/thooh-admin/app/core/utils/R"
+	"github.com/x-thooh/thooh-admin/common/json/bitx"
 	"net/http"
 	"strconv"
 	"time"
@@ -29,7 +30,7 @@ func ListDict(context *gin.Context) {
 		PageSize: pageSize,
 		Other: system.SysDictData{
 			DictType:  dictType,
-			Status:    status,
+			Status:    bitx.Str(status),
 			DictLabel: dictLabel,
 		},
 		Params: tools.Params{
@@ -231,7 +232,7 @@ func ListDictType(context *gin.Context) {
 		Other: system.SysDictType{
 			DictName: dictName,
 			DictType: dictType,
-			Status:   status,
+			Status:   bitx.Str(status),
 		},
 		Params: tools.Params{
 			BeginTime: beginTime,
@@ -260,7 +261,7 @@ func ExportType(context *gin.Context) {
 		Other: system.SysDictType{
 			DictName: dictName,
 			DictType: dictType,
-			Status:   status,
+			Status:   bitx.Str(status),
 		},
 		Params: tools.Params{
 			BeginTime: beginTime,
@@ -300,7 +301,7 @@ func ExportType(context *gin.Context) {
 	data := make([]map[string]interface{}, 0)
 	if len(list) > 0 {
 		for _, v := range list {
-			status = v.Status
+			status = string(v.Status)
 			var statusStr = ""
 			if status == "0" {
 				statusStr = "正常"
