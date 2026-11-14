@@ -312,11 +312,12 @@
     {
       "id": "T-31",
       "title": "用户列表响应体里带着 password（口令散列直接出站）",
-      "status": "open",
+      "status": "doing",
       "priority": "high",
       "detail": "实测（2026-10-30，带 token 打 /sys/user?pageNum=1&pageSize=2）：返回 rows[0] 含 \"password\":\"$2a$10$...\"，即 bcrypt 散列原样发给前端。modules/sys/user 的 model 没把 password 从 JSON 输出里摘掉，列表与详情都会带。对私有化交付这是可离线破解的素材，且不因「在内网」而变轻。做法：VO 层不带 password（modules/sys/user 的返回改走显式 vo，或 model 里 password 标 json:\"-\"），改完实测一次列表响应体里搜不到 $2。",
       "owner": "thooh",
-      "scope": "modules"
+      "scope": "modules",
+      "worktree": "T-31"
     },
     {
       "id": "T-32",

@@ -5,7 +5,7 @@
 
 ## 下一步（看板）
 
-- 看板更新于 2026-10-30，共 39 条：open 25、doing 1、blocked 1、done 12
+- 看板更新于 2026-10-30，共 39 条：open 24、doing 2、blocked 1、done 12
 - 高优先级未完成（逐条点名，不写概括句）：
   - `T-1` sys_config 的 DDL 与 GORM 模型列名不一致
   - `T-17` make task-done 半途失败后没有出路：只读模块缓存让 worktree remove 卡住

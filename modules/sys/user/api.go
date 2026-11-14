@@ -30,6 +30,9 @@ func Get(c *gin.Context) {
 	if err != nil {
 		return
 	}
+	for i := range paginate.Rows {
+		paginate.Rows[i].Password = "" // WHY: 列表出站不吐口令散列（T-31）
+	}
 	c.JSON(http.StatusOK, r.Ok(paginate))
 }
 
@@ -40,6 +43,7 @@ func GetInfo(c *gin.Context) {
 	if main.Id == "" {
 		panic(R.ReturnFailMsg("未找到记录"))
 	}
+	main.Password = "" // WHY: 详情出站不吐口令散列（T-31）
 	c.JSON(http.StatusOK, r.Ok(main))
 }
 

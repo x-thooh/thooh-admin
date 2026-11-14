@@ -9,7 +9,7 @@ type SysUser struct {
 	Id       string     `json:"id" gorm:"primaryKey"` //主键ID
 	Name     string     `json:"name"`                 //名称
 	Username string     `json:"username"`             //用户名（账号）
-	Password string     `json:"password"`             //用户名（账号）
+	Password string     `json:"password,omitempty"`   //口令（散列）；出站置空后 omitempty 让字段不再出现
 	Email    string     `json:"email"`                //邮箱
 	Monum    string     `json:"monum"`                //手机号
 	Gender   string     `json:"gender"`               //性别
