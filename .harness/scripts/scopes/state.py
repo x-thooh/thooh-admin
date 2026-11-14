@@ -18,6 +18,8 @@ import subprocess
 from datetime import date, datetime
 from pathlib import Path
 
+import ageing
+
 from .common import add, as_list, load_json, number, text
 
 NAME = "state"
@@ -138,7 +140,7 @@ def check_board(root, findings, quality):
         return
     raw_limit = quality.get("board_stale_days") if isinstance(quality, dict) else None
     limit = number(raw_limit) or DEFAULT_STALE_DAYS
-    days = (today - updated).days
+    days = ageing.age_days(ageing.day_ts(updated), ageing.day_ts(today))
     if days >= 2 * limit:
         add(findings, "ERROR", NAME, BOARD_REL, 1, "STATE008",
             f"看板已经 {days} 天没动（额度 {limit} 天的两倍）：过期到没人会再信它，就该当问题处理")

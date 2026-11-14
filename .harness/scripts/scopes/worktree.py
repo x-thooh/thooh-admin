@@ -22,7 +22,9 @@
 from pathlib import Path
 
 import wt as wtlib
-from .common import add, rel_to
+import time
+
+from .common import add, quality_get, rel_to
 
 NAME = "worktree"
 
@@ -85,9 +87,13 @@ def run(ctx, findings):
                     f"（{state_problem}）：证明不了它结束，先别撤树")
             elif merged:
                 extra = "" if clean else f"；树里另有没提交的东西，task-done 会先拒绝：{dirty}"
-                add(findings, "WARN", NAME, rel_to(root, path), 1, "WKT001",
-                    f"任务 {tid} 已 done，这份工作已经合进主树，树 {name} 还挂着：只差最后一步"
-                    f" make task-done TASK={name}{extra}。这一档按 WARN 记——提交途中的树"
+                limit = int(quality_get(ctx.get("quality"), "worktree_done_days", 7))
+                days = wtlib.head_age_days(path, time.time()) or 0
+                late = days >= 2 * limit
+                add(findings, "ERROR" if late else "WARN", NAME, rel_to(root, path), 1, "WKT001",
+                    f"任务 {tid} 已 done，这份工作已经合进主树，树 {name} 还挂着（树的 HEAD 距今 {days} 天，"
+                    f"{limit} 天起 WARN、{2 * limit} 天起 ERROR）：只差最后一步"
+                    f" make task-done TASK={name}{extra}。未到时限按 WARN 记——提交途中的树"
                     "永远是 dirty 的，按 ERROR 记等于把收尾那次提交自己拦住")
             else:
                 add(findings, "ERROR", NAME, rel_to(root, path), 1, "WKT001",
