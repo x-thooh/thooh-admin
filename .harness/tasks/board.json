@@ -417,6 +417,24 @@
       "detail": "实测（2026-10-30）：sys_role 里 1 号备注「拥有所有权限」，但 sys_role_menu 给它 38 条（缺的正好是「使用案例」8000/8010/8020/8030 整块），sys_role_api 给它 57 条（共 73）。旧实现靠 userId==1 发 [\"admin\"] 与 [\"*:*:*\"] 兜住，T-28 把超管改成数据（补 sys_role_actor 1:u1）之后，这条路就没有兜底了——换客户现场漏授一行就是自己把自己关在门外。要人判：①补齐角色 1 的授权行；②在数据里表达「全部」（sys_api 里放一行 *:*:* 或 sys_role 加个标记列），②会牵动 getRouters 与门判定，是单独一轮。在定之前，getInfo/getRouters 都按数据给，不写特判——这是 T-28 定的口径，别在别处悄悄破。",
       "worktree": "T-39",
       "evidence": "commit:927f0aa"
+    },
+    {
+      "id": "T-40",
+      "title": "app/admin/model/system 旧表名旧列名全面对账到 dump 口径",
+      "status": "open",
+      "priority": "high",
+      "owner": "thooh",
+      "scope": "modules",
+      "detail": "上一轮 T-20 只改了 gorm tag，原生/联表 SQL 里的旧表名没动。对账基线（dump 为准）：sys_user_role→sys_role_actor(rid/aid)（sysRoles.go 联表多处、sysMenu.go:74/105/340、sysUserRole.go TableName）、sys_user_post→sys_post_actor（sysPosts.go:35/103/135、sysUserPost.go TableName）、sys_dept→sys_org（sysRoles.go、sysUserRole.go:35）、旧列名 user_id/role_id/dept_id/post_id/status→dump 短列名（id/rid/aid/porid/avtag 等）。sys_role_dept 在 dump 无对应表：sysRoleDept.go 整个文件与 sysRoles.go:263 调用、sysRoles.go:618 联表一并摘掉（数据权限功能删除，用户已拍板）。"
+    },
+    {
+      "id": "T-41",
+      "title": "gen.go 原生 SQL 对账到 tool_code 口径",
+      "status": "open",
+      "priority": "medium",
+      "owner": "thooh",
+      "scope": "modules",
+      "detail": "app/admin/service/tools/gen.go 的原生 SQL 引用 gen_table/gen_table_column（RuoYi 长列名 table_id/table_name/table_comment/class_name/column_id 等），dump 是 tool_code_table/tool_code_field（短列名 id/name/notes/ornum/pmeid 等）。做法：逐字段对账 tool_code 表结构；对不上的字段若 tool_code 确实没有就标注未实现或摘掉代码生成器功能，并记 decisions；不许瞎猜映射。"
     }
   ]
 }
