@@ -544,13 +544,9 @@ CREATE TABLE `sys_menu`  (
 INSERT INTO `sys_menu` VALUES (1000, b'1', b'0', 'Layout', '2026-01-20 15:03:01.104000', NULL, 'tdesign:system-setting', '系统管理', NULL, 1000, b'0', NULL, 'sys', 0, b'1', '1', '2026-01-20 15:03:01.104000', NULL);
 INSERT INTO `sys_menu` VALUES (1010, b'1', b'0', 'system/dept/index', '2026-01-20 15:03:01.104000', NULL, 'mingcute:department-line', '组织管理', NULL, 1010, b'0', NULL, 'org', 1000, b'1', '2', '2026-01-20 15:03:01.104000', NULL);
 INSERT INTO `sys_menu` VALUES (1020, b'1', b'0', 'system/user/index', '2026-01-20 15:03:01.104000', NULL, 'ant-design:user-outlined', '用户管理', NULL, 1020, b'0', NULL, 'user', 1000, b'1', '2', '2026-01-20 15:03:01.104000', NULL);
-INSERT INTO `sys_menu` VALUES (1021, b'1', b'1', 'sys/user/tedit', '2026-01-20 15:03:01.104000', NULL, 'mingcute:user-edit-line', '用户编辑', NULL, 1021, b'0', NULL, 'user/edit', 1000, b'0', '2', '2026-01-20 15:03:01.104000', NULL);
 INSERT INTO `sys_menu` VALUES (1030, b'1', b'0', 'system/post/index', '2026-01-20 15:03:01.104000', NULL, 'icon-park-outline:appointment', '岗位管理', NULL, 1030, b'0', NULL, 'post', 1000, b'1', '2', '2026-01-20 15:03:01.104000', NULL);
-INSERT INTO `sys_menu` VALUES (1040, b'1', b'0', 'sys/group/index', '2026-01-20 15:03:01.104000', NULL, 'material-symbols:group-outline-rounded', '群组管理', NULL, 1040, b'0', NULL, 'group', 1000, b'1', '2', '2026-01-20 15:03:01.104000', NULL);
 INSERT INTO `sys_menu` VALUES (1050, b'1', b'0', 'system/menu/index', '2026-01-20 15:03:01.104000', NULL, 'ri:menu-fold-2-fill', '菜单管理', NULL, 1050, b'0', NULL, 'menu', 1000, b'1', '2', '2026-01-20 15:03:01.104000', NULL);
-INSERT INTO `sys_menu` VALUES (1060, b'1', b'0', 'sys/api/index', '2026-01-20 15:03:01.104000', NULL, 'ant-design:api-outlined', '接口管理', NULL, 1060, b'0', NULL, 'api', 1000, b'1', '2', '2026-01-20 15:03:01.104000', NULL);
 INSERT INTO `sys_menu` VALUES (1070, b'1', b'0', 'system/role/index', '2026-01-20 15:03:01.104000', NULL, 'eos-icons:role-binding-outlined', '角色管理', NULL, 1070, b'0', NULL, 'role', 1000, b'1', '2', '2026-01-20 15:03:01.104000', NULL);
-INSERT INTO `sys_menu` VALUES (1071, b'1', b'1', 'sys/role/edit', '2026-01-20 15:03:01.104000', NULL, 'oui:app-users-roles', '角色编辑', NULL, 1071, b'0', NULL, 'role/edit', 1000, b'0', '2', '2026-01-20 15:03:01.104000', NULL);
 INSERT INTO `sys_menu` VALUES (1080, b'1', b'0', 'system/config/index', '2026-01-20 15:03:01.104000', NULL, 'ant-design:setting-outlined', '参数设置', NULL, 1080, b'0', NULL, 'config', 1000, b'1', '2', '2026-01-20 15:03:01.104000', NULL);
 INSERT INTO `sys_menu` VALUES (1090, b'1', b'0', 'system/notice/index', '2026-01-20 15:03:01.104000', NULL, 'fe:notice-push', '通知公告', NULL, 1090, b'0', NULL, 'notice', 1000, b'1', '2', '2026-01-20 15:03:01.104000', NULL);
 INSERT INTO `sys_menu` VALUES (2000, b'1', b'0', 'Layout', '2026-01-20 15:03:01.104000', NULL, 'eos-icons:monitoring', '监控中心', NULL, 2000, b'0', NULL, 'mon', 0, b'1', '1', '2026-01-20 15:03:01.104000', NULL);
@@ -560,29 +556,10 @@ INSERT INTO `sys_menu` VALUES (2030, b'1', b'0', 'monitor/operlog/index', '2026-
 INSERT INTO `sys_menu` VALUES (2040, b'1', b'0', 'monitor/server/index', '2026-01-20 15:03:01.104000', NULL, 'mdi:server-outline', '服务监控', NULL, 2040, b'0', NULL, 'server', 2000, b'1', '2', '2026-01-20 15:03:01.104000', NULL);
 INSERT INTO `sys_menu` VALUES (2050, b'1', b'0', 'monitor/cache/index', '2026-01-20 15:03:01.104000', NULL, 'octicon:cache-24', '缓存监控', NULL, 2050, b'0', NULL, 'cache', 2000, b'1', '2', '2026-01-20 15:03:01.104000', NULL);
 INSERT INTO `sys_menu` VALUES (2060, b'1', b'0', 'monitor/job/index', '2026-01-20 15:03:01.104000', NULL, 'streamline:task-list', '定时任务', NULL, 2060, b'0', NULL, 'job', 2000, b'1', '2', '2026-01-20 15:03:01.104000', NULL);
-INSERT INTO `sys_menu` VALUES (2061, b'1', b'0', 'mon/job/log/index', '2026-01-20 15:03:01.104000', NULL, 'ix:log', '任务日志', NULL, 2061, b'0', NULL, 'jobl', 2000, b'0', '2', '2026-01-20 15:03:01.104000', NULL);
 INSERT INTO `sys_menu` VALUES (3000, b'1', b'0', 'Layout', '2026-01-20 15:03:01.104000', NULL, 'ant-design:tool-outlined', '辅助工具', NULL, 3000, b'0', NULL, 'tool', 0, b'1', '1', '2026-01-20 15:03:01.104000', NULL);
 INSERT INTO `sys_menu` VALUES (3010, b'1', b'0', 'system/dict/index', '2026-01-20 15:03:01.104000', NULL, 'fluent-mdl2:dictionary', '字典工具', NULL, 3010, b'0', NULL, 'dict', 3000, b'1', '2', '2026-01-20 15:03:01.104000', NULL);
-INSERT INTO `sys_menu` VALUES (3020, b'1', b'0', 'tool/num/index', '2026-01-20 15:03:01.104000', NULL, 'streamline-sharp:steps-number', '编号工具', NULL, 3020, b'0', NULL, 'num', 3000, b'1', '2', '2026-01-20 15:03:01.104000', NULL);
-INSERT INTO `sys_menu` VALUES (3030, b'1', b'0', 'tool/oss/main/index', '2026-01-20 15:03:01.104000', NULL, 'mdi:file-outline', '文件工具', NULL, 3030, b'0', NULL, 'oss', 3000, b'1', '2', '2026-01-20 15:03:01.104000', NULL);
 INSERT INTO `sys_menu` VALUES (3040, b'1', b'0', 'tool/build/index', '2026-01-20 15:03:01.104000', NULL, 'fluent:form-20-regular', '在线表单', NULL, 3040, b'0', NULL, 'form', 3000, b'1', '2', '2026-01-20 15:03:01.104000', NULL);
-INSERT INTO `sys_menu` VALUES (3041, b'1', b'1', 'tool/form/edit', '2026-01-20 15:03:01.104000', NULL, 'fluent:form-20-regular', '在线表单', NULL, 3041, b'0', NULL, 'form/edit', 3000, b'0', '2', '2026-01-20 15:03:01.104000', NULL);
 INSERT INTO `sys_menu` VALUES (3050, b'1', b'0', 'tool/gen/index', '2026-01-20 15:03:01.104000', NULL, 'humbleicons:code', '代码生成', NULL, 3050, b'0', NULL, 'code', 3000, b'1', '2', '2026-01-20 15:03:01.104000', NULL);
-INSERT INTO `sys_menu` VALUES (3051, b'1', b'0', 'tool/code/edit', '2026-01-20 15:03:01.104000', NULL, 'humbleicons:code', '代码生成', NULL, 3051, b'0', NULL, 'code/edit', 3000, b'0', '2', '2026-01-20 15:03:01.104000', NULL);
-INSERT INTO `sys_menu` VALUES (6000, b'1', b'0', 'Layout', '2026-01-20 15:03:01.150000', NULL, 'streamline-sharp:text-flow-rows', '流程管理', NULL, 6000, b'0', NULL, 'bpm', 0, b'1', '1', '2026-01-20 15:03:01.150000', NULL);
-INSERT INTO `sys_menu` VALUES (6010, b'1', b'0', 'bpm/bus/cate/index', '2026-01-20 15:03:01.150000', NULL, 'tabler:category-plus', '流程分类', NULL, 6010, b'0', NULL, 'busc', 6000, b'1', '2', '2026-01-20 15:03:01.150000', NULL);
-INSERT INTO `sys_menu` VALUES (6020, b'1', b'0', 'bpm/bus/tmpl/index', '2026-01-20 15:03:01.150000', NULL, 'carbon:prompt-template', '流程模板', NULL, 6020, b'0', NULL, 'bust', 6000, b'1', '2', '2026-01-20 15:03:01.150000', NULL);
-INSERT INTO `sys_menu` VALUES (6021, b'1', b'1', 'bpm/bus/tmpl/edit', '2026-01-20 15:03:01.150000', NULL, 'carbon:prompt-template', '流程模板编辑', NULL, 6021, b'0', NULL, 'bust/edit', 6000, b'0', '2', '2026-01-20 15:03:01.150000', NULL);
-INSERT INTO `sys_menu` VALUES (6030, b'1', b'0', 'bpm/bus/main/index', '2026-01-20 15:03:01.150000', NULL, 'ri:instance-line', '流程清单', NULL, 6030, b'0', NULL, 'bus', 6000, b'1', '2', '2026-01-20 15:03:01.150000', NULL);
-INSERT INTO `sys_menu` VALUES (6031, b'1', b'1', 'bpm/bus/main/edit', '2026-01-20 15:03:01.150000', NULL, 'ri:instance-line', '流程编辑', NULL, 6031, b'0', NULL, 'bus/edit', 6000, b'0', '2', '2026-01-20 15:03:01.150000', NULL);
-INSERT INTO `sys_menu` VALUES (6032, b'1', b'1', 'bpm/bus/main/view', '2026-01-20 15:03:01.150000', NULL, 'ri:instance-line', '流程查看', NULL, 6032, b'0', NULL, 'bus/view', 6000, b'0', '2', '2026-01-20 15:03:01.150000', NULL);
-INSERT INTO `sys_menu` VALUES (6040, b'1', b'0', 'bpm/todo/index', '2026-01-20 15:03:01.150000', NULL, 'ri:todo-line', '流程待办', NULL, 6040, b'0', NULL, 'todo', 6000, b'1', '2', '2026-01-20 15:03:01.150000', NULL);
-INSERT INTO `sys_menu` VALUES (6050, b'1', b'0', 'bpm/role/tree/index', '2026-01-20 15:03:01.150000', NULL, 'mdi:workflow-outline', '流程角色', NULL, 6050, b'0', NULL, 'role', 6000, b'1', '2', '2026-01-20 15:03:01.150000', NULL);
-INSERT INTO `sys_menu` VALUES (6051, b'1', b'0', 'bpm/role/node/index', '2026-01-20 15:03:01.150000', NULL, 'mdi:workflow-outline', '流程角色节点', NULL, 6051, b'0', NULL, 'role/node', 6000, b'0', '2', '2026-01-20 15:03:01.150000', NULL);
-INSERT INTO `sys_menu` VALUES (8000, b'1', b'0', 'Layout', '2026-01-20 15:03:01.429000', NULL, 'hugeicons:star', '使用案例', NULL, 8000, b'0', NULL, 'demo', 0, b'1', '1', '2026-01-20 15:03:01.429000', NULL);
-INSERT INTO `sys_menu` VALUES (8010, b'1', b'0', 'demo/single/main/index', '2026-01-20 15:03:01.429000', NULL, 'pajamas:work-item-requirement', '单一主表案例', NULL, 8010, b'0', NULL, 'single', 8000, b'1', '2', '2026-01-20 15:03:01.429000', NULL);
-INSERT INTO `sys_menu` VALUES (8020, b'1', b'0', 'demo/single/cate/index', '2026-01-20 15:03:01.429000', NULL, 'pajamas:work-item-requirement', '单一树表案例', NULL, 8020, b'0', NULL, 'singlec', 8000, b'1', '2', '2026-01-20 15:03:01.429000', NULL);
-INSERT INTO `sys_menu` VALUES (8030, b'1', b'0', 'demo/link/index', '2026-01-20 15:03:01.429000', NULL, 'pajamas:work-item-requirement', '关联主分子案例', NULL, 8030, b'0', NULL, 'link', 8000, b'1', '2', '2026-01-20 15:03:01.429000', NULL);
 
 -- ----------------------------
 -- Table structure for sys_notice
@@ -937,13 +914,9 @@ CREATE TABLE `sys_role_menu`  (
 INSERT INTO `sys_role_menu` VALUES (1, 1000);
 INSERT INTO `sys_role_menu` VALUES (1, 1010);
 INSERT INTO `sys_role_menu` VALUES (1, 1020);
-INSERT INTO `sys_role_menu` VALUES (1, 1021);
 INSERT INTO `sys_role_menu` VALUES (1, 1030);
-INSERT INTO `sys_role_menu` VALUES (1, 1040);
 INSERT INTO `sys_role_menu` VALUES (1, 1050);
-INSERT INTO `sys_role_menu` VALUES (1, 1060);
 INSERT INTO `sys_role_menu` VALUES (1, 1070);
-INSERT INTO `sys_role_menu` VALUES (1, 1071);
 INSERT INTO `sys_role_menu` VALUES (1, 1080);
 INSERT INTO `sys_role_menu` VALUES (1, 1090);
 INSERT INTO `sys_role_menu` VALUES (1, 2000);
@@ -953,39 +926,10 @@ INSERT INTO `sys_role_menu` VALUES (1, 2030);
 INSERT INTO `sys_role_menu` VALUES (1, 2040);
 INSERT INTO `sys_role_menu` VALUES (1, 2050);
 INSERT INTO `sys_role_menu` VALUES (1, 2060);
-INSERT INTO `sys_role_menu` VALUES (1, 2061);
 INSERT INTO `sys_role_menu` VALUES (1, 3000);
 INSERT INTO `sys_role_menu` VALUES (1, 3010);
-INSERT INTO `sys_role_menu` VALUES (1, 3020);
-INSERT INTO `sys_role_menu` VALUES (1, 3030);
 INSERT INTO `sys_role_menu` VALUES (1, 3040);
-INSERT INTO `sys_role_menu` VALUES (1, 3041);
 INSERT INTO `sys_role_menu` VALUES (1, 3050);
-INSERT INTO `sys_role_menu` VALUES (1, 3051);
-INSERT INTO `sys_role_menu` VALUES (1, 6000);
-INSERT INTO `sys_role_menu` VALUES (1, 6010);
-INSERT INTO `sys_role_menu` VALUES (1, 6020);
-INSERT INTO `sys_role_menu` VALUES (1, 6021);
-INSERT INTO `sys_role_menu` VALUES (1, 6030);
-INSERT INTO `sys_role_menu` VALUES (1, 6031);
-INSERT INTO `sys_role_menu` VALUES (1, 6032);
-INSERT INTO `sys_role_menu` VALUES (1, 6040);
-INSERT INTO `sys_role_menu` VALUES (1, 6050);
-INSERT INTO `sys_role_menu` VALUES (1, 6051);
-INSERT INTO `sys_role_menu` VALUES (1, 8000);
-INSERT INTO `sys_role_menu` VALUES (1, 8010);
-INSERT INTO `sys_role_menu` VALUES (1, 8020);
-INSERT INTO `sys_role_menu` VALUES (1, 8030);
-INSERT INTO `sys_role_menu` VALUES (2, 6000);
-INSERT INTO `sys_role_menu` VALUES (2, 6010);
-INSERT INTO `sys_role_menu` VALUES (2, 6020);
-INSERT INTO `sys_role_menu` VALUES (2, 6021);
-INSERT INTO `sys_role_menu` VALUES (2, 6030);
-INSERT INTO `sys_role_menu` VALUES (2, 6031);
-INSERT INTO `sys_role_menu` VALUES (2, 6032);
-INSERT INTO `sys_role_menu` VALUES (2, 6040);
-INSERT INTO `sys_role_menu` VALUES (2, 6050);
-INSERT INTO `sys_role_menu` VALUES (2, 6051);
 
 -- ----------------------------
 -- Table structure for sys_social

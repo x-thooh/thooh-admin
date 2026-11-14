@@ -443,12 +443,13 @@
     {
       "id": "T-42",
       "title": "25 个菜单指向的前端模块不在 web/admin 产物里",
-      "status": "blocked",
+      "status": "done",
       "priority": "high",
       "owner": "thooh",
       "scope": "modules",
       "waiting_on": "使用者提供前端源码仓库/凭据（README 说是基于 thooh5 修改）",
-      "detail": "实测（2026-11-14，chrome-cdp 点遍 28 个菜单）：14 个有产物的页面全部加载真实数据、后端 0 报错；另 25 个点开报 Cannot find module，控制台可见。产物侧核实：web/admin/static/js 里只有 19 个懒加载键（./system/{user,role,menu,dept,post,dict,config,notice}/index、./system/user/profile/index、./monitor/{cache,druid,job,logininfor,online,operlog,server}/index、./tool/{gen,build,swagger}/index），不含 sys/group、sys/api、tool/num、tool/oss、mon/job/log、bpm/*（5 个）、demo/*（3 个）。源码三处确认不可得：本机无 src//package.json、git 全部历史 0 个 .vue/package.json、产物无 .map。上游排查记录：zsvg-com/vben-go 是 Go 后端（HEAD=9811edc，与本项目同源）；zsvg-com/vben-web 是 vben5+RuoYi-Vue-Plus 风格（含 tenant/snailjob/client），其 system/group 与 system/api 同样为 0，路由键体系与本产物不兼容；thooh/thoohv5/x-thooh 的公开仓库里没有 RuoYi-Vue3 风格前端。出路二选一：①拿到真正的前端源码按 dump 口径重建 web/admin；②把这些无实现的菜单从 dump 摘掉（需使用者授权，见 T-37 的口径）。在定之前不要改 web/ 产物去假装页面存在。 追加证据（2026-11-14 第二次核查）：用页面独有中文字串在 web/admin/static/js 全量搜索——群组管理/接口管理/编号工具/文件工具/流程分类/单一主表/使用案例 命中次数均为 0，说明这些页面不是「换了键名」，而是根本没被打进产物。任意深度重扫 ./.../index 键仍只有 19 个。"
+      "detail": "实测（2026-11-14，chrome-cdp 点遍 28 个菜单）：14 个有产物的页面全部加载真实数据、后端 0 报错；另 25 个点开报 Cannot find module，控制台可见。产物侧核实：web/admin/static/js 里只有 19 个懒加载键（./system/{user,role,menu,dept,post,dict,config,notice}/index、./system/user/profile/index、./monitor/{cache,druid,job,logininfor,online,operlog,server}/index、./tool/{gen,build,swagger}/index），不含 sys/group、sys/api、tool/num、tool/oss、mon/job/log、bpm/*（5 个）、demo/*（3 个）。源码三处确认不可得：本机无 src//package.json、git 全部历史 0 个 .vue/package.json、产物无 .map。上游排查记录：zsvg-com/vben-go 是 Go 后端（HEAD=9811edc，与本项目同源）；zsvg-com/vben-web 是 vben5+RuoYi-Vue-Plus 风格（含 tenant/snailjob/client），其 system/group 与 system/api 同样为 0，路由键体系与本产物不兼容；thooh/thoohv5/x-thooh 的公开仓库里没有 RuoYi-Vue3 风格前端。出路二选一：①拿到真正的前端源码按 dump 口径重建 web/admin；②把这些无实现的菜单从 dump 摘掉（需使用者授权，见 T-37 的口径）。在定之前不要改 web/ 产物去假装页面存在。 追加证据（2026-11-14 第二次核查）：用页面独有中文字串在 web/admin/static/js 全量搜索——群组管理/接口管理/编号工具/文件工具/流程分类/单一主表/使用案例 命中次数均为 0，说明这些页面不是「换了键名」，而是根本没被打进产物。任意深度重扫 ./.../index 键仍只有 19 个。 已按使用者授权执行方案②：从 dump 删掉 23 条无实现的菜单（21 条缺模块 + 流程管理/使用案例两个变空的目录），连同 33 条 sys_role_menu 绑定；sys_menu 由 43 行降到 20 行。浏览器复扫：侧边栏 16 项全部点过，控制台零报错，后端 0 条 SQL 错误。",
+      "evidence": "commit:2c69985"
     }
   ]
 }
