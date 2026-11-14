@@ -32,6 +32,7 @@
 | --- | --- | --- | --- | --- |
 | 1 | 命令只从 `Makefile` 走 | `scope=cmd`：CMD001 表里有 target 里没有、CMD002 target 有表里没登记、CMD003 Makefile 指向不存在的脚本、CMD004 脚本既不当命令也不被引用、CMD005 样本为 0 或缺输入 | ERROR | CMD001–CMD005（各一条独立夹具）+ CMD00n 三方一致正对照 |
 | 2 | 模块要在两处登记 | `scope=modules`：MOD001 未注册、MOD002 死引用、MOD003 只 import 不挂、MOD004 形状不完整、MOD005 样本为 0 | ERROR | `make selftest`：MOD001–MOD005、MOD003c（注释里的挂载不算）、MOD00n 正对照 |
+| 2a | 全局鉴权门不能被删或挪后 | `scope=modules`：GTE001（`r.Use(jwt.Gate())` 缺失或在 html/admin.Routers 之后） | ERROR | `make selftest`：GTE001（注释掉）、GTE001b（顺序颠倒）、GTE001n 正对照 |
 | 3 | 提交前 `make check` 退出码 0；合并前 `make check-all` | `scope=build`：BLD003 编译/vet 失败、BLD005 未 gofmt；BLD001/BLD002 证据缺失与过期为 WARN（留痕是流程账，不当提交门）。`.harness/git-hooks/pre-commit` 由 `make init` 通过 `core.hooksPath` 装上，跑快域 | ERROR / WARN | BLD003、BLD005、BLD001、BLD002 + 两条正对照 |
 | 4 | go 指令不低于 `go_version_min` | `scope=build`：BLD006 | ERROR | BLD006 + BLD006n |
 | 5 | 密钥与本地覆盖配置不入库 | `scope=secret`：SEC001 高熵、SEC002 弱默认（WARN）、SEC003 覆盖文件被跟踪、SEC004 样本为 0、SEC005 高熵键只在 gitignore 排除的本地文件里（WARN，点名不判入库） | ERROR / WARN | SEC001、SEC001b（未跟踪且没被排除→仍算入库）、SEC002、SEC003、SEC004、SEC005 + SEC00n（`${...}` 占位符不报） |

@@ -23,7 +23,7 @@ from .common import add, blank_strings, code_lines, go_package, quality_get
 NAME = "modules"
 PLAN = "业务模块清单与 `app/admin/router.go` 的注册表双向对账：多一个没注册的模块、" \
     "少一个还在注册的文件都算缺陷；模块骨架（api.go/model.go/router.go）齐不齐也在这里判"
-REFLECT = ("MOD001", "MOD002", "MOD003", "MOD004", "MOD005")
+REFLECT = ("MOD001", "MOD002", "MOD003", "MOD004", "MOD005", "GTE001")
 IMPORT_RE = re.compile(r'^(?:(?P<alias>[\w.]+|\.)\s+)?"(?P<path>[^"]+)"$')
 INIT_RE = re.compile(r"\b(?P<alias>[A-Za-z_]\w*)\.Init\w*\(")
 SHAPE_FILES = ("api.go", "model.go", "router.go")
@@ -93,9 +93,35 @@ def init_aliases(path):
     return aliases
 
 
+GATE_RE = re.compile(r"\br\.Use\(\s*jwt\.Gate\(\)\s*\)")
+ROUTERS_RE = re.compile(r"\b(?:html|admin)\.Routers\(")
+
+
+def check_gate(root, gate_rel, findings):
+    """GTE001：全局鉴权门 `r.Use(jwt.Gate())` 必须存在，且在 html/admin.Routers 之前（按行序）。
+
+    删掉或挪到注册之后，go build 都不报错，整套路由静默免鉴权。注释里的不算。
+    """
+    path = root / gate_rel
+    if not path.is_file():
+        add(findings, "ERROR", NAME, gate_rel, 1, "GTE001", f"{gate_rel} 不存在——全局鉴权门无从判定")
+        return
+    gate = [n for n, seg in code_lines(path) if GATE_RE.search(seg)]
+    routes = [n for n, seg in code_lines(path) if ROUTERS_RE.search(seg)]
+    if not gate:
+        add(findings, "ERROR", NAME, gate_rel, 1, "GTE001",
+            "没有 `r.Use(jwt.Gate())`——全局鉴权门缺失，路由静默免鉴权")
+    elif routes and gate[0] > min(routes):
+        add(findings, "ERROR", NAME, gate_rel, gate[0], "GTE001",
+            "`r.Use(jwt.Gate())` 在 html/admin.Routers 之后——gin 的 Use 只对其后注册的路由生效")
+
+
 def run(ctx, findings):
     root = Path(ctx["root"])
     quality = ctx.get("quality") or {}
+    gate_rel = quality_get(quality, "gate_file", "app/core/routers/routers.go")
+    if gate_rel:
+        check_gate(root, str(gate_rel), findings)
     roots = [str(r) for r in quality_get(quality, "module_roots", ["modules"]) or []]
     registry_rel = quality_get(quality, "registry_file", "app/admin/router.go")
     registry = root / str(registry_rel)

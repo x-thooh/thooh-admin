@@ -21,7 +21,7 @@
 | `workflow` | 一次修改的五段循环有唯一事实源（flow.json：阶段、门径、转移），可安装流程的声明与磁盘双向对账 | FLOW001, FLOW002, FLOW003, FLOW004, FLOW005, FLOW006, FLOW007, FLOW008, FLOW009, FLOW010 |
 | `hooks` | 动手前每个域说清自己管什么（PLAN）、复盘时能报哪些 code（REFLECT）；这张表与 scopes/ 源码逐条对账 | HOOK001, HOOK002, HOOK003, HOOK004, HOOK005 |
 | `budget` | 工具层每个文件按角色有行数额度（域 / 调度 / 共享 helper / 反向语料），超限即该拆；额度写在 config.json | BUDGET001, BUDGET002 |
-| `modules` | 业务模块清单与 `app/admin/router.go` 的注册表双向对账：多一个没注册的模块、少一个还在注册的文件都算缺陷；模块骨架（api.go/model.go/router.go）齐不齐也在这里判 | MOD001, MOD002, MOD003, MOD004, MOD005 |
+| `modules` | 业务模块清单与 `app/admin/router.go` 的注册表双向对账：多一个没注册的模块、少一个还在注册的文件都算缺陷；模块骨架（api.go/model.go/router.go）齐不齐也在这里判 | MOD001, MOD002, MOD003, MOD004, MOD005, GTE001 |
 | `secret` | 配置里的密钥与弱凭据：只报「哪个键路径有问题」，永不报出值本身；命中基线的老账标「基线内」 | SEC001, SEC002, SEC003, SEC004, SEC005 |
 | `stale` | 会过期的引用：前端产物里被 `r.Static()` 挂载的资产还存不存在、swagger 三份元数据（注解 / docs.go / json / yaml）是否互相一致、文档时效是否越过告警线 | STL001, STL002, STL003, STL004, STL005 |
 | `state` | 状态层是事实不是装饰：看板每条有形状与闭集取值、完成态带可核验证据，INDEX 与磁盘现算一致 | STATE001, STATE002, STATE003, STATE004, STATE005, STATE006, STATE007, STATE008 |
