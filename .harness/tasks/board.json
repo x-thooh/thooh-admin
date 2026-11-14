@@ -5,11 +5,12 @@
     {
       "id": "T-1",
       "title": "sys_config 的 DDL 与 GORM 模型列名不一致",
-      "status": "open",
+      "status": "done",
       "priority": "high",
       "detail": "thooh-go.sql:390 的列是 id/kenam/keval/name/notes/ornum/crtim/uptim，而 app/admin/model/system/sysConfig.go:12 的 tag 是 config_id/config_key/config_value/…——按模型查这张表运行时会 Unknown column。改哪一边要人判：改 DDL 是迁移（存量数据跟着动），改模型是重写映射。",
       "owner": "thooh",
-      "scope": ""
+      "scope": "",
+      "evidence": "commit:fd986f5"
     },
     {
       "id": "T-2",
@@ -204,12 +205,13 @@
     {
       "id": "T-20",
       "title": "app/admin/model 的列名以 thooh-go.sql 为准重写",
-      "status": "doing",
+      "status": "done",
       "priority": "high",
       "detail": "决策 D-20：以 dump 为准（客户存量库不动，modules/ 那套短列名已是这个口径）。旧 RuoYi 模型与 dump 大面积漂移：sys_config 十列全不同（system/sysConfig.go:13-27 vs sql:390）、sys_job↔mon_job（monitor/sysJob.go:42,60 vs sql:153，RunSqlCron 启动即查不存在的表）、sys_dept↔sys_org、sys_dict_*↔tool_dict*、sys_oper_log↔mon_oper_log、sys_logininfor↔mon_login_log、gen_table*↔tool_code_*、sys_user/role/menu/post/notice/role_menu 各列名不同，sys_user_role/sys_user_post/sys_role_dept 在 dump 里无对应表（疑为 sys_rece/sys_post_actor，未定）。验收：跑在 T-19 起起来的那套容器上，/login 返回 200 且 sys_config/mon_job 相关接口不再报 Unknown column。依赖 T-19 提供能跑的环境（顺序不能反：先在能连库的环境里逐个模型对账，再谈打包）。",
       "owner": "thooh",
       "scope": "",
-      "worktree": "T-20"
+      "worktree": "T-20",
+      "evidence": "commit:fd986f5"
     },
     {
       "id": "T-21",
@@ -300,20 +302,22 @@
     {
       "id": "T-29",
       "title": "启动期旧 cron 查 sys_job，dump 里没有这张表",
-      "status": "open",
+      "status": "done",
       "priority": "medium",
       "detail": "每次启动都有一条 Error 1146: Table 'thooh-go.sys_job' doesn't exist（app/admin/model/monitor/sysJob.go:89），dump 里定时任务表叫 mon_job，且 modules/mon 下只有 login 与 oper、没有 job 模块。后果不只是脏日志：定时任务实际一条都没注册。做法二选一——补 modules/mon/job 按 mon_job（id/code/cron/name/retyp/reurl/ornum）重写并接管启动注册，或在没实现前显式不注册并把这条从启动路径摘干净。",
       "owner": "thooh",
-      "scope": "modules"
+      "scope": "modules",
+      "evidence": "commit:fd986f5"
     },
     {
       "id": "T-30",
       "title": "出错日志写 sys_oper_log，表在 dump 里叫 mon_oper_log",
-      "status": "open",
+      "status": "done",
       "priority": "medium",
       "detail": "Recover 中间件（app/core/utils/error/Recover.go:24）调旧的 monitor.SysOperLog.AddSysOperLog 写 sys_oper_log，dump 里没这张表（mon_oper_log 才是），于是「一次业务报错」变成「报错 + 写日志再 panic + 一整屏 goroutine dump」，客户端拿不到 msg。这属 T-25 那条错误传递链的落库一半。做法：Recover 改调 modules/mon/oper 的写入口（列名对 opmod/reurl/reway/opuna/ermsg/sutag 等），并按 T-25 把 panic 从错误传递里拆出来。",
       "owner": "thooh",
-      "scope": "modules"
+      "scope": "modules",
+      "evidence": "commit:fd986f5"
     },
     {
       "id": "T-35",
