@@ -20,6 +20,8 @@ import re
 import subprocess
 from pathlib import Path
 
+import ageing
+
 from .common import add, go_files, quality_get
 
 NAME = "stale"
@@ -183,7 +185,7 @@ def check_swag_staleness(root, quality, findings, na):
         na.append("stale:swagger 时效")
         return
     src_ts = int(out2.splitlines()[0])
-    days = (src_ts - docs_ts) // 86400
+    days = ageing.age_days(docs_ts, src_ts)
     if days < warn_days:
         return
     cfg = datetime.date.fromtimestamp(docs_ts).isoformat()

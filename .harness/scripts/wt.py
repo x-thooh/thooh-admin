@@ -23,6 +23,7 @@ HERE = Path(__file__).resolve().parent
 if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 
+import ageing  # noqa: E402
 import gitenv  # noqa: E402
 
 BOARD_REL = ".harness/tasks/board.json"
@@ -129,6 +130,12 @@ def tree_state(target, main):
     if code == 1:
         return not dirty, False, dirty, sha, None
     return None, None, dirty, sha, f"判不了 {target}（{sha[:8]}）有没有合进 {main}：{err or 'merge-base 失败'}"
+
+
+def head_age_days(target, now_ts):
+    """树的 HEAD 提交距 now_ts 几天；读不出返回 None（判不了不当 0 天）。"""
+    code, ts, _err = git(target, "log", "-1", "--format=%ct")
+    return ageing.age_days(int(ts), now_ts) if code == 0 and ts.isdigit() else None
 
 
 def find_task(tasks, task_id):

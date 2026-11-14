@@ -27,5 +27,6 @@
   "stale_days_warn": 7,
   "stale_days_error": 14,
   "board_stale_days": 30,
+  "worktree_done_days": 7,
   "rules_version": "1"
 }
