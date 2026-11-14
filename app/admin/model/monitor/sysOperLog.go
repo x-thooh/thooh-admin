@@ -26,7 +26,7 @@ type SysOperLog struct {
 	OperLocation  string    `json:"operLocation" gorm:"column:oploc"`
 	OperParam     string    `json:"operParam" gorm:"column:bapar"`
 	JsonResult    string    `json:"jsonResult" gorm:"column:repar"`
-	Status        string    `json:"status" gorm:"column:sutag"`
+	Status        int8      `json:"status" gorm:"column:sutag"` // WHY: sutag 是 bit(1)，塞字符串 '1' 会 1406 Data too long（浏览器实测）
 	ErrorMsg      string    `json:"errorMsg" gorm:"column:ermsg"`
 	OperTime      time.Time `json:"operTime" gorm:"column:optim;type:datetime;autoCreateTime"`
 }
@@ -80,8 +80,8 @@ func SelectOperLogList(params tools.SearchTableDataParam) tools.TableDataInfo {
 	//}
 
 	var status = sysOperLog.Status
-	if status != "" {
-		db.Where("status = ?", status)
+	if status != 0 {
+		db.Where("sutag = ?", status)
 	}
 
 	var oper_name = sysOperLog.OperName

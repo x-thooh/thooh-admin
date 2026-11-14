@@ -76,7 +76,7 @@ func findUser(param system.LoginParam, context *gin.Context) {
 		})
 		return
 	}
-	if user.Status == "1" {
+	if !user.Status { // avtag=0 表示停用
 		monitor.LoginInfoAdd(context, param, "登录失败，账号已停用", false)
 		context.JSON(http.StatusOK, R.ReturnFailMsg("账号已停用"))
 		return
@@ -349,10 +349,10 @@ func ListUser(context *gin.Context) {
 		PageNum:  pageNum,
 		PageSize: pageSize,
 		Other: system.SysUser{
-			DeptId:      deptId,
-			UserName:    userName,
-			Phonenumber: phonenumber,
-			Status:      status,
+			DeptId:       deptId,
+			UserName:     userName,
+			Phonenumber:  phonenumber,
+			StatusFilter: status,
 		},
 		Params: tools.Params{
 			BeginTime: beginTime,
@@ -379,10 +379,10 @@ func ExportExport(context *gin.Context) {
 		PageNum:  pageNum,
 		PageSize: pageSize,
 		Other: system.SysUser{
-			DeptId:      deptId,
-			UserName:    userName,
-			Phonenumber: phonenumber,
-			Status:      status,
+			DeptId:       deptId,
+			UserName:     userName,
+			Phonenumber:  phonenumber,
+			StatusFilter: status,
 		},
 		Params: tools.Params{
 			BeginTime: beginTime,
@@ -482,7 +482,7 @@ func ExportExport(context *gin.Context) {
 			}
 			var status = v.Status
 			var statusStr = ""
-			if status == "0" {
+			if status == "0" { // RuoYi 口径 0=正常
 				statusStr = "正常"
 			} else {
 				statusStr = "停用"

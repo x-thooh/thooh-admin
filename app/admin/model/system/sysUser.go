@@ -9,30 +9,32 @@ import (
 	"github.com/x-thooh/thooh-admin/app/admin/model/tools"
 	utils2 "github.com/x-thooh/thooh-admin/app/core/utils"
 	"github.com/x-thooh/thooh-admin/app/core/utils/R"
+	"github.com/x-thooh/thooh-admin/common/json/boolx"
 	"github.com/x-thooh/thooh-admin/pkg/mysql"
 )
 
 // SysUser model：数据库字段
 type SysUser struct {
-	UserId      string    `json:"userId" gorm:"column:id;primaryKey"` //表示主键
-	DeptId      string    `json:"deptId" gorm:"column:orgid"`
-	UserName    string    `json:"userName" gorm:"column:username"`
-	NickName    string    `json:"nickName" gorm:"column:name"`
-	UserType    string    `json:"userType" gorm:"column:type"`
-	Email       string    `json:"email" gorm:"column:email"`
-	Phonenumber string    `json:"phonenumber" gorm:"column:monum"`
-	Sex         string    `json:"sex" gorm:"column:gender"`
-	Avatar      string    `json:"avatar" gorm:"column:avatar"`
-	Password    string    `json:"password" gorm:"column:password"`
-	Status      string    `json:"status" gorm:"column:avtag"`
-	DelFlag     string    `json:"delFlag" gorm:"-"`
-	LoginIp     string    `json:"loginIp" gorm:"column:loip"`
-	LoginDate   time.Time `json:"loginDate" gorm:"column:lotim;type:datetime"`
-	CreateBy    string    `json:"createBy" gorm:"-"`
-	CreateTime  time.Time `json:"createTime" gorm:"column:crtim;type:datetime;autoCreateTime"`
-	UpdateBy    string    `json:"updateBy" gorm:"-"`
-	UpdateTime  time.Time `json:"updateTime" gorm:"column:uptim;type:datetime;autoCreateTime"`
-	Remark      string    `json:"remark" gorm:"column:notes"`
+	UserId       string     `json:"userId" gorm:"column:id;primaryKey"` //表示主键
+	DeptId       string     `json:"deptId" gorm:"column:orgid"`
+	UserName     string     `json:"userName" gorm:"column:username"`
+	NickName     string     `json:"nickName" gorm:"column:name"`
+	UserType     string     `json:"userType" gorm:"column:type"`
+	Email        string     `json:"email" gorm:"column:email"`
+	Phonenumber  string     `json:"phonenumber" gorm:"column:monum"`
+	Sex          string     `json:"sex" gorm:"column:gender"`
+	Avatar       string     `json:"avatar" gorm:"column:avatar"`
+	Password     string     `json:"password" gorm:"column:password"`
+	Status       boolx.Bool `json:"status" gorm:"column:avtag"` // WHY: avtag 是 bit(1)，boolx 有 Scan/Value
+	StatusFilter string     `json:"-" gorm:"-"`                 // 检索用的三态："" 不过滤、"0" 正常、"1" 停用
+	DelFlag      string     `json:"delFlag" gorm:"-"`
+	LoginIp      string     `json:"loginIp" gorm:"column:loip"`
+	LoginDate    time.Time  `json:"loginDate" gorm:"column:lotim;type:datetime"`
+	CreateBy     string     `json:"createBy" gorm:"-"`
+	CreateTime   time.Time  `json:"createTime" gorm:"column:crtim;type:datetime;autoCreateTime"`
+	UpdateBy     string     `json:"updateBy" gorm:"-"`
+	UpdateTime   time.Time  `json:"updateTime" gorm:"column:uptim;type:datetime;autoCreateTime"`
+	Remark       string     `json:"remark" gorm:"column:notes"`
 }
 
 type SysUserParm struct {
@@ -46,7 +48,7 @@ type SysUserParm struct {
 	Sex         string    `json:"sex" gorm:"column:gender"`
 	Avatar      string    `json:"avatar" gorm:"column:avatar"`
 	Password    string    `json:"password" gorm:"column:password"`
-	Status      string    `json:"status" gorm:"column:avtag"`
+	Status      string    `json:"status" gorm:"column:avtag"` // 请求/导出口径，RuoYi 的 0=正常
 	DelFlag     string    `json:"delFlag" gorm:"-"`
 	LoginIp     string    `json:"loginIp" gorm:"column:loip"`
 	LoginDate   string    `json:"loginDate" gorm:"column:lotim;type:datetime"`
@@ -73,7 +75,7 @@ type SysUserExcel struct {
 	Sex         string    `json:"sex" gorm:"column:gender"`
 	Avatar      string    `json:"avatar" gorm:"column:avatar"`
 	Password    string    `json:"password" gorm:"column:password"`
-	Status      string    `json:"status" gorm:"column:avtag"`
+	Status      string    `json:"status" gorm:"column:avtag"` // 请求/导出口径，RuoYi 的 0=正常
 	DelFlag     string    `json:"delFlag" gorm:"-"`
 	LoginIp     string    `json:"loginIp" gorm:"column:loip"`
 	LoginDate   time.Time `json:"loginDate" gorm:"column:lotim;type:datetime"`
@@ -161,7 +163,7 @@ func FindUserById(id any) SysUser {
 	var db = mysql.MysqlDb().Model(&user).
 		Select("`sys_user`.*, d.name as dept_name, d.label as leader").
 		Joins("left join sys_org d on d.id = `sys_user`.orgid")
-	err := db.Where("id = ?", fmt.Sprint(id)).First(&user).Error
+	err := db.Where("`sys_user`.id = ?", fmt.Sprint(id)).First(&user).Error
 	if err != nil {
 		panic(R.ReturnFailMsg(err.Error()))
 	}
@@ -174,7 +176,7 @@ func FindUserPassWordById(id any) string {
 	var user SysUser
 	var db = mysql.MysqlDb().Model(&user).
 		Select("`sys_user`.*")
-	err := db.Where("id = ?", fmt.Sprint(id)).First(&user).Error
+	err := db.Where("`sys_user`.id = ?", fmt.Sprint(id)).First(&user).Error
 	if err != nil {
 		panic(R.ReturnFailMsg(err.Error()))
 	}
@@ -232,9 +234,13 @@ func SelectUserList(params tools.SearchTableDataParam, isPage bool) tools.TableD
 		db.Where("`sys_user`.username like concat('%', ?, '%')", userName)
 	}
 
-	var status = sysUser.Status
-	if status != "" {
-		db.Where("`sys_user`.avtag = ? ", status)
+	// RuoYi 口径 0=正常 → dump 的 avtag 1=可用（用 StatusFilter 保住三态检索）
+	if f := sysUser.StatusFilter; f != "" {
+		avtag := 0
+		if f == "0" {
+			avtag = 1
+		}
+		db.Where("`sys_user`.avtag = ? ", avtag)
 	}
 
 	var phonenumber = sysUser.Phonenumber
@@ -298,9 +304,13 @@ func SelectUserParmList(params tools.SearchTableDataParam, isPage bool) tools.Ta
 		db.Where("`sys_user`.username like concat('%', ?, '%')", userName)
 	}
 
-	var status = sysUser.Status
-	if status != "" {
-		db.Where("`sys_user`.avtag = ? ", status)
+	// RuoYi 口径 0=正常 → dump 的 avtag 1=可用（用 StatusFilter 保住三态检索）
+	if f := sysUser.StatusFilter; f != "" {
+		avtag := 0
+		if f == "0" {
+			avtag = 1
+		}
+		db.Where("`sys_user`.avtag = ? ", avtag)
 	}
 
 	var phonenumber = sysUser.Phonenumber
@@ -430,6 +440,7 @@ func ImportUserData(users []SysUserParm, updateSupport string) (string, string) 
 func SaveUser(user SysUserParm) string {
 	var result = ""
 	var u = SysUser{
+		UserId:      newUserId(), // WHY: sys_user.id 是 varchar(36)，前端表单不带主键，必须后端生成
 		NickName:    user.NickName,
 		DeptId:      user.DeptId,
 		UserName:    user.UserName,
@@ -440,7 +451,7 @@ func SaveUser(user SysUserParm) string {
 		Avatar:      user.Avatar,
 		Password:    user.Password,
 		LoginDate:   user.CreateTime,
-		Status:      "0",
+		Status:      true,
 		DelFlag:     "0",
 		CreateBy:    user.CreateBy,
 		CreateTime:  user.CreateTime,
@@ -470,7 +481,7 @@ func UploadUser(userParm SysUserParm) {
 		Phonenumber: userParm.Phonenumber,
 		Email:       userParm.Email,
 		Sex:         userParm.Sex,
-		Status:      userParm.Status,
+		Status:      boolx.Bool(userParm.Status == "0"),
 		Remark:      userParm.Remark,
 	}
 	err := mysql.MysqlDb().Updates(&user).Error
@@ -541,7 +552,11 @@ func ChangeUserStatus(param SysUserParm) R.Result {
 	data := make(map[string]interface{})
 
 	if param.Status != "" {
-		data["status"] = param.Status
+		avtag := 0
+		if param.Status == "0" {
+			avtag = 1
+		}
+		data["avtag"] = avtag // WHY: 列名是 avtag；RuoYi 的 0=正常 对应 avtag 1
 	}
 
 	//等价于: UPDATE `foods` SET `price` = '35', `stock` = '0'  WHERE (user_id = '2')
@@ -568,4 +583,11 @@ func ResetPwd(param SysUserParm) R.Result {
 	}
 
 	return R.ReturnSuccess("修改成功")
+}
+
+// newUserId 造一个 varchar(36) 用户主键。
+// WHY: dump 的 sys_user.id 是 varchar(36)（u1/u2…），新增接口的表单没有主键字段，
+// 不自增就会插进空串（浏览器新增用户实测：id=” 直接违反主键约定）。
+func newUserId() string {
+	return "u" + strconv.FormatInt(time.Now().UnixNano(), 36)
 }

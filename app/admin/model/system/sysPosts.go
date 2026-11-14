@@ -124,6 +124,9 @@ func AddPostListByUser(postIds []string, userId string) {
 		}
 		posts = append(posts, post)
 	}
+	if len(posts) == 0 {
+		return // WHY: 没选岗位时 CreateInBatches(x, 0) 会失败（浏览器新增用户实测）
+	}
 	err := mysql.MysqlDb().CreateInBatches(posts, len(posts)).Error
 	if err != nil {
 		panic(R.ReturnFailMsg("添加 部门管理用户失败"))

@@ -221,6 +221,9 @@ func InsertRolesByUser(userId string, roleIds []int) R.Result {
 		}
 		roless = append(roless, roles)
 	}
+	if len(roless) == 0 {
+		return R.ReturnSuccess("操作成功") // WHY: 没选角色时 Create 空切片会报 empty slice found（浏览器新增用户实测）
+	}
 	err := mysql.MysqlDb().Create(&roless).Error
 	if err != nil {
 		panic(R.ReturnFailMsg("添加权限管理用户失败"))

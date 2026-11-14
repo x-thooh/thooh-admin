@@ -3,7 +3,6 @@ package logs
 import (
 	"fmt"
 	"os"
-	"strconv"
 	"time"
 
 	"github.com/x-thooh/thooh-admin/app/admin/model/constants"
@@ -161,7 +160,7 @@ func MysqlLogger() gin.HandlerFunc {
 					OperatorType: monitor.OperatorTypeAdmin,
 					OperParam:    "",
 					JsonResult:   "",
-					Status:       "" + strconv.Itoa(statusCode),
+					Status:       logStatus(statusCode),
 					OperUrl:      path,
 					OperIp:       clientIp,
 				}
@@ -234,4 +233,13 @@ func Poster() {
 		"MiniGO_SDK: 	" + config2.MinGoVersion + "\r\n" +
 		"Link: https://gitee.com/thooh/thooh-go"
 	fg.Println(logo)
+}
+
+// logStatus 把 HTTP 状态码折成 sutag（bit(1)：0=正常，1=异常）。
+// WHY: mon_oper_log.sutag 是 bit(1)，写字符串会 1406 Data too long（浏览器实测）。
+func logStatus(code int) int8 {
+	if code == 200 {
+		return 0
+	}
+	return 1
 }

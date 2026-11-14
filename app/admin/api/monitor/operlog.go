@@ -38,7 +38,7 @@ func getListOperlog(context *gin.Context) tools.TableDataInfo {
 			Title:        title,
 			OperName:     operName,
 			BusinessType: businessType,
-			Status:       status,
+			Status:       int8(utils.GetInterfaceToInt(status)),
 		},
 		OrderByColumn: orderByColumn,
 		IsAsc:         isAsc,
@@ -207,7 +207,7 @@ func ExportOperlog(context *gin.Context) {
 			}
 			var status = v.Status
 			var statusStr = ""
-			if status == "0" {
+			if status == 0 {
 				statusStr = "正常"
 			} else {
 				statusStr = "停用"
