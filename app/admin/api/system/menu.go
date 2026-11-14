@@ -27,7 +27,7 @@ func GetRoutersHandler(context *gin.Context) {
 		return
 	}
 
-	menu := system.SelectMenuTreeByUserId(utils.GetInterfaceToInt(userId))
+	menu := system.SelectMenuTreeByUserId(utils.GetInterfaceToStr(userId))
 	var data = system.BuildMenus(menu)
 	context.JSON(http.StatusOK, gin.H{
 		"msg":  "操作成功",
@@ -49,7 +49,7 @@ func ListMenu(context *gin.Context) {
 		Params: tools.Params{},
 	}
 	userId, _ := context.Get("userId")
-	if system.IsAdminById(utils.GetInterfaceToInt(userId)) {
+	if system.IsAdminById(utils.GetInterfaceToStr(userId)) {
 		var result = system.SelectSysMenuList(param)
 		context.JSON(http.StatusOK, gin.H{
 			"msg":  "操作成功",
@@ -90,7 +90,7 @@ func GetTreeSelect(context *gin.Context) {
 		return
 	}
 
-	menu := system.SelectMenuTree(utils.GetInterfaceToInt(userId), menuParm)
+	menu := system.SelectMenuTree(utils.GetInterfaceToStr(userId), menuParm)
 	var result = system.BuildMenuTreeSelect(menu)
 
 	context.JSON(http.StatusOK, gin.H{
@@ -104,7 +104,7 @@ func TreeSelectByRole(context *gin.Context) {
 	userId, _ := context.Get("userId")
 	var roleId = context.Param("roleId")
 	var menuPerms system.SysMenu
-	menu := system.SelectMenuTree(utils.GetInterfaceToInt(userId), menuPerms)
+	menu := system.SelectMenuTree(utils.GetInterfaceToStr(userId), menuPerms)
 	var result = system.BuildMenuTreeSelect(menu)
 	roles := system.FindRoleInfoById(roleId)
 	var checkedKeys = system.SelectMenuListByRoleId(roleId, roles.MenuCheckStrictly)

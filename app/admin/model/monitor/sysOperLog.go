@@ -1,7 +1,6 @@
 package monitor
 
 import (
-	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -155,7 +154,7 @@ func (param *SysOperLog) OperationLogAdd(context *gin.Context) R.Result {
 	userId, _ := context.Get("userId")
 	if userId != nil {
 		sysUser := system.FindUserById(userId)
-		dept := system.GetDeptInfo(strconv.Itoa(sysUser.DeptId))
+		dept := system.GetDeptInfo(sysUser.DeptId)
 		param.OperName = sysUser.UserName
 		param.DeptName = dept.DeptName
 		param.OperatorType = "1"

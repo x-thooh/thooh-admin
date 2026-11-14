@@ -58,7 +58,7 @@ func ExcludeDept(context *gin.Context) {
 		ancestors := bean.Ancestors
 		ancestors1 := utils.SplitStr(ancestors)
 		index := arrays.ContainsString(ancestors1, deptId)
-		if deptId != strconv.Itoa(bean.DeptId) || index == -1 {
+		if deptId != bean.DeptId || index == -1 {
 			ExcludeList = append(ExcludeList, bean)
 		}
 	}

@@ -14,8 +14,8 @@ import (
 
 // SysUser model：数据库字段
 type SysUser struct {
-	UserId      int       `json:"userId" gorm:"column:id;primaryKey"` //表示主键
-	DeptId      int       `json:"deptId" gorm:"column:orgid"`
+	UserId      string    `json:"userId" gorm:"column:id;primaryKey"` //表示主键
+	DeptId      string    `json:"deptId" gorm:"column:orgid"`
 	UserName    string    `json:"userName" gorm:"column:username"`
 	NickName    string    `json:"nickName" gorm:"column:name"`
 	UserType    string    `json:"userType" gorm:"column:type"`
@@ -36,8 +36,8 @@ type SysUser struct {
 }
 
 type SysUserParm struct {
-	UserId      int       `json:"userId" gorm:"column:id;primaryKey"` //表示主键
-	DeptId      int       `json:"deptId" gorm:"column:orgid"`
+	UserId      string    `json:"userId" gorm:"column:id;primaryKey"` //表示主键
+	DeptId      string    `json:"deptId" gorm:"column:orgid"`
 	UserName    string    `json:"userName" gorm:"column:username"`
 	NickName    string    `json:"nickName" gorm:"column:name"`
 	UserType    string    `json:"userType" gorm:"column:type"`
@@ -57,14 +57,14 @@ type SysUserParm struct {
 	UpdateTime  time.Time `json:"updateTime" gorm:"column:uptim;type:datetime"`
 	DeptName    string    `json:"deptName,omitempty"`
 	Leader      string    `json:"leader,omitempty"`
-	PostIds     []int     `json:"postIds,omitempty"`
+	PostIds     []string  `json:"postIds,omitempty"`
 	RoleIds     []int     `json:"roleIds,omitempty"`
 	RoleId      int       `json:"roleId,omitempty"`
 }
 
 type SysUserExcel struct {
-	UserId      int       `json:"userId" gorm:"column:id;primaryKey"` //表示主键
-	DeptId      int       `json:"deptId" gorm:"column:orgid"`
+	UserId      string    `json:"userId" gorm:"column:id;primaryKey"` //表示主键
+	DeptId      string    `json:"deptId" gorm:"column:orgid"`
 	UserName    string    `json:"userName" gorm:"column:username"`
 	NickName    string    `json:"nickName" gorm:"column:name"`
 	UserType    string    `json:"userType" gorm:"column:type"`
@@ -110,12 +110,12 @@ func (SysUser) TableName() string {
 
 // IsAdmin 指定数据库表名称
 func IsAdmin(user *SysUser) bool {
-	return user.UserId == 1
+	return user.UserId == "u1"
 }
 
 // IsAdmin 指定数据库表名称
-func IsAdminById(userId int) bool {
-	return userId == 1
+func IsAdminById(userId string) bool {
+	return userId == "u1"
 }
 
 // IsExistUser 判断用户是否存在 返回bool类型
@@ -191,7 +191,7 @@ func UploadUserPassWord(id any, password string) {
 }
 
 /*校验用户是否有数据权限*/
-func CheckUserDataScope(userId int, useridP int) {
+func CheckUserDataScope(userId string, useridP string) {
 	if !IsAdminById(userId) {
 		var param = tools.SearchTableDataParam{
 			Other: SysUser{
@@ -219,11 +219,11 @@ func SelectUserList(params tools.SearchTableDataParam, isPage bool) tools.TableD
 		Joins("left join sys_org d on d.id = `sys_user`.orgid")
 
 	var userId = sysUser.UserId
-	if userId != 0 {
+	if userId != "" {
 		db.Where("`sys_user`.id = ?", userId)
 	}
 	var deptId = sysUser.DeptId
-	if deptId != 0 {
+	if deptId != "" {
 		db.Where("`sys_user`.orgid = ? OR `sys_user`.orgid IN (SELECT t.id FROM sys_org t WHERE find_in_set(?, t.tier))", deptId, deptId)
 	}
 
@@ -285,11 +285,11 @@ func SelectUserParmList(params tools.SearchTableDataParam, isPage bool) tools.Ta
 		Joins("left join sys_org d on d.id = `sys_user`.orgid")
 
 	var userId = sysUser.UserId
-	if userId != 0 {
+	if userId != "" {
 		db.Where("`sys_user`.id = ?", userId)
 	}
 	var deptId = sysUser.DeptId
-	if deptId != 0 {
+	if deptId != "" {
 		db.Where("`sys_user`.orgid = ? OR `sys_user`.orgid IN (SELECT t.id FROM sys_org t WHERE find_in_set(?, t.tier))", deptId, deptId)
 	}
 
@@ -347,7 +347,7 @@ func GetUserDeptTree() []SysDeptDto {
 	var data []SysDeptDto
 	for i := 0; i < int(total); i++ {
 		var bean = result[i]
-		if bean.ParentId == 0 {
+		if bean.ParentId == "" {
 			dept := SysDeptDto{
 				Id:    bean.DeptId,
 				Label: bean.DeptName,
@@ -394,7 +394,7 @@ func ImportUserData(users []SysUserParm, updateSupport string) (string, string) 
 
 		u1.Password = pwd
 		var d = strconv.Itoa(i + 1)
-		if u2.UserId == 0 {
+		if u2.UserId == "" {
 			err := SaveUser(u1)
 			if err != "" {
 				error = "error"
@@ -404,7 +404,7 @@ func ImportUserData(users []SysUserParm, updateSupport string) (string, string) 
 			}
 		} else {
 			if updateSupport == "true" {
-				userIds := make([]int, 0)
+				userIds := make([]string, 0)
 				userIds = append(userIds, u2.UserId)
 				DeleteUser(userIds)
 				err := SaveUser(u1)
@@ -458,7 +458,7 @@ func SaveUser(user SysUserParm) string {
 }
 
 func UploadUser(userParm SysUserParm) {
-	var userIds = []int{userParm.UserId}
+	var userIds = []string{userParm.UserId}
 	DeleteRolesByUser(userIds)
 	AddRolesByUser(userParm)
 	DeletePostByUser(userIds)
@@ -479,7 +479,7 @@ func UploadUser(userParm SysUserParm) {
 	}
 }
 
-func EditProfileUserInfo(userId int, param Userparam) R.Result {
+func EditProfileUserInfo(userId string, param Userparam) R.Result {
 	var user SysUser
 	err1 := mysql.MysqlDb().Where("id = ?", userId).First(&user)
 
@@ -514,7 +514,7 @@ func EditProfileUserInfo(userId int, param Userparam) R.Result {
 	return R.ReturnSuccess("修改成功")
 }
 
-func DeleteUser(userId []int) R.Result {
+func DeleteUser(userId []string) R.Result {
 	for _, v := range userId {
 		if v == constants.AdminId {
 			return R.ReturnFailMsg("管理员数据不开操作")
@@ -529,7 +529,7 @@ func DeleteUser(userId []int) R.Result {
 	return R.ReturnSuccess("操作成功")
 }
 
-func DeleteUserById(userId []int) R.Result {
+func DeleteUserById(userId []string) R.Result {
 	err := mysql.MysqlDb().Exec("update sys_user set avtag = 0 where id in (?) ", userId).Error
 	if err != nil {
 		panic(R.ReturnFailMsg(err.Error()))

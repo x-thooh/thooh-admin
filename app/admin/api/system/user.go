@@ -68,7 +68,7 @@ func findUser(param system.LoginParam, context *gin.Context) {
 	var loginName = param.UserName
 	var pass = param.Password
 	var user = system.FindUserByName(loginName)
-	if user.UserId <= 0 {
+	if user.UserId == "" {
 		monitor.LoginInfoAdd(context, param, "登录失败，用户不存在", false)
 		context.JSON(http.StatusOK, gin.H{
 			"msg":  "用户不存在",
@@ -103,11 +103,11 @@ func findUser(param system.LoginParam, context *gin.Context) {
 	}
 	newUUID, _ := uuid.NewUUID()
 	tokenId := newUUID.String()
-	dept := system.GetDeptInfo(strconv.Itoa(user.DeptId))
+	dept := system.GetDeptInfo(user.DeptId)
 	userAgent := context.Request.Header.Get("User-Agent")
 	os := useragent.GetOsName(userAgent)
 	browser := useragent.GetBrowserName(userAgent)
-	tokenString, err := jwt.CreateToken(user.UserName, strconv.Itoa(user.UserId), strconv.Itoa(user.DeptId), newUUID.String())
+	tokenString, err := jwt.CreateToken(user.UserName, user.UserId, user.DeptId, newUUID.String())
 	if err != nil {
 		monitor.LoginInfoAdd(context, param, "登录失败，"+err.Error(), false)
 		context.JSON(http.StatusOK, R.ReturnFailMsg("登录失败"))
@@ -147,7 +147,7 @@ func GetInfoHandler(context *gin.Context) {
 	var user = system.FindUserById(userId)
 	roles := system.GetRolePermission(user)
 	permissions := system.GetMenuPermission(user)
-	dept := system.GetDeptInfo(strconv.Itoa(user.DeptId))
+	dept := system.GetDeptInfo(user.DeptId)
 	context.JSON(http.StatusOK, gin.H{
 		"msg":  "获取成功",
 		"code": http.StatusOK,
@@ -278,7 +278,7 @@ func PostProfileHandler(context *gin.Context) {
 		context.JSON(http.StatusOK, R.ReturnFailMsg("参数不能为空"))
 		return
 	}
-	var result = system.EditProfileUserInfo(utils2.GetInterfaceToInt(userId), param)
+	var result = system.EditProfileUserInfo(utils2.GetInterfaceToStr(userId), param)
 	context.JSON(http.StatusOK, result)
 }
 
@@ -336,7 +336,7 @@ func ListUser(context *gin.Context) {
 	pageNum, _ := strconv.Atoi(context.DefaultQuery("pageNum", "1"))
 	pageSize, _ := strconv.Atoi(context.DefaultQuery("pageSize", "10"))
 
-	deptId, _ := strconv.Atoi(context.DefaultQuery("deptId", "0"))
+	deptId := context.DefaultQuery("deptId", "")
 	var userName = context.DefaultQuery("userName", "")
 	var status = context.DefaultQuery("status", "")
 
@@ -366,7 +366,7 @@ func ExportExport(context *gin.Context) {
 	pageNum, _ := strconv.Atoi(context.DefaultQuery("pageNum", "1"))
 	pageSize, _ := strconv.Atoi(context.DefaultQuery("pageSize", "10"))
 
-	deptId, _ := strconv.Atoi(context.DefaultQuery("deptId", "0"))
+	deptId := context.DefaultQuery("deptId", "")
 	var userName = context.DefaultQuery("userName", "")
 	var status = context.DefaultQuery("status", "")
 
@@ -541,8 +541,8 @@ func ImportUserData(context *gin.Context) {
 				Email:       data[4],
 				Status:      data[7],
 				CreateTime:  time.Now(),
-				DeptId:      utils2.GetInterfaceToInt(data[1]),
-				PostIds:     utils2.Split(data[8]),
+				DeptId:      data[1],
+				PostIds:     utils2.SplitStr(data[8]),
 				RoleIds:     utils2.Split(data[9]),
 			})
 		}
@@ -638,16 +638,15 @@ func GetUserInfo(context *gin.Context) {
 	userIdStr := context.Param("userId")
 	//登录用户
 	loginUserId, _ := context.Get("userId")
-	userId := utils2.GetInterfaceToInt(loginUserId)
+	userId := utils2.GetInterfaceToStr(loginUserId)
 
 	if userIdStr == "" {
-		userIdStr = strconv.Itoa(userId)
+		userIdStr = userId
 	}
-	useridP, _ := strconv.Atoi(userIdStr)
 
-	system.CheckUserDataScope(userId, useridP)
+	system.CheckUserDataScope(userId, userIdStr)
 
-	user := system.FindUserById(useridP)
+	user := system.FindUserById(userIdStr)
 
 	var roles []system.SysRoles
 	var roleIds []int
@@ -666,9 +665,9 @@ func GetUserInfo(context *gin.Context) {
 		"posts": posts,
 	}
 	// 判断当期是否为管理员
-	if useridP != 0 {
-		postIds := system.SelectPostListByUserId(useridP)
-		roles2 := system.SelectRolePermissionByUserId(useridP)
+	if userIdStr != "" {
+		postIds := system.SelectPostListByUserId(userIdStr)
+		roles2 := system.SelectRolePermissionByUserId(userIdStr)
 		for _, sysRoles := range roles2 {
 			roleIds = append(roleIds, sysRoles.RoleId)
 		}
@@ -734,7 +733,7 @@ func UploadUser(context *gin.Context) {
 		return
 	}
 	var uId = userParm.UserId
-	if uId == 0 {
+	if uId == "" {
 		context.JSON(http.StatusOK, R.ReturnFailMsg("参数不能为空"))
 		return
 	}
@@ -782,7 +781,7 @@ func UploadUser(context *gin.Context) {
 
 func DeleteUserById(context *gin.Context) {
 	var userIds = context.Param("userIds")
-	context.JSON(http.StatusOK, system.DeleteUser(utils2.Split(userIds)))
+	context.JSON(http.StatusOK, system.DeleteUser(utils2.SplitStr(userIds)))
 }
 
 // 重设密码
@@ -815,13 +814,13 @@ func GetAuthUserRole(context *gin.Context) {
 	userIdStr := context.Param("userId")
 	userId, _ := strconv.Atoi(userIdStr)
 	uIdStr, _ := context.Get("userId")
-	uId := utils2.GetInterfaceToInt(uIdStr)
+	uId := utils2.GetInterfaceToStr(uIdStr)
 	// 登录者的权限
 	var roles []system.SysRoles
 	if system.IsAdminById(uId) {
 		roles = system.SelectRolePermissionByUserId(uId)
 	} else {
-		roles = system.SelectRolePermissionByUserId(userId)
+		roles = system.SelectRolePermissionByUserId(userIdStr)
 	}
 
 	user := system.FindUserById(userId)
@@ -836,11 +835,10 @@ func GetAuthUserRole(context *gin.Context) {
 
 func PutAuthUser(context *gin.Context) {
 	uIdStr, _ := context.GetQuery("userId")
-	uId, _ := strconv.Atoi(uIdStr)
 	roleIds, _ := context.GetQuery("roleIds")
-	uIds := []int{uId}
+	uIds := []string{uIdStr}
 	system.DeleteRolesByUser(uIds)
-	result := system.InsertRolesByUser(uId, utils2.Split(roleIds))
+	result := system.InsertRolesByUser(uIdStr, utils2.Split(roleIds))
 	context.JSON(http.StatusOK, result)
 }
 

@@ -10,7 +10,7 @@ import (
 
 // SysPost model：数据库字段
 type SysPost struct {
-	PostId     int       `json:"postId" gorm:"column:id;primaryKey"` //表示主键
+	PostId     string    `json:"postId" gorm:"column:id;primaryKey"` //表示主键
 	PostCode   string    `json:"postCode" gorm:"column:label"`
 	PostName   string    `json:"postName" gorm:"column:name"`
 	PostSort   int       `json:"postSort" gorm:"column:ornum"`
@@ -96,8 +96,8 @@ func SelectSysPostList(params tools.SearchTableDataParam, isPage bool) tools.Tab
 	}
 }
 
-func SelectPostListByUserId(userId int) []int {
-	var result []int
+func SelectPostListByUserId(userId string) []string {
+	var result []string
 	mysql.MysqlDb().Raw("select p.id "+
 		"from sys_post p "+
 		"left join sys_post_actor up on up.pid = p.id "+
@@ -115,7 +115,7 @@ func AddPostByUser(user SysUserParm) {
 	AddPostListByUser(postIds, userId)
 }
 
-func AddPostListByUser(postIds []int, userId int) {
+func AddPostListByUser(postIds []string, userId string) {
 	var posts []SysUserPost
 	for i := 0; i < len(postIds); i++ {
 		var post = SysUserPost{
@@ -131,7 +131,7 @@ func AddPostListByUser(postIds []int, userId int) {
 }
 
 // 删除关联用户
-func DeletePostByUser(userIds []int) {
+func DeletePostByUser(userIds []string) {
 	err := mysql.MysqlDb().Exec("delete from sys_post_actor where aid in (?) ", userIds).Error
 	if err != nil {
 		panic(R.ReturnFailMsg("删除部门关联用户失败"))

@@ -3,7 +3,7 @@ package constants
 /*公共常量*/
 // menu
 const (
-	AdminId = 1
+	AdminId = "u1"
 
 	IsFrameYes = "0"
 	IsFrameNo  = "1"

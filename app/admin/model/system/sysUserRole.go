@@ -7,8 +7,8 @@ import (
 
 // SysUserRole model：数据库字段
 type SysUserRole struct {
-	UserId int `json:"userId" gorm:"column:aid"` //表示主键
-	RoleId int `json:"roleId" gorm:"column:rid"`
+	UserId string `json:"userId" gorm:"column:aid"` //表示主键
+	RoleId int    `json:"roleId" gorm:"column:rid"`
 }
 
 // TableName 指定数据库表名称
@@ -17,8 +17,8 @@ func (SysUserRole) TableName() string {
 }
 
 type SysUserRolesParam struct {
-	RoleId int `json:"roleId"`
-	UserId int `json:"userId"`
+	RoleId int    `json:"roleId"`
+	UserId string `json:"userId"`
 }
 
 // 分页查询
@@ -37,7 +37,7 @@ func SelectSysUserRoleList(params tools.SearchTableDataParam, isPage bool) tools
 
 	db.Where("1 = 1")
 	var userId = sysUserRole.UserId
-	if userId != 0 {
+	if userId != "" {
 		db.Where("aid = ?", userId)
 	}
 	if err := db.Count(&total).Error; err != nil {

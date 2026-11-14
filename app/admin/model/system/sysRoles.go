@@ -52,7 +52,7 @@ func (SysRoles) TableName() string {
 	return "sys_role"
 }
 
-func SelectRolePermissionByUserId(userId int) []SysRoles {
+func SelectRolePermissionByUserId(userId string) []SysRoles {
 	var roles []SysRoles
 	var sql = "select distinct r.* " +
 		"from sys_role r " +
@@ -60,9 +60,9 @@ func SelectRolePermissionByUserId(userId int) []SysRoles {
 		"left join sys_user u on u.id = ur.aid " +
 		"left join sys_org d on u.orgid = d.id " +
 		"where 1=1"
-	if userId != 0 {
+	if userId != "" {
 		if !IsAdminById(userId) {
-			sql += " and ur.aid = " + strconv.Itoa(userId)
+			sql += " and ur.aid = '" + userId + "'"
 		}
 	}
 	err := mysql.MysqlDb().Raw(sql).Scan(&roles).Error
@@ -72,7 +72,7 @@ func SelectRolePermissionByUserId(userId int) []SysRoles {
 	return roles
 }
 
-func buildRolePermissionByUserId(userId int) []string {
+func buildRolePermissionByUserId(userId string) []string {
 	var roles = SelectRolePermissionByUserId(userId)
 	var roleNames []string
 	for i := 0; i < len(roles); i++ {
@@ -87,7 +87,7 @@ func GetRolePermission(user SysUser) []string {
 	return GetRolePermissionById(user.UserId)
 }
 
-func GetRolePermissionById(userId int) []string {
+func GetRolePermissionById(userId string) []string {
 	if IsAdminById(userId) {
 		return []string{"admin"}
 	} else {
@@ -104,7 +104,7 @@ func GetMenuPermission(user SysUser) []string {
 			join sys_role r on r.id = ra.rid and r.avtag = 1
 			join sys_role_api rpa on rpa.rid = r.id
 			join sys_api a on a.id = rpa.aid and a.avtag = 1
-			where ra.aid = ? and a.perm is not null order by a.perm`, strconv.Itoa(user.UserId)).
+			where ra.aid = ? and a.perm is not null order by a.perm`, user.UserId).
 			Scan(&permissions).Error
 		if err != nil {
 			panic(R.ReturnFailMsg(err.Error()))
@@ -212,7 +212,7 @@ func AddRolesByUser(user SysUserParm) {
 	InsertRolesByUser(userId, roleIds)
 }
 
-func InsertRolesByUser(userId int, roleIds []int) R.Result {
+func InsertRolesByUser(userId string, roleIds []int) R.Result {
 	var roless []SysUserRole
 	for i := 0; i < len(roleIds); i++ {
 		var roles = SysUserRole{
@@ -229,7 +229,7 @@ func InsertRolesByUser(userId int, roleIds []int) R.Result {
 }
 
 // 添加权限管理用户
-func DeleteRolesByUser(userId []int) {
+func DeleteRolesByUser(userId []string) {
 	err := mysql.MysqlDb().Exec("delete from sys_role_actor where aid in (?)", userId).Error
 	if err != nil {
 		panic(R.ReturnFailMsg("删除权限关联用户失败"))
@@ -237,7 +237,7 @@ func DeleteRolesByUser(userId []int) {
 }
 
 // 批量删除角色信息
-func DeleteRolesById(roleId string, userId int) {
+func DeleteRolesById(roleId string, userId string) {
 	roleIds := utils2.Split(roleId)
 	for i := 0; i < len(roleIds); i++ {
 		roleId := roleIds[i]
@@ -318,8 +318,8 @@ func countUserRoleByRoleId(roleId string) int {
 }
 
 // 校验角色是否有数据权限
-func checkRoleDataScope(roleId string, userId int) {
-	if !IsAdminById(utils2.GetInterfaceToInt(userId)) {
+func checkRoleDataScope(roleId string, userId string) {
+	if !IsAdminById(userId) {
 		var sql = baseSql + "where 1=1 AND r.id = " + roleId + " " + "order by r.ornum"
 		var list []SysRoles
 		err := mysql.MysqlDb().Raw(sql).Scan(&list).Error
@@ -381,7 +381,7 @@ func insertRoleMenu(roles SysRolesParam) {
 }
 
 /*更新*/
-func UploadRole(rolesParam SysRolesParam, userId int) R.Result {
+func UploadRole(rolesParam SysRolesParam, userId string) R.Result {
 	//校验角色是否允许操作
 	checkRoleAllowed(strconv.Itoa(rolesParam.RoleId))
 	/*校验角色是否有数据权限*/
@@ -419,7 +419,7 @@ func UploadRole(rolesParam SysRolesParam, userId int) R.Result {
 	return R.ReturnSuccess("操作成功")
 }
 
-func PutDataScope(rolesParam SysRolesParam, userId int) R.Result {
+func PutDataScope(rolesParam SysRolesParam, userId string) R.Result {
 	/*校验角色是否允许操作*/
 	checkRoleAllowed(strconv.Itoa(rolesParam.RoleId))
 	/*校验角色是否有数据权限*/
@@ -432,7 +432,7 @@ func PutDataScope(rolesParam SysRolesParam, userId int) R.Result {
 	return R.ReturnSuccess("操作成功")
 }
 
-func ChangeRoleStatus(rolesParam SysRoles, userId int) R.Result {
+func ChangeRoleStatus(rolesParam SysRoles, userId string) R.Result {
 	/*校验角色是否允许操作*/
 	checkRoleAllowed(strconv.Itoa(rolesParam.RoleId))
 	/*校验角色是否有数据权限*/
@@ -548,7 +548,7 @@ func GetUnAllocatedList(params tools.SearchTableDataParam) tools.TableDataInfo {
 	}
 }
 
-func CancelRole(userId int, roleId int) R.Result {
+func CancelRole(userId string, roleId int) R.Result {
 	err := mysql.MysqlDb().Exec("delete from sys_role_actor where aid = ? and rid = ?", userId, roleId).Error
 	if err != nil {
 		panic(R.ReturnFailMsg(err.Error()))
@@ -565,11 +565,11 @@ func CancelAllRole(roleId string, userIds string) R.Result {
 	return R.ReturnSuccess("操作成功")
 }
 
-func SelectRoleAll(roleId string, userIdStr string, userId int) R.Result {
+func SelectRoleAll(roleId string, userIdStr string, userId string) R.Result {
 	checkRoleDataScope(roleId, userId)
 	/*批量插入*/
 	var userRoles []SysUserRole
-	var userIds = utils2.Split(userIdStr)
+	var userIds = utils2.SplitStr(userIdStr)
 	for i := 0; i < len(userIds); i++ {
 		id := userIds[i]
 		userRoles = append(userRoles, SysUserRole{RoleId: utils2.GetInterfaceToInt(roleId), UserId: id})

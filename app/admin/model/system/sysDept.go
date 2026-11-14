@@ -10,8 +10,8 @@ import (
 
 // SysDept model：数据库字段
 type SysDept struct {
-	DeptId     int       `json:"deptId" gorm:"column:id;primaryKey"` //表示主键
-	ParentId   int       `json:"parentId" gorm:"column:pid"`
+	DeptId     string    `json:"deptId" gorm:"column:id;primaryKey"` //表示主键
+	ParentId   string    `json:"parentId" gorm:"column:pid"`
 	Ancestors  string    `json:"ancestors" gorm:"-"`
 	DeptName   string    `json:"deptName" gorm:"column:name"`
 	OrderNum   int       `json:"orderNum" gorm:"column:ornum"`
@@ -27,8 +27,8 @@ type SysDept struct {
 }
 
 type SysDeptResult struct {
-	DeptId     int             `json:"deptId" gorm:"column:id;primaryKey"` //表示主键
-	ParentId   int             `json:"parentId" gorm:"column:pid"`
+	DeptId     string          `json:"deptId" gorm:"column:id;primaryKey"` //表示主键
+	ParentId   string          `json:"parentId" gorm:"column:pid"`
 	Ancestors  string          `json:"ancestors" gorm:"-"`
 	DeptName   string          `json:"deptName" gorm:"column:name"`
 	OrderNum   int             `json:"orderNum" gorm:"column:ornum"`
@@ -50,7 +50,7 @@ func (SysDept) TableName() string {
 }
 
 type SysDeptDto struct {
-	Id int `json:"id"`
+	Id string `json:"id"`
 	/** 节点名称 */
 	Label string `json:"label"`
 	/** 子节点 */
@@ -69,12 +69,12 @@ func GetDeptList(params tools.SearchTableDataParam, isPaging bool) ([]SysDeptRes
 	var db = mysql.MysqlDb().Model(&[]SysDept{})
 
 	var deptId = dept.DeptId
-	if deptId != 0 {
+	if deptId != "" {
 		db.Where("id = ?", deptId)
 	}
 
 	var parentId = dept.ParentId
-	if parentId != 0 {
+	if parentId != "" {
 		db.Where("pid = ?", parentId)
 	}
 
@@ -150,7 +150,7 @@ func DeleteDept(deptId string) R.Result {
 }
 
 type TreeSelect struct {
-	Id       int          `json:"id"`
+	Id       string       `json:"id"`
 	Label    string       `json:"label"`
 	Children []TreeSelect `json:"children"`
 }
@@ -168,7 +168,7 @@ func SelectDeptTreeList() []TreeSelect {
 		deptId := dept.DeptId
 		name := dept.DeptName
 		pId := dept.ParentId
-		if pId == 0 {
+		if pId == "" {
 			tChild := getChildList(depts, deptId)
 			treeSelect := TreeSelect{
 				Id:       deptId,
@@ -182,7 +182,7 @@ func SelectDeptTreeList() []TreeSelect {
 	return deptResults
 }
 
-func getChildList(depts []SysDept, deptId int) []TreeSelect {
+func getChildList(depts []SysDept, deptId string) []TreeSelect {
 	var tlist []TreeSelect
 	for i := 0; i < len(depts); i++ {
 		dept1 := depts[i]

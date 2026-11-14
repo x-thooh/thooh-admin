@@ -110,6 +110,23 @@ func Join(sep []int, sp string) string {
 	return strings.Join(sarr, fmt.Sprint(sp))
 }
 
+// GetInterfaceToStr 把 ctx 里的身份值转成 string。
+// WHY: dump 的 sys_user.id / sys_org.id 是 varchar(36)（u1/o1000），鉴权中间件往
+// ctx 放的就是这个字符串；用 GetInterfaceToInt 会把它变成 0，进而误判「不是超管」。
+func GetInterfaceToStr(v interface{}) string {
+	if v == nil {
+		return ""
+	}
+	switch t := v.(type) {
+	case string:
+		return t
+	case []byte:
+		return string(t)
+	default:
+		return fmt.Sprint(t)
+	}
+}
+
 // string转数组
 /* 1,1,2,3,4,5*/
 func Split(data string) []int {

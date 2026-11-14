@@ -63,7 +63,7 @@ func (SysMenu) TableName() string {
 	return "sys_menu"
 }
 
-func SelectMenuTreeByUserId(userId int) []SysMenu {
+func SelectMenuTreeByUserId(userId string) []SysMenu {
 	var menu []SysMenu
 	if IsAdminById(userId) {
 		err := mysql.MysqlDb().Where("type in (?) ", []string{"M", "C"}).Where("avtag", "0").Order("pid").Order("ornum").Find(&menu).Error
@@ -79,7 +79,7 @@ func SelectMenuTreeByUserId(userId int) []SysMenu {
 	return menu
 }
 
-func SelectMenuTree(userId int, menu SysMenu) []SysMenu {
+func SelectMenuTree(userId string, menu SysMenu) []SysMenu {
 	var menus []SysMenu
 	sql := "select distinct m.id, m.pid, m.name, m.path, m.comp, m.param, m.shtag, m.avtag, '' as perms, m.outag, m.catag, m.type, m.icon, m.ornum, m.crtim "
 	sql += "from sys_menu m "
@@ -104,7 +104,7 @@ func SelectMenuTree(userId int, menu SysMenu) []SysMenu {
 		sql += "left join sys_role_menu rm on m.id = rm.mid "
 		sql += "left join sys_role_actor ur on rm.rid = ur.rid "
 		sql += "left join sys_role ro on ur.rid = ro.id "
-		sql += "where ur.aid = " + strconv.Itoa(userId)
+		sql += "where ur.aid = '" + userId + "'"
 		var menuName = menu.MenuName
 		if menuName != "" {
 			sql += "AND m.name like concat('%', " + menuName + ", '%')"

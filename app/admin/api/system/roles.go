@@ -150,7 +150,7 @@ func ExportRole(context *gin.Context) {
 func GetRoleInfo(context *gin.Context) {
 	roleId := context.Param("roleId")
 	userId, _ := context.Get("userId")
-	if !system.IsAdminById(utils.GetInterfaceToInt(userId)) {
+	if !system.IsAdminById(utils.GetInterfaceToStr(userId)) {
 		var isCheck = system.CheckRoleDataScope(roleId)
 		if isCheck {
 			context.JSON(http.StatusOK, R.ReturnFailMsg("没有权限访问角色数据！"))
@@ -184,7 +184,7 @@ func UploadRole(context *gin.Context) {
 	}
 	user := system.FindUserById(userId)
 	rolesParam.UpdateBy = user.UserName
-	result := system.UploadRole(rolesParam, utils.GetInterfaceToInt(userId))
+	result := system.UploadRole(rolesParam, utils.GetInterfaceToStr(userId))
 	context.JSON(http.StatusOK, result)
 }
 
@@ -195,7 +195,7 @@ func PutDataScope(context *gin.Context) {
 		context.JSON(http.StatusOK, R.ReturnFailMsg("参数不能为空"))
 		return
 	}
-	result := system.PutDataScope(rolesParam, utils.GetInterfaceToInt(userId))
+	result := system.PutDataScope(rolesParam, utils.GetInterfaceToStr(userId))
 	context.JSON(http.StatusOK, result)
 }
 
@@ -209,14 +209,14 @@ func ChangeRoleStatus(context *gin.Context) {
 	user := system.FindUserById(userId)
 	rolesParam.UpdateBy = user.UserName
 	rolesParam.UpdateTime = time.Now()
-	result := system.ChangeRoleStatus(rolesParam, utils.GetInterfaceToInt(userId))
+	result := system.ChangeRoleStatus(rolesParam, utils.GetInterfaceToStr(userId))
 	context.JSON(http.StatusOK, result)
 }
 
 func DeleteRole(context *gin.Context) {
 	userId, _ := context.Get("userId")
 	var roleIds = context.Param("roleIds")
-	system.DeleteRolesById(roleIds, utils.GetInterfaceToInt(userId))
+	system.DeleteRolesById(roleIds, utils.GetInterfaceToStr(userId))
 	context.JSON(http.StatusOK, gin.H{
 		"msg":  "操作成功",
 		"code": http.StatusOK,
@@ -311,7 +311,7 @@ func SelectRoleAll(context *gin.Context) {
 	roleId, _ := context.GetQuery("roleId")
 	userIds, _ := context.GetQuery("userIds")
 	userId, _ := context.Get("userId")
-	result := system.SelectRoleAll(roleId, userIds, utils.GetInterfaceToInt(userId))
+	result := system.SelectRoleAll(roleId, userIds, utils.GetInterfaceToStr(userId))
 	context.JSON(http.StatusOK, result)
 }
 
