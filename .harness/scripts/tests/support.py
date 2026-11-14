@@ -53,6 +53,7 @@ def codes_of(findings):
 def git(root, *argv):
     env = dict(os.environ, GIT_AUTHOR_NAME="t", GIT_AUTHOR_EMAIL="t@t", GIT_COMMITTER_NAME="t",
                GIT_COMMITTER_EMAIL="t@t")
+    # 目标就是本仓库：root 即被检的那棵树
     p = subprocess.run(["git", "-C", str(root), *argv], capture_output=True, text=True, env=env)
     return p.returncode == 0, (p.stdout or "") + (p.stderr or "")
 

@@ -70,6 +70,7 @@ def check_message(message, emit, max_chars=DEFAULT_SUBJECT_MAX):
 
 def head_message(root):
     """HEAD 的完整提交信息；没有 git 或还没有提交时返回 None。"""
+    # 目标就是本仓库：root 即被检的那棵树
     proc = subprocess.run(["git", "-C", str(root), "log", "-1", "--pretty=%B"],
                           check=False, capture_output=True, text=True)
     if proc.returncode != 0:

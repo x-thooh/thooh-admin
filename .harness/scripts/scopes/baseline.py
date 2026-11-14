@@ -190,6 +190,7 @@ def head_total(root):
     total = 0
     for rel in (BASELINE_REL, ACCEPTED_REL):
         proc = subprocess.run(
+            # 目标就是本仓库：root 即被检的那棵树
             ["git", "-C", str(root), "show", f"HEAD:{rel}"], check=False, capture_output=True, text=True
         )
         if proc.returncode != 0:
