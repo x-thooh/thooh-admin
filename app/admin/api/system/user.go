@@ -247,7 +247,7 @@ func UpdatePwdHandler(context *gin.Context) {
 func ProfileHandler(context *gin.Context) {
 	userId, _ := context.Get("userId")
 	var user system.SysUser
-	err1 := mysql.MysqlDb().Where("user_id = ?", userId).First(&user)
+	err1 := mysql.MysqlDb().Where("id = ?", userId).First(&user)
 
 	if err1.Error != nil {
 		context.JSON(http.StatusOK, R.ReturnFailMsg("未找到用户"))
@@ -286,7 +286,7 @@ func PostProfileHandler(context *gin.Context) {
 func AvatarHandler(context *gin.Context) {
 	userId, _ := context.Get("userId")
 	var user system.SysUser
-	err1 := mysql.MysqlDb().Where("user_id = ?", userId).First(&user)
+	err1 := mysql.MysqlDb().Where("id = ?", userId).First(&user)
 
 	if err1.Error != nil {
 		context.JSON(http.StatusOK, R.ReturnFailMsg("未找到用户"))

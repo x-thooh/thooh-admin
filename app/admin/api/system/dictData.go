@@ -158,8 +158,12 @@ func GetDictDataByDictType(context *gin.Context) {
 	dictType := context.Param("dictType")
 	result := cache.GetDictDataCacheByType(dictType)
 	if result == nil {
-		relResult := system.SelectDictDataByType(dictType)
-		result = relResult
+		result = system.SelectDictDataByType(dictType)
+	}
+	if result == nil {
+		// WHY: nil 切片会被序列化成 JSON null，前端的字典转换器 (app.js 的 responseConverter)
+		// 会执行 e.content instanceof Array 而抛 "Cannot read properties of null"（浏览器实测）。
+		result = []system.SysDictData{}
 	}
 	context.JSON(http.StatusOK, gin.H{
 		"msg":  "操作成功",

@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func GetInterfaceToInt(t1 interface{}) int {
@@ -216,4 +217,17 @@ func RemoveEmpty(arr []string) (result []string) {
 		}
 	}
 	return
+}
+
+// NextIntId 给 dump 里「bigint 主键但没有 auto_increment」的表造主键。
+// WHY: mon_oper_log / mon_login_log / mon_job / sys_notice / tool_dict* / sys_config /
+// sys_menu / sys_role 的 id 都不自增，INSERT 不显式给值就是 1364 Field 'id' doesn't
+// have a default value（浏览器与接口实测，审计驳回的正是这一类）。
+func NextIntId() int64 {
+	return time.Now().UnixNano() / 1000
+}
+
+// NextStrId 给 varchar(36) 主键的表（sys_user / sys_org / sys_post）造主键。
+func NextStrId(prefix string) string {
+	return prefix + strconv.FormatInt(time.Now().UnixNano(), 36)
 }

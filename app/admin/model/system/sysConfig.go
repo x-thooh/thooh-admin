@@ -118,6 +118,9 @@ func SaveConfig(config SysConfig) R.Result {
 	if keyCount > 0 {
 		return R.ReturnFailMsg("新增参数'" + config.ConfigName + "'失败，参数键名已存在")
 	}
+	if config.ConfigId == 0 {
+		config.ConfigId = int(utils2.NextIntId())
+	}
 	err := mysql.MysqlDb().Model(&SysConfig{}).Create(&config).Error
 	if err == nil {
 		return R.ReturnSuccess("操作成功")

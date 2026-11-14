@@ -97,6 +97,9 @@ func FindNoticeInfoById(noticeId string) SysNotice {
 }
 
 func SaveNotice(sysNotice SysNotice) R.Result {
+	if sysNotice.NoticeId == 0 {
+		sysNotice.NoticeId = int(utils2.NextIntId())
+	}
 	err := mysql.MysqlDb().Model(&SysNotice{}).Create(&sysNotice).Error
 	if err != nil {
 		return R.ReturnFailMsg(err.Error())

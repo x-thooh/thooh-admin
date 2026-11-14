@@ -117,6 +117,9 @@ func SaveJob(jobParam SysJobParam, userId interface{}) R.Result {
 	job.CreateTime = time.Now()
 	user := system.FindUserById(userId)
 	job.CreateBy = user.UserName
+	if job.JobId == 0 {
+		job.JobId = int(utils2.NextIntId())
+	}
 	err = mysql.MysqlDb().Model(&SysJob{}).Create(&job).Error
 	if err != nil {
 		panic(R.ReturnFailMsg(err.Error()))
@@ -130,6 +133,9 @@ func UploadJob(jobParam SysJob, userId interface{}) R.Result {
 	user := system.FindUserById(userId)
 	job.UpdateBy = user.UserName
 	job.UpdateTime = time.Now()
+	if jobParam.JobId == 0 {
+		jobParam.JobId = int(utils2.NextIntId())
+	}
 	err = mysql.MysqlDb().Model(&SysJob{}).Create(&jobParam).Error
 	if err != nil {
 		panic(R.ReturnFailMsg(err.Error()))
@@ -181,6 +187,9 @@ func FindJobLogById(id string) R.Result {
 
 func (param *SysJobLog) JobLogAdd() R.Result {
 	param.CreateTime = time.Now()
+	if param.JobLogId == 0 {
+		param.JobLogId = int(utils2.NextIntId())
+	}
 	if err := mysql.MysqlDb().Model(&SysJobLog{}).Create(&param).Error; err != nil {
 		return R.ReturnFailMsg(err.Error())
 	}

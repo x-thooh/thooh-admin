@@ -51,7 +51,8 @@ func ListDept(context *gin.Context) {
 /*排除节点*/
 func ExcludeDept(context *gin.Context) {
 	deptId := context.Param("deptId")
-	var param = tools.SearchTableDataParam{}
+	// WHY: GetDeptList 内部做 params.Other.(SysDept) 断言，传空 param 会 panic（审计实测 500）
+	var param = tools.SearchTableDataParam{Other: system.SysDept{}}
 	var list, _ = system.GetDeptList(param, false)
 	var ExcludeList []system.SysDeptResult
 	for i := 0; i < len(list); i++ {

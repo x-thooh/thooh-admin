@@ -14,7 +14,7 @@ func InitCache(e *gin.Engine) {
 		auth.Use(jwt.JWTAuthMiddleware())
 		{
 			auth.GET("", monitor.CacheHandler)
-			auth.GET("getNames", monitor.CacheHandler)
+			auth.GET("getNames", monitor.CacheNamesHandler)
 			auth.GET("getKeys/:cacheName", monitor.GetCacheKeysHandler)
 			auth.GET("getValue/:cacheName/:cacheKey", monitor.GetCacheValueHandler)
 			auth.DELETE("clearCacheName/:cacheName", monitor.ClearCacheNameHandler)

@@ -112,6 +112,9 @@ func SaveDictData(dictDataParam SysDictData) R.Result {
 	if isDefault == "" {
 		dictDataParam.IsDefault = "N"
 	}
+	if dictDataParam.DictCode == 0 {
+		dictDataParam.DictCode = int(utils.NextIntId())
+	}
 	err := mysql.MysqlDb().Model(&SysDictData{}).Create(&dictDataParam).Error
 	if err != nil {
 		return R.ReturnFailMsg(err.Error())

@@ -1,0 +1,22 @@
+# 浏览器实测（chrome-cdp，UTC 2026-11-14T14:25:50Z）
+# 目标：登录后点遍侧边栏全部菜单，记录每次控制台错误与非 200 请求
+
+collector ready, menus=17
+{"menu":"组织管理","path":"/admin/sys/org","rows":16,"errs":["reject:TypeError: Cannot read properties of null (reading 'content')"],"badNet":[]}
+{"menu":"用户管理","path":"/admin/sys/user","rows":9,"errs":["reject:TypeError: Cannot read properties of null (reading 'content')"],"badNet":[]}
+{"menu":"岗位管理","path":"/admin/sys/post","rows":4,"errs":["reject:TypeError: Cannot read properties of null (reading 'content')"],"badNet":[]}
+{"menu":"菜单管理","path":"/admin/sys/menu","rows":19,"errs":["reject:TypeError: Cannot read properties of null (reading 'content')"],"badNet":[]}
+{"menu":"角色管理","path":"/admin/sys/role","rows":2,"errs":["reject:TypeError: Cannot read properties of null (reading 'content')"],"badNet":[]}
+{"menu":"参数设置","path":"/admin/sys/config","rows":3,"errs":["reject:TypeError: Cannot read properties of null (reading 'content')"],"badNet":[]}
+{"menu":"通知公告","path":"/admin/sys/notice","rows":1,"errs":["reject:TypeError: Cannot read properties of null (reading 'content')"],"badNet":[]}
+{"menu":"在线用户","path":"/admin/mon/online","rows":10,"errs":[],"badNet":[]}
+{"menu":"登录日志","path":"/admin/mon/login","rows":1,"errs":["reject:TypeError: Cannot read properties of null (reading 'content')"],"badNet":[]}
+{"menu":"操作日志","path":"/admin/mon/oper","rows":0,"errs":["reject:TypeError: Cannot read properties of null (reading 'content')","reject:Error: 查询失败"],"badNet":[]}
+{"menu":"服务监控","path":"/admin/mon/server","rows":0,"errs":[],"badNet":[]}
+{"menu":"缓存监控","path":"/admin/mon/cache","rows":0,"errs":["reject:TypeError: Cannot read properties of undefined (reading 'used_memory_human')"],"badNet":[]}
+{"menu":"定时任务","path":"/admin/mon/job","rows":0,"errs":["reject:TypeError: Cannot read properties of null (reading 'content')"],"badNet":[]}
+{"menu":"字典工具","path":"/admin/tool/dict","rows":3,"errs":["reject:TypeError: Cannot read properties of null (reading 'content')"],"badNet":[]}
+{"menu":"在线表单","path":"/admin/tool/form","rows":0,"errs":[],"badNet":[]}
+{"menu":"代码生成","path":"/admin/tool/code","rows":0,"errs":[],"badNet":[]}
+
+# 截图

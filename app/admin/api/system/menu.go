@@ -18,7 +18,7 @@ import (
 func GetRoutersHandler(context *gin.Context) {
 	userId, _ := context.Get("userId")
 	var user system.SysUser
-	err1 := mysql.MysqlDb().Where("user_id = ?", userId).First(&user)
+	err1 := mysql.MysqlDb().Where("id = ?", userId).First(&user)
 
 	if err1.Error != nil {
 		context.JSON(http.StatusOK, gin.H{

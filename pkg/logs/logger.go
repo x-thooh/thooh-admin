@@ -2,6 +2,7 @@ package logs
 
 import (
 	"fmt"
+	"github.com/x-thooh/thooh-admin/common/json/bitx"
 	"os"
 	"time"
 
@@ -237,9 +238,9 @@ func Poster() {
 
 // logStatus 把 HTTP 状态码折成 sutag（bit(1)：0=正常，1=异常）。
 // WHY: mon_oper_log.sutag 是 bit(1)，写字符串会 1406 Data too long（浏览器实测）。
-func logStatus(code int) int8 {
+func logStatus(code int) bitx.Str {
 	if code == 200 {
-		return 0
+		return "0"
 	}
-	return 1
+	return "1"
 }

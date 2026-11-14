@@ -1,0 +1,22 @@
+
+## 审计员点名接口（判 body.code）
+  /system/user/list?pageNum=1&pageSize=10 => code=200 total=9 rows=9
+  /system/role/list?pageNum=1&pageSize=10 => code=200 total=2 rows=2
+  /system/role/optionselect => code=200 total=- rows=3
+  /system/dept/list/exclude/100 => code=200 total=- rows=16
+  /system/user/profile => code=200 total=- rows=obj
+  /monitor/operlog/list?pageNum=1&pageSize=10 => code=200 total=1 rows=1
+  /monitor/cache => code=200 total=- rows=obj
+  /system/dict/data/type/no_such_type => code=200 total=- rows=0
+
+## 后端 SQL 错误计数（应为 0）
+  Scan/1364/1054/1146/1064/3065/1406: 0
+  panic recovered: 0
+
+## 数据规模（审计员指出的报数偏差，按实际查库）
+  sys_menu 行数: 20
+  sys_role 行数: 2
+  sys_user 行数: 9
+
+## 已知边界（不是通过，如实记录）
+  POST /tool/gen/importTable => record not found：代码生成器缺模板所需字段，T-41 已定性「未实现」，非 SQL 错误。

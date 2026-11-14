@@ -20,9 +20,9 @@ type GenTable struct {
 	GenType        string         `json:"genType" gorm:"-"`
 	GenPath        string         `json:"genPath" gorm:"-"`
 	Options        string         `json:"options" gorm:"-"`
-	CreateBy       string         `json:"-" gorm:"column:cruid"`
+	CreateBy       string         `json:"-" gorm:"-"`
 	CreateTime     utils.JsonTime `json:"createTime" gorm:"column:crtim;type:datetime;autoCreateTime"`
-	UpdateBy       string         `json:"-" gorm:"column:upuid"`
+	UpdateBy       string         `json:"-" gorm:"-"`
 	UpdateTime     utils.JsonTime `json:"updateTime" gorm:"column:uptim;type:datetime;autoCreateTime"`
 	Remark         string         `json:"remark" gorm:"column:remark"`
 }
@@ -51,10 +51,10 @@ type GenTableColumn struct {
 	HtmlType      string         `json:"htmlType" gorm:"-"`
 	DictType      string         `json:"dictType" gorm:"-"`
 	Sort          string         `json:"sort" gorm:"column:ornum"`
-	CreateBy      string         `json:"createBy" gorm:"column:cruid"`
-	CreateTime    utils.JsonTime `json:"createTime" gorm:"column:crtim;type:datetime"`
-	UpdateBy      string         `json:"updateBy" gorm:"column:upuid"`
-	UpdateTime    utils.JsonTime `json:"updateTime" gorm:"column:uptim;type:datetime"`
+	CreateBy      string         `json:"createBy" gorm:"-"`
+	CreateTime    utils.JsonTime `json:"createTime" gorm:"-"`
+	UpdateBy      string         `json:"updateBy" gorm:"-"`
+	UpdateTime    utils.JsonTime `json:"updateTime" gorm:"-"`
 }
 
 // TableName 指定数据库表名称
@@ -64,52 +64,52 @@ func (GenTableColumn) TableName() string {
 
 type GenTableVO struct {
 	TableId        string             `json:"tableId" gorm:"-"`
-	Table_Name     string             `json:"tableName,omitempty" gorm:"table_name"`
-	TableComment   string             `json:"tableComment" gorm:"table_comment"`
-	SubTableName   string             `json:"subTableName" gorm:"sub_table_name"`
-	SubTableFkName string             `json:"subTableFkName" gorm:"sub_table_fk_name"`
-	ClassName      string             `json:"className" gorm:"class_name"`
-	TplCategory    string             `json:"tplCategory" gorm:"tpl_category"`
-	PackageName    string             `json:"packageName" gorm:"package_name"`
-	ModuleName     string             `json:"moduleName" gorm:"module_name"`
-	BusinessName   string             `json:"businessName" gorm:"business_name"`
-	FunctionName   string             `json:"functionName" gorm:"function_name"`
-	FunctionAuthor string             `json:"functionAuthor" gorm:"function_author"`
-	GenType        string             `json:"genType" gorm:"gen_type"`
-	GenPath        string             `json:"genPath" gorm:"gen_path"`
-	Options        string             `json:"options" gorm:"options"`
+	Table_Name     string             `json:"tableName,omitempty" gorm:"-"`
+	TableComment   string             `json:"tableComment" gorm:"-"`
+	SubTableName   string             `json:"subTableName" gorm:"-"`
+	SubTableFkName string             `json:"subTableFkName" gorm:"-"`
+	ClassName      string             `json:"className" gorm:"-"`
+	TplCategory    string             `json:"tplCategory" gorm:"-"`
+	PackageName    string             `json:"packageName" gorm:"-"`
+	ModuleName     string             `json:"moduleName" gorm:"-"`
+	BusinessName   string             `json:"businessName" gorm:"-"`
+	FunctionName   string             `json:"functionName" gorm:"-"`
+	FunctionAuthor string             `json:"functionAuthor" gorm:"-"`
+	GenType        string             `json:"genType" gorm:"-"`
+	GenPath        string             `json:"genPath" gorm:"-"`
+	Options        string             `json:"options" gorm:"-"`
 	Fields         []GenTableColumnVO `json:"fields"`
 }
 
 type GenTableColumnVO struct {
 	TableId        string `json:"tableId" gorm:"-"`
-	Table_Name     string `json:"tableName,omitempty" gorm:"table_name"`
-	TableComment   string `json:"tableComment" gorm:"table_comment"`
-	SubTableName   string `json:"subTableName" gorm:"sub_table_name"`
-	SubTableFkName string `json:"subTableFkName" gorm:"sub_table_fk_name"`
-	ClassName      string `json:"className" gorm:"class_name"`
-	TplCategory    string `json:"tplCategory" gorm:"tpl_category"`
-	PackageName    string `json:"packageName" gorm:"package_name"`
-	ModuleName     string `json:"moduleName" gorm:"module_name"`
-	BusinessName   string `json:"businessName" gorm:"business_name"`
-	FunctionName   string `json:"functionName" gorm:"function_name"`
-	FunctionAuthor string `json:"functionAuthor" gorm:"function_author"`
-	GenType        string `json:"genType" gorm:"gen_type"`
-	GenPath        string `json:"genPath" gorm:"gen_path"`
-	Options        string `json:"options" gorm:"options"`
+	Table_Name     string `json:"tableName,omitempty" gorm:"-"`
+	TableComment   string `json:"tableComment" gorm:"-"`
+	SubTableName   string `json:"subTableName" gorm:"-"`
+	SubTableFkName string `json:"subTableFkName" gorm:"-"`
+	ClassName      string `json:"className" gorm:"-"`
+	TplCategory    string `json:"tplCategory" gorm:"-"`
+	PackageName    string `json:"packageName" gorm:"-"`
+	ModuleName     string `json:"moduleName" gorm:"-"`
+	BusinessName   string `json:"businessName" gorm:"-"`
+	FunctionName   string `json:"functionName" gorm:"-"`
+	FunctionAuthor string `json:"functionAuthor" gorm:"-"`
+	GenType        string `json:"genType" gorm:"-"`
+	GenPath        string `json:"genPath" gorm:"-"`
+	Options        string `json:"options" gorm:"-"`
 	ColumnId       string `json:"columnId" gorm:"-"`
-	ColumnName     string `json:"columnName" gorm:"column_name"`
-	ColumnComment  string `json:"columnComment" gorm:"column_comment"`
-	ColumnType     string `json:"columnType" gorm:"column_type"`
-	JavaType       string `json:"javaType" gorm:"java_type"`
+	ColumnName     string `json:"columnName" gorm:"-"`
+	ColumnComment  string `json:"columnComment" gorm:"-"`
+	ColumnType     string `json:"columnType" gorm:"-"`
+	JavaType       string `json:"javaType" gorm:"-"`
 	FieldName      string `json:"fieldName"`
-	JavaField      string `json:"javaField" gorm:"java_field"`
-	IsPk           string `json:"isPk" gorm:"is_pk"`
-	IsIncrement    string `json:"isIncrement" gorm:"is_increment"`
-	IsRequired     string `json:"isRequired" gorm:"is_required"`
-	IsInsert       string `json:"isInsert" gorm:"is_insert"`
-	IsEdit         string `json:"isEdit" gorm:"is_edit"`
-	IsList         string `json:"isList" gorm:"is_list"`
+	JavaField      string `json:"javaField" gorm:"-"`
+	IsPk           string `json:"isPk" gorm:"-"`
+	IsIncrement    string `json:"isIncrement" gorm:"-"`
+	IsRequired     string `json:"isRequired" gorm:"-"`
+	IsInsert       string `json:"isInsert" gorm:"-"`
+	IsEdit         string `json:"isEdit" gorm:"-"`
+	IsList         string `json:"isList" gorm:"-"`
 	IsQuery        string `json:"isQuery" gorm:"is_query"`
 	QueryType      string `json:"queryType" gorm:"query_type"`
 	HtmlType       string `json:"htmlType" gorm:"html_type"`

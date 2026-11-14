@@ -234,14 +234,10 @@ func SelectUserList(params tools.SearchTableDataParam, isPage bool) tools.TableD
 		db.Where("`sys_user`.username like concat('%', ?, '%')", userName)
 	}
 
-	// RuoYi 口径 0=正常 → dump 的 avtag 1=可用（用 StatusFilter 保住三态检索）
-	if f := sysUser.StatusFilter; f != "" {
-		avtag := 0
-		if f == "0" {
-			avtag = 1
-		}
-		db.Where("`sys_user`.avtag = ? ", avtag)
-	}
+	// WHY: DeleteUserById 把行写成 avtag=0（dump 没有单独的 del_flag 列），
+	// 所以「已删除」和「已停用」在这张表里共用 avtag 这一位；列表常驻只出 avtag=1，
+	// 否则删掉的账号还会留在列表里（审计实测：删除后 total 仍为 10）。
+	db.Where("`sys_user`.avtag = 1")
 
 	var phonenumber = sysUser.Phonenumber
 	if phonenumber != "" {
@@ -304,14 +300,10 @@ func SelectUserParmList(params tools.SearchTableDataParam, isPage bool) tools.Ta
 		db.Where("`sys_user`.username like concat('%', ?, '%')", userName)
 	}
 
-	// RuoYi 口径 0=正常 → dump 的 avtag 1=可用（用 StatusFilter 保住三态检索）
-	if f := sysUser.StatusFilter; f != "" {
-		avtag := 0
-		if f == "0" {
-			avtag = 1
-		}
-		db.Where("`sys_user`.avtag = ? ", avtag)
-	}
+	// WHY: DeleteUserById 把行写成 avtag=0（dump 没有单独的 del_flag 列），
+	// 所以「已删除」和「已停用」在这张表里共用 avtag 这一位；列表常驻只出 avtag=1，
+	// 否则删掉的账号还会留在列表里（审计实测：删除后 total 仍为 10）。
+	db.Where("`sys_user`.avtag = 1")
 
 	var phonenumber = sysUser.Phonenumber
 	if phonenumber != "" {

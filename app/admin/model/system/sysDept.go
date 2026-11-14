@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/x-thooh/thooh-admin/app/admin/model/tools"
+	"github.com/x-thooh/thooh-admin/app/core/utils"
 	"github.com/x-thooh/thooh-admin/app/core/utils/R"
 	"github.com/x-thooh/thooh-admin/pkg/mysql"
 )
@@ -117,6 +118,9 @@ func GetDeptInfo(deptId string) SysDept {
 
 func SaveDept(sysDept SysDept) R.Result {
 	sysDept.DelFlag = "0"
+	if sysDept.DeptId == "" {
+		sysDept.DeptId = utils.NextStrId("o")
+	}
 	err := mysql.MysqlDb().Model(&sysDept).Create(&sysDept).Error
 	if err != nil {
 		return R.ReturnFailMsg(err.Error())

@@ -96,6 +96,9 @@ func FindTypeDictById(dictId string) SysDictType {
 }
 
 func SaveType(dictType SysDictType) R.Result {
+	if dictType.DictId == 0 {
+		dictType.DictId = int(utils2.NextIntId())
+	}
 	err := mysql.MysqlDb().Model(&SysDictType{}).Create(&dictType).Error
 	if err != nil {
 		return R.ReturnFailMsg(err.Error())

@@ -7,6 +7,7 @@ import (
 	"github.com/x-thooh/thooh-admin/app/core/utils/R"
 	"github.com/x-thooh/thooh-admin/common/json/bitx"
 	"github.com/x-thooh/thooh-admin/pkg/mysql"
+	"gorm.io/gorm"
 	"strconv"
 	"time"
 )
@@ -185,11 +186,16 @@ func SelectRoleList(params tools.SearchTableDataParam, isPage bool) tools.TableD
 		db.Where("`sys_role`.crtim >= ?", startTime1)
 		db.Where("`sys_role`.crtim <= ?", endTime1)
 	}
-	db.Order("`sys_role`.ornum")
-
-	if err := db.Count(&total).Error; err != nil {
+	// WHY: 带 sys_role_actor/sys_user/sys_org 的 join 会把同一角色放大成多行，
+	// 直接 Count(*) 得到的总数与 rows 对不上（浏览器角色页实测 共 9 条 / 实际 2 行）。
+	// Count 必须在 Order 之前：DISTINCT 与「ORDER BY 列不在 SELECT 里」在 MySQL 8 会报 3065。
+	// 用「按角色 id 分组后的子查询」计数：join 放大行数的问题在子查询里被 GROUP BY 消掉，
+	// 且子查询里不带 ORDER BY，避开 MySQL 8 的 3065（DISTINCT 与 ORDER BY 列不在 SELECT）。
+	sub := db.Session(&gorm.Session{}).Select("`sys_role`.id").Group("`sys_role`.id")
+	if err := mysql.MysqlDb().Table("(?) AS t", sub).Count(&total).Error; err != nil {
 		return tools.Fail()
 	}
+	db.Order("`sys_role`.ornum")
 	if isPage {
 		if err := db.Limit(pageSize).Offset(offset).Find(&rows).Error; err != nil {
 			return tools.Fail()
@@ -465,7 +471,7 @@ func ChangeRoleStatus(rolesParam SysRoles, userId string) R.Result {
 }
 
 func GetRoleOptionSelect() R.Result {
-	var sql = baseSql + "where 1=1"
+	var sql = baseSql + "where 1=1 "
 	sql += "order by r.ornum"
 	var rols []SysRoles
 	err := mysql.MysqlDb().Raw(sql).Scan(&rols).Error

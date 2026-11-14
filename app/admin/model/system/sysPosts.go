@@ -152,6 +152,9 @@ func FindPostInfoById(postId string) SysPost {
 }
 
 func SavePost(post SysPost) R.Result {
+	if post.PostId == "" {
+		post.PostId = utils.NextStrId("p")
+	}
 	err := mysql.MysqlDb().Model(&SysPost{}).Create(&post).Error
 	if err != nil {
 		return R.ReturnFailMsg(err.Error())

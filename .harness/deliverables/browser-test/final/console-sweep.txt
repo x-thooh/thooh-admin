@@ -1,0 +1,17 @@
+# chrome-cdp 最终扫描（UTC 2026-11-14T14:32:22Z）HEAD 源码构建
+{"menu":"组织管理","path":"/admin/sys/org","rows":16,"errors":[]}
+{"menu":"用户管理","path":"/admin/sys/user","rows":9,"errors":[]}
+{"menu":"岗位管理","path":"/admin/sys/post","rows":4,"errors":[]}
+{"menu":"菜单管理","path":"/admin/sys/menu","rows":19,"errors":[]}
+{"menu":"角色管理","path":"/admin/sys/role","rows":2,"errors":[]}
+{"menu":"参数设置","path":"/admin/sys/config","rows":3,"errors":[]}
+{"menu":"通知公告","path":"/admin/sys/notice","rows":1,"errors":[]}
+{"menu":"在线用户","path":"/admin/mon/online","rows":9,"errors":[]}
+{"menu":"登录日志","path":"/admin/mon/login","rows":4,"errors":[]}
+{"menu":"操作日志","path":"/admin/mon/oper","rows":1,"errors":[]}
+{"menu":"服务监控","path":"/admin/mon/server","rows":0,"errors":[]}
+{"menu":"缓存监控","path":"/admin/mon/cache","rows":0,"errors":[]}
+{"menu":"定时任务","path":"/admin/mon/job","rows":0,"errors":[]}
+{"menu":"字典工具","path":"/admin/tool/dict","rows":3,"errors":[]}
+{"menu":"在线表单","path":"/admin/tool/form","rows":0,"errors":[]}
+{"menu":"代码生成","path":"/admin/tool/code","rows":0,"errors":[]}

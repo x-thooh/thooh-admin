@@ -8,6 +8,7 @@ import (
 	"github.com/x-thooh/thooh-admin/app/admin/model/tools"
 	utils2 "github.com/x-thooh/thooh-admin/app/core/utils"
 	"github.com/x-thooh/thooh-admin/app/core/utils/R"
+	"github.com/x-thooh/thooh-admin/common/json/bitx"
 	"github.com/x-thooh/thooh-admin/pkg/mysql"
 )
 
@@ -26,7 +27,7 @@ type SysOperLog struct {
 	OperLocation  string    `json:"operLocation" gorm:"column:oploc"`
 	OperParam     string    `json:"operParam" gorm:"column:bapar"`
 	JsonResult    string    `json:"jsonResult" gorm:"column:repar"`
-	Status        int8      `json:"status" gorm:"column:sutag"` // WHY: sutag 是 bit(1)，塞字符串 '1' 会 1406 Data too long（浏览器实测）
+	Status        bitx.Str  `json:"status" gorm:"column:sutag"` // bit(1)：bitx 同时管 Scan([]byte) 与 Value
 	ErrorMsg      string    `json:"errorMsg" gorm:"column:ermsg"`
 	OperTime      time.Time `json:"operTime" gorm:"column:optim;type:datetime;autoCreateTime"`
 }
@@ -80,7 +81,7 @@ func SelectOperLogList(params tools.SearchTableDataParam) tools.TableDataInfo {
 	//}
 
 	var status = sysOperLog.Status
-	if status != 0 {
+	if status != "" {
 		db.Where("sutag = ?", status)
 	}
 
@@ -183,6 +184,9 @@ func (param *SysOperLog) OperationLogAdd(context *gin.Context) R.Result {
 	param.OperIp = ip
 	param.OperTime = time.Now()
 	param.OperLocation = "" + utils2.GetRealAddressByIP(ip)
+	if param.OperId == 0 {
+		param.OperId = int(utils2.NextIntId())
+	}
 	if err := mysql.MysqlDb().Model(&SysOperLog{}).Create(&param).Error; err != nil {
 		return R.ReturnFailMsg(err.Error())
 	}

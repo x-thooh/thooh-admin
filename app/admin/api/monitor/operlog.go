@@ -9,6 +9,7 @@ import (
 	"github.com/x-thooh/thooh-admin/app/admin/model/monitor"
 	"github.com/x-thooh/thooh-admin/app/admin/model/tools"
 	"github.com/x-thooh/thooh-admin/app/core/utils"
+	"github.com/x-thooh/thooh-admin/common/json/bitx"
 )
 
 func ListOperlog(context *gin.Context) {
@@ -38,7 +39,7 @@ func getListOperlog(context *gin.Context) tools.TableDataInfo {
 			Title:        title,
 			OperName:     operName,
 			BusinessType: businessType,
-			Status:       int8(utils.GetInterfaceToInt(status)),
+			Status:       bitx.Str(status),
 		},
 		OrderByColumn: orderByColumn,
 		IsAsc:         isAsc,
@@ -207,7 +208,7 @@ func ExportOperlog(context *gin.Context) {
 			}
 			var status = v.Status
 			var statusStr = ""
-			if status == 0 {
+			if status == "0" {
 				statusStr = "正常"
 			} else {
 				statusStr = "停用"

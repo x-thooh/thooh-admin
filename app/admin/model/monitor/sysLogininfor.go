@@ -115,6 +115,9 @@ func LoginInfoAdd(context *gin.Context, param system.LoginParam, message string,
 		Status:        status,
 		LoginTime:     time.Now(),
 	}
+	if info.InfoId == 0 {
+		info.InfoId = int(utils2.NextIntId())
+	}
 	if err := mysql.MysqlDb().Model(SysLogininfor{}).Create(&info).First(&SysLogininfor{}).Error; err != nil {
 		return R.ReturnFailMsg(err.Error())
 	}
