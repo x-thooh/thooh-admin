@@ -65,6 +65,7 @@ def wt_parent(root):
     main, problem = main_worktree(root)
     if problem:
         return None, problem
+    assert main is not None
     return main.parent / f"{main.name}-wt", None
 
 
@@ -72,6 +73,7 @@ def tree_dir(root, task_id):
     parent, problem = wt_parent(root)
     if problem:
         return None, problem
+    assert parent is not None
     return parent / task_id, None
 
 
@@ -157,6 +159,7 @@ def mark_doing(root, task_id):
     path = Path(root) / BOARD_REL
     data = json.loads(path.read_text(encoding="utf-8"))
     entry = find_task(data.get("tasks") or [], task_id)
+    assert entry is not None
     was = str(entry.get("status"))
     entry["status"] = "doing"
     entry["worktree"] = task_id
@@ -177,6 +180,7 @@ def task_new(root, task_id):
     target, problem = tree_dir(root, task_id)
     if problem:
         return 2, problem
+    assert target is not None
     if target.exists():
         return 2, f"树已经在：{target}——同一个 id 第二次执行不该再建一遍，先看清它是什么"
     code, base, err = git(root, "rev-parse", "--abbrev-ref", "HEAD")
@@ -213,11 +217,13 @@ def task_done(root, task_id):
     target, problem = tree_dir(root, task_id)
     if problem:
         return 2, problem
+    assert target is not None
     if not target.is_dir():
         return 2, f"没有这棵树：{target}"
     main, problem = main_worktree(root)
     if problem:
         return 2, problem
+    assert main is not None
     clean, merged, dirty, sha, problem = tree_state(target, main)
     if problem:
         return 2, problem
@@ -257,6 +263,7 @@ def list_trees(root):
     parent, problem = wt_parent(root)
     if problem:
         return 2, problem
+    assert parent is not None
     if not parent.is_dir():
         return 0, f"{parent} 不存在：现在没有任务树"
     names = sorted(p.name for p in parent.iterdir() if p.is_dir())
@@ -272,8 +279,8 @@ def main(argv=None):
             return 2, "用法：wt.py --root <仓库根> <动作> [TASK]"
         root = Path(argv.pop(0)).resolve()
     if not argv or argv[0] in ("-h", "--help"):
-        print(__doc__.strip())
-        return 0
+        print((__doc__ or "").strip())
+        return 0, ""
     action = argv[0]
     if action not in ("task-new", "task-done", "list"):
         return 2, f"未知动作 {action}：可选 task-new / task-done / list"

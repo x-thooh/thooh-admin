@@ -19,10 +19,10 @@
 「忘了开树」判不了（任务可能在别人机器上做），那条写在根 `AGENTS.md` 硬规则里靠人守。
 """
 
+import time
 from pathlib import Path
 
 import wt as wtlib
-import time
 
 from .common import add, quality_get, rel_to
 
@@ -51,6 +51,7 @@ def trees_of(root):
     parent, problem = wtlib.wt_parent(root)
     if problem:
         return [], problem
+    assert parent is not None
     if not parent.is_dir():
         return [], None
     return sorted((p for p in parent.iterdir() if p.is_dir()), key=lambda p: p.name), None
