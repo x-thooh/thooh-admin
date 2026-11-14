@@ -10,16 +10,16 @@ import (
 
 // SysPost model：数据库字段
 type SysPost struct {
-	PostId     int       `json:"postId" gorm:"column:post_id;primaryKey"` //表示主键
-	PostCode   string    `json:"postCode" gorm:"post_code"`
-	PostName   string    `json:"postName" gorm:"post_name"`
-	PostSort   int       `json:"postSort" gorm:"post_sort"`
-	Status     string    `json:"status" gorm:"status"`
-	CreateBy   string    `json:"createBy" gorm:"create_by"`
-	CreateTime time.Time `json:"createTime" gorm:"column:create_time;type:datetime;autoCreateTime"`
-	UpdateBy   string    `json:"updateBy" gorm:"update_by"`
-	UpdateTime time.Time `json:"updateTime" gorm:"column:update_time;type:datetime;autoCreateTime"`
-	Remark     string    `json:"remark" gorm:"remark"`
+	PostId     int       `json:"postId" gorm:"column:id;primaryKey"` //表示主键
+	PostCode   string    `json:"postCode" gorm:"column:label"`
+	PostName   string    `json:"postName" gorm:"column:name"`
+	PostSort   int       `json:"postSort" gorm:"column:ornum"`
+	Status     string    `json:"status" gorm:"column:avtag"`
+	CreateBy   string    `json:"createBy" gorm:"-"`
+	CreateTime time.Time `json:"createTime" gorm:"column:crtim;type:datetime;autoCreateTime"`
+	UpdateBy   string    `json:"updateBy" gorm:"-"`
+	UpdateTime time.Time `json:"updateTime" gorm:"column:uptim;type:datetime;autoCreateTime"`
+	Remark     string    `json:"remark" gorm:"column:notes"`
 }
 
 // TableName 指定数据库表名称
@@ -30,9 +30,9 @@ func (SysPost) TableName() string {
 func SelectUserPostGroup(userName string) string {
 	var posts []SysPost
 	var result = ""
-	mysql.MysqlDb().Raw("select p.post_id, p.post_name, p.post_code "+
+	mysql.MysqlDb().Raw("select p.id as post_id, p.name as post_name, p.label as post_code "+
 		"from sys_post p "+
-		"left join sys_user_post up on up.post_id = p.post_id "+
+		"left join sys_user_post up on up.post_id = p.id "+
 		"left join sys_user u on u.user_id = up.user_id "+
 		"where u.user_name = ?", userName).Scan(&posts)
 	if posts != nil {
@@ -63,18 +63,18 @@ func SelectSysPostList(params tools.SearchTableDataParam, isPage bool) tools.Tab
 
 	var postCode = sysPost.PostCode
 	if postCode != "" {
-		db.Where("post_code like ?", "%"+postCode+"%")
+		db.Where("label like ?", "%"+postCode+"%")
 	}
 	var status = sysPost.Status
 	if status != "" {
-		db.Where("status = ?", status)
+		db.Where("avtag = ?", status)
 	}
 	var postName = sysPost.PostName
 	if postName != "" {
-		db.Where("post_name like ?", "%"+postName+"%")
+		db.Where("name like ?", "%"+postName+"%")
 	}
 
-	db.Order("post_sort")
+	db.Order("ornum")
 
 	if err := db.Count(&total).Error; err != nil {
 		return tools.Fail()
@@ -98,9 +98,9 @@ func SelectSysPostList(params tools.SearchTableDataParam, isPage bool) tools.Tab
 
 func SelectPostListByUserId(userId int) []int {
 	var result []int
-	mysql.MysqlDb().Raw("select p.post_id "+
+	mysql.MysqlDb().Raw("select p.id "+
 		"from sys_post p "+
-		"left join sys_user_post up on up.post_id = p.post_id "+
+		"left join sys_user_post up on up.post_id = p.id "+
 		"left join sys_user u on u.user_id = up.user_id "+
 		"where u.user_id = ? ", userId).Find(&result)
 	return result
@@ -140,7 +140,7 @@ func DeletePostByUser(userIds []int) {
 
 func FindPostInfoById(postId string) SysPost {
 	var post SysPost
-	err := mysql.MysqlDb().Where("post_id = ?", postId).First(&post).Error
+	err := mysql.MysqlDb().Where("id = ?", postId).First(&post).Error
 	if err != nil {
 		panic(R.ReturnFailMsg(err.Error()))
 	}
@@ -164,7 +164,7 @@ func EditPost(sysPost SysPost) R.Result {
 }
 
 func DeletePost(postIds string) R.Result {
-	err := mysql.MysqlDb().Where("post_id in (?)", utils.Split(postIds)).Delete(&SysPost{}).Error
+	err := mysql.MysqlDb().Where("id in (?)", utils.Split(postIds)).Delete(&SysPost{}).Error
 	if err != nil {
 		return R.ReturnFailMsg(err.Error())
 	}

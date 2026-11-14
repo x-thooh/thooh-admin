@@ -10,16 +10,16 @@ import (
 )
 
 type SysConfig struct {
-	ConfigId    int       `json:"configId" gorm:"column:config_id;primaryKey"` //表示主键
-	ConfigName  string    `json:"configName" gorm:"config_name"`
-	ConfigKey   string    `json:"configKey" gorm:"config_key"`
-	ConfigValue string    `json:"configValue" gorm:"config_value"`
-	ConfigType  string    `json:"configType" gorm:"config_type"`
-	CreateBy    string    `json:"createBy" gorm:"create_by"`
-	CreateTime  time.Time `json:"createTime" gorm:"column:create_time;type:datetime;autoCreateTime"`
-	UpdateBy    string    `json:"updateBy" gorm:"update_by"`
-	UpdateTime  time.Time `json:"updateTime" gorm:"column:update_time;type:datetime;autoCreateTime"`
-	Remark      string    `json:"remark" gorm:"remark"`
+	ConfigId    int       `json:"configId" gorm:"column:id;primaryKey"` //表示主键
+	ConfigName  string    `json:"configName" gorm:"column:name"`
+	ConfigKey   string    `json:"configKey" gorm:"column:kenam"`
+	ConfigValue string    `json:"configValue" gorm:"column:keval"`
+	ConfigType  string    `json:"configType" gorm:"-"` // dump 无此列
+	CreateBy    string    `json:"createBy" gorm:"-"`   // dump 无此列
+	UpdateBy    string    `json:"updateBy" gorm:"-"`   // dump 无此列
+	CreateTime  time.Time `json:"createTime" gorm:"column:crtim;type:datetime;autoCreateTime"`
+	UpdateTime  time.Time `json:"updateTime" gorm:"column:uptim;type:datetime;autoUpdateTime"`
+	Remark      string    `json:"remark" gorm:"column:notes"`
 }
 
 // TableName 指定数据库表名称
@@ -39,22 +39,17 @@ func SelectConfigList(params tools.SearchTableDataParam, isPage bool) tools.Tabl
 
 	var configId = sysRoles.ConfigId
 	if configId != 0 {
-		db.Where("config_id = ?", configId)
+		db.Where("id = ?", configId)
 	}
 
 	var configKey = sysRoles.ConfigKey
 	if configKey != "" {
-		db.Where("config_key = ?", configKey)
+		db.Where("kenam = ?", configKey)
 	}
 
 	var configName = sysRoles.ConfigName
 	if configName != "" {
-		db.Where("config_name like concat('%', ?, '%')", configName)
-	}
-
-	var configType = sysRoles.ConfigType
-	if configType != "" {
-		db.Where("config_type = ?", configType)
+		db.Where("name like concat('%', ?, '%')", configName)
 	}
 
 	var beginTime = params.Params.BeginTime
@@ -62,8 +57,8 @@ func SelectConfigList(params tools.SearchTableDataParam, isPage bool) tools.Tabl
 
 	if beginTime != "" {
 		startTime1, endTime1 := utils2.GetBeginAndEndTime(beginTime, endTime)
-		db.Where("create_time >= ?", startTime1)
-		db.Where("create_time <= ?", endTime1)
+		db.Where("crtim >= ?", startTime1)
+		db.Where("crtim <= ?", endTime1)
 	}
 
 	if err := db.Count(&total).Error; err != nil {
@@ -91,11 +86,11 @@ func SelectConfig(config SysConfig) SysConfig {
 	var dbg = mysql.MysqlDb().Model(&result)
 	var configId = config.ConfigId
 	if configId != 0 {
-		dbg.Where("config_id = ?", configId)
+		dbg.Where("id = ?", configId)
 	}
 	var configKey = config.ConfigKey
 	if configKey != "" {
-		dbg.Where("config_key = ?", configKey)
+		dbg.Where("kenam = ?", configKey)
 	}
 	err := dbg.First(&result).Error
 	if err != nil {
@@ -106,11 +101,11 @@ func SelectConfig(config SysConfig) SysConfig {
 
 func GetConfigInfo(configId interface{}) SysConfig {
 	/*方式一*/
-	//var sql = "select config_id, config_name, config_key, config_value, config_type, create_by, create_time, update_by, update_time, remark from sys_config where config_id = ?"
+	//var sql = "select config_id, config_name, config_key, config_value, config_type, create_by, create_time, update_by, update_time, remark from sys_config where id = ?"
 	var config SysConfig
 	//mysql.MysqlDb().Raw(sql, configId).Find(&config)
 	/*方式二*/
-	err := mysql.MysqlDb().Where("config_id = ?", configId).First(&config).Error
+	err := mysql.MysqlDb().Where("id = ?", configId).First(&config).Error
 	if err != nil {
 		panic(R.ReturnFailMsg(err.Error()))
 	}
@@ -133,7 +128,7 @@ func SaveConfig(config SysConfig) R.Result {
 
 func checkConfigKeyUnique(configKey string) int64 {
 	var keyCount int64
-	err := mysql.MysqlDb().Model(&SysConfig{}).Where("config_key = ?", configKey).Count(&keyCount).Error
+	err := mysql.MysqlDb().Model(&SysConfig{}).Where("kenam = ?", configKey).Count(&keyCount).Error
 	if err != nil {
 		panic(R.ReturnFailMsg(err.Error()))
 	}
@@ -142,7 +137,7 @@ func checkConfigKeyUnique(configKey string) int64 {
 
 func SelectConfigByKey(configKey string) string {
 	var config SysConfig
-	err := mysql.MysqlDb().Where("config_key = ?", configKey).First(&config).Error
+	err := mysql.MysqlDb().Where("kenam = ?", configKey).First(&config).Error
 	if err != nil {
 		panic(R.ReturnFailMsg(err.Error()))
 	}
@@ -168,7 +163,7 @@ func DelConfig(configIds string) R.Result {
 }
 
 func DelConfigById(configId int) {
-	err := mysql.MysqlDb().Where("config_id = ?", configId).Delete(&SysConfig{}).Error
+	err := mysql.MysqlDb().Where("id = ?", configId).Delete(&SysConfig{}).Error
 	if err != nil {
 		panic(R.ReturnFailMsg(err.Error()))
 	}

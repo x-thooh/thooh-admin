@@ -15,20 +15,20 @@ import (
 
 // SysLogininfor model：数据库字段
 type SysLogininfor struct {
-	InfoId        int       `json:"infoId" gorm:"column:info_id;primaryKey"` //表示主键
-	UserName      string    `json:"userName" gorm:"user_name"`
-	Ipaddr        string    `json:"ipaddr" gorm:"ipaddr"`
-	LoginLocation string    `json:"loginLocation" gorm:"login_location"`
-	Browser       string    `json:"browser" gorm:"browser"`
-	Os            string    `json:"os" gorm:"os"`
-	Status        string    `json:"status" gorm:"status"`
-	Msg           string    `json:"msg" gorm:"msg"`
-	LoginTime     time.Time `json:"loginTime" gorm:"column:login_time;type:datetime"`
+	InfoId        int       `json:"infoId" gorm:"column:id;primaryKey"` //表示主键
+	UserName      string    `json:"userName" gorm:"column:username"`
+	Ipaddr        string    `json:"ipaddr" gorm:"column:loip"`
+	LoginLocation string    `json:"loginLocation" gorm:"column:loloc"`
+	Browser       string    `json:"browser" gorm:"column:browser"`
+	Os            string    `json:"os" gorm:"column:os"`
+	Status        string    `json:"status" gorm:"column:sutag"`
+	Msg           string    `json:"msg" gorm:"column:himsg"`
+	LoginTime     time.Time `json:"loginTime" gorm:"column:lotim;type:datetime"`
 }
 
 // TableName 指定数据库表名称
 func (SysLogininfor) TableName() string {
-	return "sys_logininfor"
+	return "mon_login_log"
 }
 
 // 分页查询
@@ -50,13 +50,13 @@ func SelectLogininforList(params tools.SearchTableDataParam) ([]SysLogininfor, i
 	db := mysql.MysqlDb().Model(SysLogininfor{})
 
 	if ipaddr != "" {
-		db.Where("ipaddr like ?", ipaddr+"%")
+		db.Where("loip like ?", ipaddr+"%")
 	}
 	if status != "" {
-		db.Where("status = ?", status)
+		db.Where("sutag = ?", status)
 	}
 	if userName != "" {
-		db.Where("user_name like ?", userName+"%")
+		db.Where("username like ?", userName+"%")
 	}
 	if beginTime != "" {
 		//Loc, _ := time.LoadLocation("Asia/Shanghai")
@@ -64,25 +64,25 @@ func SelectLogininforList(params tools.SearchTableDataParam) ([]SysLogininfor, i
 		//endTime = endTime + " 23:59:59"
 		//endTime1, _ := time.ParseInLocation(constants.TimeFormat, endTime, Loc)
 		startTime1, endTime1 := utils2.GetBeginAndEndTime(beginTime, endTime)
-		//db.Where("login_time >= ? and login_time <= ?", startTime1, endTime1)
-		db.Where("login_time >= ?", startTime1)
-		db.Where("login_time <= ?", endTime1)
+		//db.Where("lotim >= ? and lotim <= ?", startTime1, endTime1)
+		db.Where("lotim >= ?", startTime1)
+		db.Where("lotim <= ?", endTime1)
 	}
 	if orderByColumn != "" {
 		if "ascending" == isAsc {
 			if "loginTime" == orderByColumn {
-				db.Order("login_time DESC")
+				db.Order("lotim DESC")
 			}
 			if "userName" == orderByColumn {
-				db.Order("user_name DESC")
+				db.Order("username DESC")
 			}
 		}
 		if "descending" == isAsc {
 			if "loginTime" == orderByColumn {
-				db.Order("login_time ASC")
+				db.Order("lotim ASC")
 			}
 			if "userName" == orderByColumn {
-				db.Order("user_name ASC")
+				db.Order("username ASC")
 			}
 		}
 	}
@@ -91,7 +91,7 @@ func SelectLogininforList(params tools.SearchTableDataParam) ([]SysLogininfor, i
 	}
 	offset := (pageNum - 1) * pageSize
 	var list []SysLogininfor
-	db.Order("info_id DESC").Offset(offset).Limit(pageSize).Find(&list)
+	db.Order("id DESC").Offset(offset).Limit(pageSize).Find(&list)
 	return list, total
 }
 
@@ -122,7 +122,7 @@ func LoginInfoAdd(context *gin.Context, param system.LoginParam, message string,
 }
 
 func DelectLoginlog(operIds []int) R.Result {
-	if err := mysql.MysqlDb().Model(&SysLogininfor{}).Delete("info_id in (?)", operIds).Error; err != nil {
+	if err := mysql.MysqlDb().Model(&SysLogininfor{}).Delete("id in (?)", operIds).Error; err != nil {
 		return R.ReturnFailMsg(err.Error())
 	}
 	return R.ReturnSuccess("操作成功")

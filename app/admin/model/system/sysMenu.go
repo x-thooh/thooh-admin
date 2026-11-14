@@ -12,25 +12,25 @@ import (
 
 // SysMenu model：数据库字段
 type SysMenu struct {
-	MenuId     int       `json:"menuId" gorm:"column:menu_id;primaryKey"` //表示主键
-	MenuName   string    `json:"menuName" gorm:"menu_name"`
-	ParentId   int       `json:"parentId" gorm:"parent_id"`
-	OrderNum   int       `json:"orderNum" gorm:"order_num"`
-	MenuType   string    `json:"menuType" gorm:"menu_type"`
-	Visible    string    `json:"visible" gorm:"visible"`
-	Perms      string    `json:"perms" gorm:"perms"`
-	Query      string    `json:"query" gorm:"query"`
-	IsFrame    string    `json:"isFrame" gorm:"is_frame"`
-	Icon       string    `json:"icon" gorm:"icon"`
-	Path       string    `json:"path" gorm:"path"`
-	Status     string    `json:"status" gorm:"status"`
-	IsCache    string    `json:"isCache" gorm:"is_cache"`
-	Component  string    `json:"component" gorm:"component"`
-	CreateBy   string    `json:"createBy" gorm:"create_by"`
-	CreateTime time.Time `json:"createTime" gorm:"column:create_time;type:datetime;autoCreateTime"`
-	UpdateBy   string    `json:"updateBy" gorm:"update_by"`
-	UpdateTime time.Time `json:"updateTime" gorm:"column:update_time;type:datetime;autoCreateTime"`
-	Remark     string    `json:"remark" gorm:"remark"`
+	MenuId     int       `json:"menuId" gorm:"column:id;primaryKey"` //表示主键
+	MenuName   string    `json:"menuName" gorm:"column:name"`
+	ParentId   int       `json:"parentId" gorm:"column:pid"`
+	OrderNum   int       `json:"orderNum" gorm:"column:ornum"`
+	MenuType   string    `json:"menuType" gorm:"column:type"`
+	Visible    string    `json:"visible" gorm:"column:shtag"`
+	Perms      string    `json:"perms" gorm:"-"`
+	Query      string    `json:"query" gorm:"column:param"`
+	IsFrame    string    `json:"isFrame" gorm:"column:outag"`
+	Icon       string    `json:"icon" gorm:"column:icon"`
+	Path       string    `json:"path" gorm:"column:path"`
+	Status     string    `json:"status" gorm:"column:avtag"`
+	IsCache    string    `json:"isCache" gorm:"column:catag"`
+	Component  string    `json:"component" gorm:"column:comp"`
+	CreateBy   string    `json:"createBy" gorm:"-"`
+	CreateTime time.Time `json:"createTime" gorm:"column:crtim;type:datetime;autoCreateTime"`
+	UpdateBy   string    `json:"updateBy" gorm:"-"`
+	UpdateTime time.Time `json:"updateTime" gorm:"column:uptim;type:datetime;autoCreateTime"`
+	Remark     string    `json:"remark" gorm:"column:notes"`
 }
 
 type MenuVo struct {
@@ -66,12 +66,12 @@ func (SysMenu) TableName() string {
 func SelectMenuTreeByUserId(userId int) []SysMenu {
 	var menu []SysMenu
 	if IsAdminById(userId) {
-		err := mysql.MysqlDb().Where("menu_type in (?) ", []string{"M", "C"}).Where("status", "0").Order("parent_id").Order("order_num").Find(&menu).Error
+		err := mysql.MysqlDb().Where("type in (?) ", []string{"M", "C"}).Where("avtag", "0").Order("pid").Order("ornum").Find(&menu).Error
 		if err != nil {
 			panic(R.ReturnFailMsg("查询错误"))
 		}
 	} else {
-		err := mysql.MysqlDb().Raw("select distinct m.* from sys_menu m left join sys_role_menu rm on m.menu_id = rm.menu_id left join sys_user_role ur on rm.role_id = ur.role_id left join sys_role ro on ur.role_id = ro.role_id left join sys_user u on ur.user_id = u.user_id where u.user_id = ? and m.menu_type in ('M', 'C') and m.status = 0  AND ro.status = 0 order by m.parent_id, m.order_num", userId).Scan(&menu).Error
+		err := mysql.MysqlDb().Raw("select distinct m.* from sys_menu m left join sys_role_menu rm on m.id = rm.mid left join sys_user_role ur on rm.rid = ur.role_id left join sys_role ro on ur.role_id = ro.role_id left join sys_user u on ur.user_id = u.user_id where u.user_id = ? and m.type in ('M', 'C') and m.avtag = 0  AND ro.avtag = 0 order by m.pid, m.ornum", userId).Scan(&menu).Error
 		if err != nil {
 			panic(R.ReturnFailMsg("查询错误"))
 		}
@@ -81,41 +81,41 @@ func SelectMenuTreeByUserId(userId int) []SysMenu {
 
 func SelectMenuTree(userId int, menu SysMenu) []SysMenu {
 	var menus []SysMenu
-	sql := "select distinct m.menu_id, m.parent_id, m.menu_name, m.path, m.component, m.`query`, m.visible, m.status, ifnull(m.perms,'') as perms, m.is_frame, m.is_cache, m.menu_type, m.icon, m.order_num, m.create_time "
+	sql := "select distinct m.id, m.pid, m.name, m.path, m.comp, m.param, m.shtag, m.avtag, '' as perms, m.outag, m.catag, m.type, m.icon, m.ornum, m.crtim "
 	sql += "from sys_menu m "
 	if IsAdminById(userId) {
 		var menuName = menu.MenuName
 		if menuName != "" {
-			sql += "AND m.menu_name like concat('%', " + menuName + ", '%')"
+			sql += "AND m.name like concat('%', " + menuName + ", '%')"
 		}
 		var visible = menu.Visible
 		if visible != "" {
-			sql += "AND m.visible = " + visible
+			sql += "AND m.shtag = " + visible
 		}
 		var status = menu.Status
 		if status != "" {
-			sql += "AND m.status = " + status
+			sql += "AND m.avtag = " + status
 		}
 		err := mysql.MysqlDb().Raw(sql).Scan(&menus).Error
 		if err != nil {
 			panic(R.ReturnFailMsg(err.Error()))
 		}
 	} else {
-		sql += "left join sys_role_menu rm on m.menu_id = rm.menu_id "
-		sql += "left join sys_user_role ur on rm.role_id = ur.role_id "
+		sql += "left join sys_role_menu rm on m.id = rm.mid "
+		sql += "left join sys_user_role ur on rm.rid = ur.role_id "
 		sql += "left join sys_role ro on ur.role_id = ro.role_id "
 		sql += "where ur.user_id = " + strconv.Itoa(userId)
 		var menuName = menu.MenuName
 		if menuName != "" {
-			sql += "AND m.menu_name like concat('%', " + menuName + ", '%')"
+			sql += "AND m.name like concat('%', " + menuName + ", '%')"
 		}
 		var visible = menu.Visible
 		if visible != "" {
-			sql += "AND m.visible = " + visible
+			sql += "AND m.shtag = " + visible
 		}
 		var status = menu.Status
 		if status != "" {
-			sql += "AND m.status = " + status
+			sql += "AND m.avtag = " + status
 		}
 		err := mysql.MysqlDb().Raw(sql).Scan(&menus).Error
 		if err != nil {
@@ -295,19 +295,19 @@ func FirstUpper(s string) string {
 func SelectSysMenuList(params tools.SearchTableDataParam) []SysMenu {
 	sysMenu := params.Other.(SysMenu)
 	var rows []SysMenu
-	var sql = "select menu_id, menu_name, parent_id, order_num, path, component, `query`, is_frame, is_cache, menu_type, visible, " +
-		"status, ifnull(perms,'') as perms, icon, create_time from sys_menu where 1 = 1 "
+	var sql = "select id, name, pid, ornum, path, comp, param, outag, catag, type, shtag, " +
+		"avtag, '' as perms, icon, crtim from sys_menu where 1 = 1 "
 	var name = sysMenu.MenuName
 	if name != "" {
-		sql += " AND menu_name LIKE CONCAT('%', '" + name + "', '%')"
+		sql += " AND name LIKE CONCAT('%', '" + name + "', '%')"
 	}
 	var visible = sysMenu.Visible
 	if visible != "" {
-		sql += " AND visible = " + visible
+		sql += " AND shtag = " + visible
 	}
 	var status = sysMenu.Status
 	if status != "" {
-		sql += " AND status = " + status
+		sql += " AND avtag = " + status
 	}
 	err := mysql.MysqlDb().Raw(sql).Find(&rows).Error
 	if err != nil {
@@ -317,13 +317,13 @@ func SelectSysMenuList(params tools.SearchTableDataParam) []SysMenu {
 }
 
 func SelectMenuListByRoleId(roleId string, menuCheckStrictly bool) []int {
-	var sql = "select m.menu_id from sys_menu m " +
-		"left join sys_role_menu rm on m.menu_id = rm.menu_id " +
-		"where rm.role_id = " + roleId + " "
+	var sql = "select m.id from sys_menu m " +
+		"left join sys_role_menu rm on m.id = rm.mid " +
+		"where rm.rid = " + roleId + " "
 	if menuCheckStrictly {
-		sql += "and m.menu_id not in (select m.parent_id from sys_menu m inner join sys_role_menu rm on m.menu_id = rm.menu_id and rm.role_id = " + roleId + ")"
+		sql += "and m.id not in (select m.pid from sys_menu m inner join sys_role_menu rm on m.id = rm.mid and rm.rid = " + roleId + ")"
 	}
-	sql += "order by m.parent_id, m.order_num"
+	sql += "order by m.pid, m.ornum"
 	var menuIds []int
 	err := mysql.MysqlDb().Raw(sql).Scan(&menuIds).Error
 	if err != nil {
@@ -334,28 +334,28 @@ func SelectMenuListByRoleId(roleId string, menuCheckStrictly bool) []int {
 
 func SelectSysMenuListByUserId(userId int, params tools.SearchTableDataParam) []SysMenu {
 	sysMenu := params.Other.(SysMenu)
-	var sql = "select distinct m.menu_id, m.parent_id, m.menu_name, m.path, m.component, m.`query`, m.visible," +
-		" m.status, ifnull(m.perms,'') as perms, m.is_frame, m.is_cache, m.menu_type, m.icon, m.order_num, m.create_time " +
-		"from sys_menu m left join sys_role_menu rm on m.menu_id = rm.menu_id " +
-		"left join sys_user_role ur on rm.role_id = ur.role_id " +
+	var sql = "select distinct m.id, m.pid, m.name, m.path, m.comp, m.param, m.shtag," +
+		" m.avtag, '' as perms, m.outag, m.catag, m.type, m.icon, m.ornum, m.crtim " +
+		"from sys_menu m left join sys_role_menu rm on m.id = rm.mid " +
+		"left join sys_user_role ur on rm.rid = ur.role_id " +
 		"left join sys_role ro on ur.role_id = ro.role_id "
 
 	sql += "where ur.user_id = " + strconv.Itoa(userId) + " "
 	var menuName = sysMenu.MenuName
 	if menuName != "" {
-		sql += "AND m.menu_name like concat(%" + menuName + "%) "
+		sql += "AND m.name like concat(%" + menuName + "%) "
 	}
 	var visible = sysMenu.Visible
 
 	if visible != "" {
-		sql += "AND m.visible = " + visible + " "
+		sql += "AND m.shtag = " + visible + " "
 	}
 	var status = sysMenu.Status
 	if status != "" {
-		sql += "AND m.status = " + status + " "
+		sql += "AND m.avtag = " + status + " "
 	}
 
-	sql += "order by m.parent_id, m.order_num"
+	sql += "order by m.pid, m.ornum"
 	var list []SysMenu
 	err := mysql.MysqlDb().Raw(sql).Scan(&list).Error
 	if err != nil {
@@ -365,10 +365,10 @@ func SelectSysMenuListByUserId(userId int, params tools.SearchTableDataParam) []
 }
 
 func FindMenuInfoById(menuId string) SysMenu {
-	sql := "select menu_id, menu_name, parent_id, order_num, path, " +
-		"component, `query`, is_frame, is_cache, menu_type, visible, status, ifnull(perms,'') as perms, icon, create_time " +
+	sql := "select id, name, pid, ornum, path, " +
+		"comp, param, outag, catag, type, shtag, avtag, '' as perms, icon, crtim " +
 		"from sys_menu "
-	sql = sql + "where menu_id = " + menuId
+	sql = sql + "where id = " + menuId
 	var list SysMenu
 	err := mysql.MysqlDb().Raw(sql).First(&list).Error
 	if err != nil {
@@ -379,13 +379,13 @@ func FindMenuInfoById(menuId string) SysMenu {
 
 func hasChildByMenuId(menuId string) SysMenu {
 	var menu SysMenu
-	mysql.MysqlDb().Where("parent_id = ? ", menuId).First(&menu)
+	mysql.MysqlDb().Where("pid = ? ", menuId).First(&menu)
 	return menu
 }
 
 func hasChildCountByMenuId(menuId string) int {
 	var menuCount int
-	err := mysql.MysqlDb().Where("parent_id = ? ", menuId).Scan(&menuCount).Error
+	err := mysql.MysqlDb().Where("pid = ? ", menuId).Scan(&menuCount).Error
 	if err != nil {
 		panic(R.ReturnFailMsg(err.Error()))
 	}
@@ -394,7 +394,7 @@ func hasChildCountByMenuId(menuId string) int {
 
 func checkMenuExistRole(menuId string) int {
 	var menuCount int
-	err := mysql.MysqlDb().Raw("select count(1) from sys_role_menu where menu_id = " + menuId).Scan(&menuCount).Error
+	err := mysql.MysqlDb().Raw("select count(1) from sys_role_menu where id = " + menuId).Scan(&menuCount).Error
 	if err != nil {
 		panic(R.ReturnFailMsg(err.Error()))
 	}
@@ -412,7 +412,7 @@ func DeleteMenu(menuIds string) R.Result {
 		return R.ReturnFailMsg("菜单已分配,不允许删除")
 	}
 
-	err := mysql.MysqlDb().Exec("delete from sys_menu where menu_id in (?) ", menuIds).Error
+	err := mysql.MysqlDb().Exec("delete from sys_menu where id in (?) ", menuIds).Error
 	if err == nil {
 		R.ReturnFailMsg("删除部门关联用户失败")
 	}
@@ -421,7 +421,7 @@ func DeleteMenu(menuIds string) R.Result {
 
 func checkMenuNameUnique(parentId int, menuName string) int {
 	var menuCount int
-	err := mysql.MysqlDb().Raw("select count(1) from sys_menu where menu_name = "+menuName+" and parent_id = "+strconv.Itoa(parentId), &menuCount).Error
+	err := mysql.MysqlDb().Raw("select count(1) from sys_menu where name = "+menuName+" and pid = "+strconv.Itoa(parentId), &menuCount).Error
 	if err != nil {
 		panic(R.ReturnFailMsg(err.Error()))
 	}

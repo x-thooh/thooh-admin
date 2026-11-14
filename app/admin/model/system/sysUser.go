@@ -13,47 +13,47 @@ import (
 
 // SysUser model：数据库字段
 type SysUser struct {
-	UserId      int       `json:"userId" gorm:"column:user_id;primaryKey"` //表示主键
-	DeptId      int       `json:"deptId" gorm:"dept_id"`
-	UserName    string    `json:"userName" gorm:"user_name"`
-	NickName    string    `json:"nickName" gorm:"nick_name"`
-	UserType    string    `json:"userType" gorm:"user_type"`
-	Email       string    `json:"email" gorm:"email"`
-	Phonenumber string    `json:"phonenumber" gorm:"phonenumber"`
-	Sex         string    `json:"sex" gorm:"sex"`
-	Avatar      string    `json:"avatar" gorm:"avatar"`
-	Password    string    `json:"password" gorm:"password"`
-	Status      string    `json:"status" gorm:"status"`
-	DelFlag     string    `json:"delFlag" gorm:"del_flag"`
-	LoginIp     string    `json:"loginIp" gorm:"login_ip"`
-	LoginDate   time.Time `json:"loginDate" gorm:"column:login_date;type:datetime"`
-	CreateBy    string    `json:"createBy" gorm:"create_by"`
-	CreateTime  time.Time `json:"createTime" gorm:"column:create_time;type:datetime;autoCreateTime"`
-	UpdateBy    string    `json:"updateBy" gorm:"update_by"`
-	UpdateTime  time.Time `json:"updateTime" gorm:"column:update_time;type:datetime;autoCreateTime"`
-	Remark      string    `json:"remark" gorm:"remark"`
+	UserId      int       `json:"userId" gorm:"column:id;primaryKey"` //表示主键
+	DeptId      int       `json:"deptId" gorm:"column:orgid"`
+	UserName    string    `json:"userName" gorm:"column:username"`
+	NickName    string    `json:"nickName" gorm:"column:name"`
+	UserType    string    `json:"userType" gorm:"column:type"`
+	Email       string    `json:"email" gorm:"column:email"`
+	Phonenumber string    `json:"phonenumber" gorm:"column:monum"`
+	Sex         string    `json:"sex" gorm:"column:gender"`
+	Avatar      string    `json:"avatar" gorm:"column:avatar"`
+	Password    string    `json:"password" gorm:"column:password"`
+	Status      string    `json:"status" gorm:"column:avtag"`
+	DelFlag     string    `json:"delFlag" gorm:"-"`
+	LoginIp     string    `json:"loginIp" gorm:"column:loip"`
+	LoginDate   time.Time `json:"loginDate" gorm:"column:lotim;type:datetime"`
+	CreateBy    string    `json:"createBy" gorm:"-"`
+	CreateTime  time.Time `json:"createTime" gorm:"column:crtim;type:datetime;autoCreateTime"`
+	UpdateBy    string    `json:"updateBy" gorm:"-"`
+	UpdateTime  time.Time `json:"updateTime" gorm:"column:uptim;type:datetime;autoCreateTime"`
+	Remark      string    `json:"remark" gorm:"column:notes"`
 }
 
 type SysUserParm struct {
-	UserId      int       `json:"userId" gorm:"column:user_id;primaryKey"` //表示主键
-	DeptId      int       `json:"deptId" gorm:"dept_id"`
-	UserName    string    `json:"userName" gorm:"user_name"`
-	NickName    string    `json:"nickName" gorm:"nick_name"`
-	UserType    string    `json:"userType" gorm:"user_type"`
-	Email       string    `json:"email" gorm:"email"`
-	Phonenumber string    `json:"phonenumber" gorm:"phonenumber"`
-	Sex         string    `json:"sex" gorm:"sex"`
-	Avatar      string    `json:"avatar" gorm:"avatar"`
-	Password    string    `json:"password" gorm:"password"`
-	Status      string    `json:"status" gorm:"status"`
-	DelFlag     string    `json:"delFlag" gorm:"del_flag"`
-	LoginIp     string    `json:"loginIp" gorm:"login_ip"`
-	LoginDate   string    `json:"loginDate" gorm:"column:login_date;type:datetime"`
-	Remark      string    `json:"remark" gorm:"remark"`
-	CreateBy    string    `json:"createBy" gorm:"create_by"`
-	CreateTime  time.Time `json:"createTime" gorm:"column:create_time;type:datetime"`
-	UpdateBy    string    `json:"updateBy" gorm:"update_by"`
-	UpdateTime  time.Time `json:"updateTime" gorm:"column:update_time;type:datetime"`
+	UserId      int       `json:"userId" gorm:"column:id;primaryKey"` //表示主键
+	DeptId      int       `json:"deptId" gorm:"column:orgid"`
+	UserName    string    `json:"userName" gorm:"column:username"`
+	NickName    string    `json:"nickName" gorm:"column:name"`
+	UserType    string    `json:"userType" gorm:"column:type"`
+	Email       string    `json:"email" gorm:"column:email"`
+	Phonenumber string    `json:"phonenumber" gorm:"column:monum"`
+	Sex         string    `json:"sex" gorm:"column:gender"`
+	Avatar      string    `json:"avatar" gorm:"column:avatar"`
+	Password    string    `json:"password" gorm:"column:password"`
+	Status      string    `json:"status" gorm:"column:avtag"`
+	DelFlag     string    `json:"delFlag" gorm:"-"`
+	LoginIp     string    `json:"loginIp" gorm:"column:loip"`
+	LoginDate   string    `json:"loginDate" gorm:"column:lotim;type:datetime"`
+	Remark      string    `json:"remark" gorm:"column:notes"`
+	CreateBy    string    `json:"createBy" gorm:"-"`
+	CreateTime  time.Time `json:"createTime" gorm:"column:crtim;type:datetime"`
+	UpdateBy    string    `json:"updateBy" gorm:"-"`
+	UpdateTime  time.Time `json:"updateTime" gorm:"column:uptim;type:datetime"`
 	DeptName    string    `json:"deptName,omitempty"`
 	Leader      string    `json:"leader,omitempty"`
 	PostIds     []int     `json:"postIds,omitempty"`
@@ -62,25 +62,25 @@ type SysUserParm struct {
 }
 
 type SysUserExcel struct {
-	UserId      int       `json:"userId" gorm:"column:user_id;primaryKey"` //表示主键
-	DeptId      int       `json:"deptId" gorm:"dept_id"`
-	UserName    string    `json:"userName" gorm:"user_name"`
-	NickName    string    `json:"nickName" gorm:"nick_name"`
-	UserType    string    `json:"userType" gorm:"user_type"`
-	Email       string    `json:"email" gorm:"email"`
-	Phonenumber string    `json:"phonenumber" gorm:"phonenumber"`
-	Sex         string    `json:"sex" gorm:"sex"`
-	Avatar      string    `json:"avatar" gorm:"avatar"`
-	Password    string    `json:"password" gorm:"password"`
-	Status      string    `json:"status" gorm:"status"`
-	DelFlag     string    `json:"delFlag" gorm:"del_flag"`
-	LoginIp     string    `json:"loginIp" gorm:"login_ip"`
-	LoginDate   time.Time `json:"loginDate" gorm:"column:login_date;type:datetime"`
-	CreateBy    string    `json:"createBy" gorm:"create_by"`
-	CreateTime  time.Time `json:"createTime" gorm:"column:create_time;type:datetime"`
-	UpdateBy    string    `json:"updateBy" gorm:"update_by"`
-	UpdateTime  time.Time `json:"updateTime" gorm:"column:update_time;type:datetime"`
-	Remark      string    `json:"remark" gorm:"remark"`
+	UserId      int       `json:"userId" gorm:"column:id;primaryKey"` //表示主键
+	DeptId      int       `json:"deptId" gorm:"column:orgid"`
+	UserName    string    `json:"userName" gorm:"column:username"`
+	NickName    string    `json:"nickName" gorm:"column:name"`
+	UserType    string    `json:"userType" gorm:"column:type"`
+	Email       string    `json:"email" gorm:"column:email"`
+	Phonenumber string    `json:"phonenumber" gorm:"column:monum"`
+	Sex         string    `json:"sex" gorm:"column:gender"`
+	Avatar      string    `json:"avatar" gorm:"column:avatar"`
+	Password    string    `json:"password" gorm:"column:password"`
+	Status      string    `json:"status" gorm:"column:avtag"`
+	DelFlag     string    `json:"delFlag" gorm:"-"`
+	LoginIp     string    `json:"loginIp" gorm:"column:loip"`
+	LoginDate   time.Time `json:"loginDate" gorm:"column:lotim;type:datetime"`
+	CreateBy    string    `json:"createBy" gorm:"-"`
+	CreateTime  time.Time `json:"createTime" gorm:"column:crtim;type:datetime"`
+	UpdateBy    string    `json:"updateBy" gorm:"-"`
+	UpdateTime  time.Time `json:"updateTime" gorm:"column:uptim;type:datetime"`
+	Remark      string    `json:"remark" gorm:"column:notes"`
 	DeptName    string    `json:"deptName,omitempty"`
 	Leader      string    `json:"leader,omitempty"`
 }
@@ -120,7 +120,7 @@ func IsAdminById(userId int) bool {
 // IsExistUser 判断用户是否存在 返回bool类型
 func IsExistUser(loginName string) bool {
 	var user SysUser
-	err := mysql.MysqlDb().Where("del_flag = 0 and user_name = ?", loginName).First(&user).Error
+	err := mysql.MysqlDb().Where("username = ?", loginName).First(&user).Error
 	if err != nil {
 		return false
 	}
@@ -129,7 +129,7 @@ func IsExistUser(loginName string) bool {
 
 func IsExistUserByPhoneNumber(phonenumber string) bool {
 	var user SysUser
-	err := mysql.MysqlDb().Where("del_flag = 0 and phonenumber = ?", phonenumber).First(&user).Error
+	err := mysql.MysqlDb().Where("monum = ?", phonenumber).First(&user).Error
 	if err != nil {
 		return false
 	}
@@ -138,7 +138,7 @@ func IsExistUserByPhoneNumber(phonenumber string) bool {
 
 func IsExistUserByEmail(email string) bool {
 	var user SysUser
-	err := mysql.MysqlDb().Where("del_flag = 0 and email = ?", email).First(&user).Error
+	err := mysql.MysqlDb().Where("email = ?", email).First(&user).Error
 	if err != nil {
 		return false
 	}
@@ -148,7 +148,7 @@ func IsExistUserByEmail(email string) bool {
 // 登录用到
 func FindUserByName(loginName string) SysUser {
 	var user SysUser
-	err := mysql.MysqlDb().Where("del_flag != 2 and user_name = ?", loginName).Find(&user).Error
+	err := mysql.MysqlDb().Where("username = ?", loginName).Find(&user).Error
 	if err != nil {
 		panic(R.ReturnFailMsg(err.Error()))
 	}
@@ -162,10 +162,9 @@ func FindUserById(id any) SysUser {
 	}
 	var user SysUser
 	var db = mysql.MysqlDb().Model(&user).
-		Select("`sys_user`.*, d.dept_name, d.leader").
-		Joins("left join sys_dept d on d.dept_id = `sys_user`.dept_id")
-	db.Where("`sys_user`.del_flag = 0")
-	err := db.Where("user_id = ?", userId).First(&user).Error
+		Select("`sys_user`.*, d.name as dept_name, d.label as leader").
+		Joins("left join sys_org d on d.id = `sys_user`.orgid")
+	err := db.Where("id = ?", userId).First(&user).Error
 	if err != nil {
 		panic(R.ReturnFailMsg(err.Error()))
 	}
@@ -182,8 +181,7 @@ func FindUserPassWordById(id any) string {
 	var user SysUser
 	var db = mysql.MysqlDb().Model(&user).
 		Select("`sys_user`.*")
-	db.Where("`sys_user`.del_flag = 0")
-	err := db.Where("user_id = ?", userId).First(&user).Error
+	err := db.Where("id = ?", userId).First(&user).Error
 	if err != nil {
 		panic(R.ReturnFailMsg(err.Error()))
 	}
@@ -193,7 +191,7 @@ func FindUserPassWordById(id any) string {
 // 更新用户密码
 func UploadUserPassWord(id any, password string) {
 	userId := utils2.GetInterfaceToInt(id)
-	err := mysql.MysqlDb().Exec("update sys_user set password = ? where user_id = ?", password, userId).Error
+	err := mysql.MysqlDb().Exec("update sys_user set password = ? where id = ?", password, userId).Error
 	if err != nil {
 		panic(R.ReturnFailMsg(err.Error()))
 	}
@@ -224,41 +222,39 @@ func SelectUserList(params tools.SearchTableDataParam, isPage bool) tools.TableD
 	var rows []SysUser
 
 	var db = mysql.MysqlDb().Model(&rows).
-		Select("`sys_user`.*, d.dept_name, d.leader").
-		Joins("left join sys_dept d on d.dept_id = `sys_user`.dept_id")
-
-	db.Where("`sys_user`.del_flag = ?", "0")
+		Select("`sys_user`.*, d.name as dept_name, d.label as leader").
+		Joins("left join sys_org d on d.id = `sys_user`.orgid")
 
 	var userId = sysUser.UserId
 	if userId != 0 {
-		db.Where("`sys_user`.user_id = ?", userId)
+		db.Where("`sys_user`.id = ?", userId)
 	}
 	var deptId = sysUser.DeptId
 	if deptId != 0 {
-		db.Where("`sys_user`.dept_id = ? OR `sys_user`.dept_id IN (SELECT t.dept_id FROM sys_dept t WHERE find_in_set(?, ancestors))", deptId, deptId)
+		db.Where("`sys_user`.orgid = ? OR `sys_user`.orgid IN (SELECT t.id FROM sys_org t WHERE find_in_set(?, t.tier))", deptId, deptId)
 	}
 
 	var userName = sysUser.UserName
 	if userName != "" {
-		db.Where("`sys_user`.user_name like concat('%', ?, '%')", userName)
+		db.Where("`sys_user`.username like concat('%', ?, '%')", userName)
 	}
 
 	var status = sysUser.Status
 	if status != "" {
-		db.Where("`sys_user`.status = ? ", status)
+		db.Where("`sys_user`.avtag = ? ", status)
 	}
 
 	var phonenumber = sysUser.Phonenumber
 	if phonenumber != "" {
-		db.Where("`sys_user`.phonenumber = ? ", phonenumber)
+		db.Where("`sys_user`.monum = ? ", phonenumber)
 	}
 	var beginTime = params.Params.BeginTime
 	var endTime = params.Params.EndTime
 
 	if beginTime != "" {
 		startTime1, endTime1 := utils2.GetBeginAndEndTime(beginTime, endTime)
-		db.Where("`sys_user`.create_time >= ?", startTime1)
-		db.Where("`sys_user`.create_time <= ?", endTime1)
+		db.Where("`sys_user`.crtim >= ?", startTime1)
+		db.Where("`sys_user`.crtim <= ?", endTime1)
 	}
 
 	if err := db.Count(&total).Error; err != nil {
@@ -292,41 +288,39 @@ func SelectUserParmList(params tools.SearchTableDataParam, isPage bool) tools.Ta
 	var rows []SysUserExcel
 
 	var db = mysql.MysqlDb().Model(&rows).
-		Select("`sys_user`.*, d.dept_name, d.leader").
-		Joins("left join sys_dept d on d.dept_id = `sys_user`.dept_id")
-
-	db.Where("`sys_user`.del_flag = ?", "0")
+		Select("`sys_user`.*, d.name as dept_name, d.label as leader").
+		Joins("left join sys_org d on d.id = `sys_user`.orgid")
 
 	var userId = sysUser.UserId
 	if userId != 0 {
-		db.Where("`sys_user`.user_id = ?", userId)
+		db.Where("`sys_user`.id = ?", userId)
 	}
 	var deptId = sysUser.DeptId
 	if deptId != 0 {
-		db.Where("`sys_user`.dept_id = ? OR `sys_user`.dept_id IN (SELECT t.dept_id FROM sys_dept t WHERE find_in_set(?, ancestors))", deptId, deptId)
+		db.Where("`sys_user`.orgid = ? OR `sys_user`.orgid IN (SELECT t.id FROM sys_org t WHERE find_in_set(?, t.tier))", deptId, deptId)
 	}
 
 	var userName = sysUser.UserName
 	if userName != "" {
-		db.Where("`sys_user`.user_name like concat('%', ?, '%')", userName)
+		db.Where("`sys_user`.username like concat('%', ?, '%')", userName)
 	}
 
 	var status = sysUser.Status
 	if status != "" {
-		db.Where("`sys_user`.status = ? ", status)
+		db.Where("`sys_user`.avtag = ? ", status)
 	}
 
 	var phonenumber = sysUser.Phonenumber
 	if phonenumber != "" {
-		db.Where("`sys_user`.phonenumber = ? ", phonenumber)
+		db.Where("`sys_user`.monum = ? ", phonenumber)
 	}
 	var beginTime = params.Params.BeginTime
 	var endTime = params.Params.EndTime
 
 	if beginTime != "" {
 		startTime1, endTime1 := utils2.GetBeginAndEndTime(beginTime, endTime)
-		db.Where("`sys_user`.create_time >= ?", startTime1)
-		db.Where("`sys_user`.create_time <= ?", endTime1)
+		db.Where("`sys_user`.crtim >= ?", startTime1)
+		db.Where("`sys_user`.crtim <= ?", endTime1)
 	}
 
 	if err := db.Count(&total).Error; err != nil {
@@ -494,7 +488,7 @@ func UploadUser(userParm SysUserParm) {
 
 func EditProfileUserInfo(userId int, param Userparam) R.Result {
 	var user SysUser
-	err1 := mysql.MysqlDb().Where("user_id = ?", userId).First(&user)
+	err1 := mysql.MysqlDb().Where("id = ?", userId).First(&user)
 
 	if err1.Error != nil {
 		return R.ReturnFailMsg("未找到用户")
@@ -518,7 +512,7 @@ func EditProfileUserInfo(userId int, param Userparam) R.Result {
 		data["sex"] = param.Sex
 	}
 	//等价于: UPDATE `foods` SET `price` = '35', `stock` = '0'  WHERE (user_id = '2')
-	err2 := mysql.MysqlDb().Model(&SysUser{}).Where("user_id = ?", userId).Updates(data)
+	err2 := mysql.MysqlDb().Model(&SysUser{}).Where("id = ?", userId).Updates(data)
 
 	if err2.Error != nil {
 		return R.ReturnFailMsg("修改失败")
@@ -543,7 +537,7 @@ func DeleteUser(userId []int) R.Result {
 }
 
 func DeleteUserById(userId []int) R.Result {
-	err := mysql.MysqlDb().Exec("update sys_user set del_flag = '2' where user_id in (?) ", userId).Error
+	err := mysql.MysqlDb().Exec("update sys_user set avtag = 0 where id in (?) ", userId).Error
 	if err != nil {
 		panic(R.ReturnFailMsg(err.Error()))
 	}
@@ -558,7 +552,7 @@ func ChangeUserStatus(param SysUserParm) R.Result {
 	}
 
 	//等价于: UPDATE `foods` SET `price` = '35', `stock` = '0'  WHERE (user_id = '2')
-	err2 := mysql.MysqlDb().Model(&SysUser{}).Where("user_id = ?", param.UserId).Updates(data)
+	err2 := mysql.MysqlDb().Model(&SysUser{}).Where("id = ?", param.UserId).Updates(data)
 	if err2.Error != nil {
 		return R.ReturnFailMsg("修改失败")
 	}
@@ -575,7 +569,7 @@ func ResetPwd(param SysUserParm) R.Result {
 	}
 
 	//等价于: UPDATE `foods` SET `price` = '35', `stock` = '0'  WHERE (user_id = '2')
-	err2 := mysql.MysqlDb().Model(&SysUser{}).Where("user_id = ?", param.UserId).Updates(data)
+	err2 := mysql.MysqlDb().Model(&SysUser{}).Where("id = ?", param.UserId).Updates(data)
 	if err2.Error != nil {
 		return R.ReturnFailMsg("修改失败")
 	}

@@ -10,43 +10,43 @@ import (
 
 // SysDept model：数据库字段
 type SysDept struct {
-	DeptId     int       `json:"deptId" gorm:"column:dept_id;primaryKey"` //表示主键
-	ParentId   int       `json:"parentId" gorm:"parent_id"`
-	Ancestors  string    `json:"ancestors" gorm:"ancestors"`
-	DeptName   string    `json:"deptName" gorm:"dept_name"`
-	OrderNum   int       `json:"orderNum" gorm:"order_num"`
-	Leader     string    `json:"leader" gorm:"leader"`
-	Phone      string    `json:"phone" gorm:"phone"`
-	Email      string    `json:"email" gorm:"email"`
-	Status     string    `json:"status" gorm:"status"`
-	DelFlag    string    `json:"delFlag" gorm:"del_flag"`
-	CreateBy   string    `json:"createBy" gorm:"create_by"`
-	CreateTime time.Time `json:"createTime" gorm:"column:create_time;type:datetime;autoCreateTime"`
-	UpdateBy   string    `json:"updateBy" gorm:"update_by"`
-	UpdateTime time.Time `json:"updateTime" gorm:"column:update_time;type:datetime;autoCreateTime"`
+	DeptId     int       `json:"deptId" gorm:"column:id;primaryKey"` //表示主键
+	ParentId   int       `json:"parentId" gorm:"column:pid"`
+	Ancestors  string    `json:"ancestors" gorm:"-"`
+	DeptName   string    `json:"deptName" gorm:"column:name"`
+	OrderNum   int       `json:"orderNum" gorm:"column:ornum"`
+	Leader     string    `json:"leader" gorm:"-"`
+	Phone      string    `json:"phone" gorm:"-"`
+	Email      string    `json:"email" gorm:"-"`
+	Status     string    `json:"status" gorm:"column:avtag"`
+	DelFlag    string    `json:"delFlag" gorm:"-"`
+	CreateBy   string    `json:"createBy" gorm:"-"`
+	CreateTime time.Time `json:"createTime" gorm:"column:crtim;type:datetime;autoCreateTime"`
+	UpdateBy   string    `json:"updateBy" gorm:"-"`
+	UpdateTime time.Time `json:"updateTime" gorm:"column:uptim;type:datetime;autoCreateTime"`
 }
 
 type SysDeptResult struct {
-	DeptId     int             `json:"deptId" gorm:"column:dept_id;primaryKey"` //表示主键
-	ParentId   int             `json:"parentId" gorm:"parent_id"`
-	Ancestors  string          `json:"ancestors" gorm:"ancestors"`
-	DeptName   string          `json:"deptName" gorm:"dept_name"`
-	OrderNum   int             `json:"orderNum" gorm:"order_num"`
-	Leader     string          `json:"leader" gorm:"leader"`
-	Phone      string          `json:"phone" gorm:"phone"`
-	Email      string          `json:"email" gorm:"email"`
-	Status     string          `json:"status" gorm:"status"`
-	ParentName string          `json:"parentName" gorm:"parent_name"`
+	DeptId     int             `json:"deptId" gorm:"column:id;primaryKey"` //表示主键
+	ParentId   int             `json:"parentId" gorm:"column:pid"`
+	Ancestors  string          `json:"ancestors" gorm:"-"`
+	DeptName   string          `json:"deptName" gorm:"column:name"`
+	OrderNum   int             `json:"orderNum" gorm:"column:ornum"`
+	Leader     string          `json:"leader" gorm:"-"`
+	Phone      string          `json:"phone" gorm:"-"`
+	Email      string          `json:"email" gorm:"-"`
+	Status     string          `json:"status" gorm:"column:avtag"`
+	ParentName string          `json:"parentName" gorm:"-"`
 	Children   []SysDeptResult `json:"children"`
-	CreateBy   string          `json:"createBy" gorm:"create_by"`
-	CreateTime time.Time       `json:"createTime" gorm:"column:create_time;type:datetime"`
-	UpdateBy   string          `json:"updateBy" gorm:"update_by"`
-	UpdateTime time.Time       `json:"updateTime" gorm:"column:update_time;type:datetime"`
+	CreateBy   string          `json:"createBy" gorm:"-"`
+	CreateTime time.Time       `json:"createTime" gorm:"column:crtim;type:datetime"`
+	UpdateBy   string          `json:"updateBy" gorm:"-"`
+	UpdateTime time.Time       `json:"updateTime" gorm:"column:uptim;type:datetime"`
 }
 
 // TableName 指定数据库表名称
 func (SysDept) TableName() string {
-	return "sys_dept"
+	return "sys_org"
 }
 
 type SysDeptDto struct {
@@ -70,24 +70,24 @@ func GetDeptList(params tools.SearchTableDataParam, isPaging bool) ([]SysDeptRes
 
 	var deptId = dept.DeptId
 	if deptId != 0 {
-		db.Where("dept_id = ?", deptId)
+		db.Where("id = ?", deptId)
 	}
 
 	var parentId = dept.ParentId
 	if parentId != 0 {
-		db.Where("parent_id = ?", parentId)
+		db.Where("pid = ?", parentId)
 	}
 
 	var deptName = dept.DeptName
 	if deptName != "" {
-		db.Where("dept_name like concat('%', ?, '%')", deptName)
+		db.Where("name like concat('%', ?, '%')", deptName)
 	}
 
 	var status = dept.Status
 	if status != "" {
-		db.Where("status = ?", status)
+		db.Where("avtag = ?", status)
 	}
-	db.Order("parent_id, order_num")
+	db.Order("pid, ornum")
 
 	if err := db.Count(&total).Error; err != nil {
 		return nil, 0
@@ -107,7 +107,7 @@ func GetDeptList(params tools.SearchTableDataParam, isPaging bool) ([]SysDeptRes
 
 func GetDeptInfo(deptId string) SysDept {
 	var dept SysDept
-	err := mysql.MysqlDb().Where("dept_id = ?", deptId).First(&dept).Error
+	err := mysql.MysqlDb().Where("id = ?", deptId).First(&dept).Error
 	if err != nil {
 		panic(R.ReturnFailMsg(err.Error()))
 	}
@@ -142,7 +142,7 @@ func DeleteDept(deptId string) R.Result {
 	//            return AjaxResult.error("部门存在用户,不允许删除");
 	//        }
 	//是否有数据权限
-	err := mysql.MysqlDb().Where("dept_id = ?", deptId).Delete(&SysDept{}).Error
+	err := mysql.MysqlDb().Where("id = ?", deptId).Delete(&SysDept{}).Error
 	if err != nil {
 		return R.ReturnFailMsg(err.Error())
 	}
@@ -158,7 +158,7 @@ type TreeSelect struct {
 func SelectDeptTreeList() []TreeSelect {
 	var deptResults []TreeSelect
 	var depts []SysDept
-	err := mysql.MysqlDb().Where("del_flag = '0'").Order("parent_id, order_num").Find(&depts).Error
+	err := mysql.MysqlDb().Order("pid, ornum").Find(&depts).Error
 	if err != nil {
 		panic(R.ReturnFailMsg(err.Error()))
 	}
