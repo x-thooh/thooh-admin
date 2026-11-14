@@ -29,3 +29,7 @@
 package-lock.json
 # 本地产物（go build -o main .）；镜像里的编译在容器里做，见 Dockerfile 的 build 段
 /main
+
+# Python 缓存（跑 .harness 门禁产生）
+__pycache__/
+*.pyc
