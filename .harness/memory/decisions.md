@@ -347,3 +347,11 @@
   同时轮换曾在历史里出现过的数据库/Redis 等弱口令并同步 `THOOH_DB_PW` 等变量。轮换后所有在线用户被登出，属预期。
 - 被否：重写 git 历史（已被 clone/镜像，无法保证抹除，且破坏所有分支）。
 - written_by: agent T-6 / version: 1 / supersedes: — / status: active
+
+## D-25 定时任务由 mon_job 数据驱动，dump 不送样例
+
+- 决策：`pkg/scheduler.RunSqlCron()` 启动即读 `mon_job`（T-20 已把 model 对齐到该表），表空则一条任务都不注册，
+  这是「数据驱动」而非「代码写死」。dump 不送定时任务样例数据，交付后由客户按需插入。
+- 理由：定时任务是运维动作，样例会随 dump 进客户库，容易变成「没人要的僵尸任务」。
+- 被否：代码里写死默认任务（客户库口径不可控）；dump 送样例（同上）。
+- written_by: goal 收尾 / version: 1 / supersedes: — / status: active

@@ -129,7 +129,7 @@ func DelectLoginlog(operIds []int) R.Result {
 }
 
 func ClearLoginlog() R.Result {
-	if err := mysql.MysqlDb().Model(&SysLogininfor{}).Raw("truncate table sys_logininfor").Find(SysLogininfor{}).Error; err != nil {
+	if err := mysql.MysqlDb().Model(&SysLogininfor{}).Raw("truncate table mon_login_log").Find(SysLogininfor{}).Error; err != nil {
 		return R.ReturnFailMsg(err.Error())
 	}
 	return R.ReturnSuccess("操作成功")
