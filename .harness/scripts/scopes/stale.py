@@ -75,7 +75,7 @@ def yaml_meta(text):
     """生成物是扁平的两档 YAML，按 key 取标量够用；不做通用 YAML 解析。"""
     out = {}
     for key in ("title", "version", "description", "host", "basePath"):
-        m = re.search(rf"^\s*{re.escape(key)}:\s*(.*)$", text, re.M)
+        m = re.search(rf"^ {{0,2}}{re.escape(key)}:\s*(.*)$", text, re.M)
         if m:
             out[key] = m.group(1).strip().strip('"')
     return out
@@ -161,7 +161,7 @@ def check_assets(root, quality, findings):
             "入口 HTML 里没解析到任何以 / 开头的资源引用——检查正则还是检查产物")
     for ref in sorted(refs):
         target, ok = resolve(ref, table, root)
-        if not ok:
+        if not ok or target is None:
             continue
         if not target.exists():
             add(findings, "ERROR", NAME, index_rel, 1, "STL002",
@@ -174,6 +174,10 @@ def check_swag_staleness(root, quality, findings, na):
     src_hits = [p for p in go_files(Path(root)) if ROUTER_ANNOTATION in p.read_text(encoding="utf-8", errors="replace")]
     if not src_hits:
         na.append("stale:swagger 时效")
+        return
+    # docs 目录有未提交改动 = 正在重新生成；提交前 git log 还是旧时间，拿它判过期会误拦本次提交
+    pd, dirty_out = sh(["git", "status", "--porcelain", "--", "docs"], root)
+    if pd is None or dirty_out.strip():
         return
     p, out = sh(["git", "log", "-1", "--format=%ct", "--", "docs"], root)
     if p is None or p.returncode != 0 or not out.strip():

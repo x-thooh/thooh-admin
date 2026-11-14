@@ -17,6 +17,13 @@ import (
 	"github.com/gin-gonic/gin/binding"
 )
 
+// Get 用户列表
+// @Summary 用户列表
+// @Tags user
+// @Param pageNum query int false "页码"
+// @Param pageSize query int false "每页条数"
+// @Success 200 {object} r.R "成功"
+// @Router /sys/user [get]
 func Get(c *gin.Context) {
 	pageNum, _ := strconv.Atoi(c.DefaultQuery("pageNum", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("pageSize", "10"))
@@ -36,6 +43,12 @@ func Get(c *gin.Context) {
 	c.JSON(http.StatusOK, r.Ok(paginate))
 }
 
+// GetInfo 用户详情
+// @Summary 用户详情
+// @Tags user
+// @Param id path string true "用户ID"
+// @Success 200 {object} r.R "成功"
+// @Router /sys/user/info/{id} [get]
 func GetInfo(c *gin.Context) {
 	id := c.Param("id")
 	var main SysUser
@@ -48,6 +61,14 @@ func GetInfo(c *gin.Context) {
 	c.JSON(http.StatusOK, r.Ok(main))
 }
 
+// Post 新增用户
+// @Summary 新增用户
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param body body SysUser true "用户"
+// @Success 200 {object} r.R "成功"
+// @Router /sys/user [post]
 func Post(c *gin.Context) {
 	var main SysUser
 	if err := c.ShouldBindBodyWith(&main, binding.JSON); err != nil {
@@ -75,6 +96,14 @@ func Post(c *gin.Context) {
 
 }
 
+// Put 更新用户
+// @Summary 更新用户
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param body body SysUser true "用户"
+// @Success 200 {object} r.R "成功"
+// @Router /sys/user [put]
 func Put(c *gin.Context) {
 	var main SysUser
 	if err := c.ShouldBindBodyWith(&main, binding.JSON); err != nil {
@@ -92,6 +121,12 @@ func Put(c *gin.Context) {
 
 }
 
+// Delete 删除用户
+// @Summary 删除用户
+// @Tags user
+// @Param ids path string true "用户ID，逗号分隔"
+// @Success 200 {object} r.R "成功"
+// @Router /sys/user/{ids} [delete]
 func Delete(c *gin.Context) {
 	var ids = c.Param("ids")
 	arr := strings.Split(ids, ",")

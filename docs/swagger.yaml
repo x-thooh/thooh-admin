@@ -1,4 +1,99 @@
 basePath: /
+definitions:
+  auth.LoginBo:
+    properties:
+      code:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+      uuid:
+        type: string
+    type: object
+  r.R:
+    properties:
+      code:
+        type: integer
+      data: {}
+      msg:
+        type: string
+    type: object
+  user.SysUser:
+    properties:
+      avatar:
+        description: 头像URL
+        type: string
+      avtag:
+        description: 可用标记
+        type: boolean
+      catag:
+        description: 缓存标记
+        type: boolean
+      crtim:
+        description: 创建时间
+        type: string
+      cruid:
+        description: 创建人ID
+        type: string
+      email:
+        description: 邮箱
+        type: string
+      gender:
+        description: 性别
+        type: string
+      id:
+        description: 主键ID
+        type: string
+      job:
+        description: 职务
+        type: string
+      label:
+        description: 标签
+        type: string
+      loip:
+        description: 登录IP
+        type: string
+      lotim:
+        description: 登录时间
+        type: string
+      monum:
+        description: 手机号
+        type: string
+      name:
+        description: 名称
+        type: string
+      notes:
+        description: 备注
+        type: string
+      orgid:
+        description: 部门ID
+        type: string
+      orgna:
+        description: 部门名称
+        type: string
+      ornum:
+        description: 排序号
+        type: integer
+      password:
+        description: 口令（散列）；出站置空后 omitempty 让字段不再出现
+        type: string
+      tier:
+        description: 层级,以“_”隔开
+        type: string
+      type:
+        description: 用户类型
+        type: integer
+      uptim:
+        description: 更新时间
+        type: string
+      upuid:
+        description: 更新人ID
+        type: string
+      username:
+        description: 用户名（账号）
+        type: string
+    type: object
 host: 127.0.0.1:8080
 info:
   contact:
@@ -7,5 +102,157 @@ info:
   description: 基于Go，gin，JWT，vue前后端分离的权限管理系统
   title: thooh-go 接口文档
   version: v1.0.2
-paths: {}
+paths:
+  /auth/code:
+    get:
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/r.R'
+      summary: 登录验证码
+      tags:
+      - auth
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 登录参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/auth.LoginBo'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/r.R'
+      summary: 账号密码登录
+      tags:
+      - auth
+  /auth/logout:
+    post:
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/r.R'
+      summary: 退出登录
+      tags:
+      - auth
+  /getInfo:
+    get:
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/r.R'
+      summary: 当前用户信息
+      tags:
+      - auth
+  /getRouters:
+    get:
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/r.R'
+      summary: 当前用户路由
+      tags:
+      - auth
+  /sys/user:
+    get:
+      parameters:
+      - description: 页码
+        in: query
+        name: pageNum
+        type: integer
+      - description: 每页条数
+        in: query
+        name: pageSize
+        type: integer
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/r.R'
+      summary: 用户列表
+      tags:
+      - user
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 用户
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/user.SysUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/r.R'
+      summary: 新增用户
+      tags:
+      - user
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 用户
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/user.SysUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/r.R'
+      summary: 更新用户
+      tags:
+      - user
+  /sys/user/{ids}:
+    delete:
+      parameters:
+      - description: 用户ID，逗号分隔
+        in: path
+        name: ids
+        required: true
+        type: string
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/r.R'
+      summary: 删除用户
+      tags:
+      - user
+  /sys/user/info/{id}:
+    get:
+      parameters:
+      - description: 用户ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/r.R'
+      summary: 用户详情
+      tags:
+      - user
 swagger: "2.0"

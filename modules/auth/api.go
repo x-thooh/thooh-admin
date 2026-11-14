@@ -18,6 +18,14 @@ import (
 	useragent "github.com/wenlng/go-user-agent"
 )
 
+// Login 账号密码登录
+// @Summary 账号密码登录
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param body body LoginBo true "登录参数"
+// @Success 200 {object} r.R "成功"
+// @Router /auth/login [post]
 func Login(c *gin.Context) {
 	var bo LoginBo
 	if err := c.ShouldBind(&bo); err != nil {
@@ -94,6 +102,11 @@ func Login(c *gin.Context) {
 // GetInfo 的响应是平铺的 user / roles / permissions：web/admin 的 GetInfo action 与
 // web/mobile 的 Info store 都直接读这三个顶层键，包一层 data 两边一起白屏。
 // user 里逐个字段点名取，不把手上的 SysUser 整个 Marshal 出去——口令列就在结构体里（T-31）。
+// GetInfo 当前用户信息
+// @Summary 当前用户信息
+// @Tags auth
+// @Success 200 {object} r.R "成功"
+// @Router /getInfo [get]
 func GetInfo(c *gin.Context) {
 	userId := c.GetString("userId")
 	u, err := findUserById(userId)
@@ -130,6 +143,11 @@ func GetInfo(c *gin.Context) {
 	})
 }
 
+// GetRouters 当前用户路由
+// @Summary 当前用户路由
+// @Tags auth
+// @Success 200 {object} r.R "成功"
+// @Router /getRouters [get]
 func GetRouters(c *gin.Context) {
 	granted, err := grantedMenus(c.GetString("userId"))
 	if err != nil {
@@ -143,6 +161,11 @@ func GetRouters(c *gin.Context) {
 	})
 }
 
+// Logout 退出登录
+// @Summary 退出登录
+// @Tags auth
+// @Success 200 {object} r.R "成功"
+// @Router /auth/logout [post]
 func Logout(c *gin.Context) {
 	jwtUuid, err := jwt.GetJwtUuid(c)
 	if err == nil && len(jwtUuid) > 0 {
@@ -157,6 +180,11 @@ func Logout(c *gin.Context) {
 
 // Code 的响应是平铺的：web/admin 读 res.data.captchaEnabled / res.data.img，
 // img 还要去掉 base64 前缀——这个形状是量出来的，不是设计出来的。
+// Code 登录验证码
+// @Summary 登录验证码
+// @Tags auth
+// @Success 200 {object} r.R "成功"
+// @Router /auth/code [get]
 func Code(c *gin.Context) {
 	enabled := captchaEnabled()
 	if !enabled {
