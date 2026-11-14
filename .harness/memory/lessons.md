@@ -340,3 +340,18 @@
 - 残留另立账：gen.go 原生 SQL 仍引用 gen_table/gen_table_column（dump 是 tool_code_*，短列名对账没做）；
   sys_user_role/sys_user_post/sys_role_dept 在 dump 无对应表（未定）；modules/mon 缺 job 模块
   （定时任务未注册，只有表名对齐了）。这三笔留在看板 open 或另开任务，不在本轮 T-20 范围。
+
+## L-22 旧表名对账的边界：摘功能要摘干净，grep 清零要覆盖到「间接引用」
+
+- 现象：T-40/T-41 对账 system 模型与 gen.go 的旧表名，两处都差点漏：
+  T-41 摘了 gen_table 的生成配置查询，但 `GenDbList` 里 information_schema 查询还有
+  `NOT IN (select table_name from gen_table)`（同样是 1146 源，只是藏在「查系统表」的 SQL 里）；
+  T-40 摘 sys_role_dept 数据权限，涟漪到 api 层 `roles.go` 的 `GetDeptTreeRole`（保留接口、checkedKeys 回空数组），
+  不这样 api 包编译不过。
+- 根因：摘一个功能/表时，引用它的点分两类——「显式引用」（grep 表名能扫到的联表）和
+  「间接引用」（information_schema 里的子查询、上层接口返回它的数据）。只 grep 表名字面量会漏后者。
+- 人判的规矩：旧表名/旧列名对账的收尾自检，除了 `grep 旧表名`，还要 `grep 该表被上层 api/service
+  消费的入口`，摘功能时把入口一起处理（保留接口就回空数据并注明，删接口就连调用点一起删）；
+  grep 清零必须连 information_schema/原生 SQL 里的表名子查询一起算。
+- 补账：T-41 的 decisions 没记（subagent 只改了代码），主线程补了「代码生成器在 tool_code 口径下
+  未实现」的说明；这提醒——「自主决策摘功能」类任务，验收时要确认决策写进了 decisions，不只看代码。
