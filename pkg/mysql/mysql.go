@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -60,15 +61,30 @@ func open(role string, t target, newLogger logger.Interface) (*gorm.DB, error) {
 	return db, nil
 }
 
+// gormLogLevel 把 server.logLevel 映射成 gorm 日志等级：
+// debug→Info（逐条 SQL）、info/warn→Warn、error→Error、silent→Silent；未知值取 Warn。
+func gormLogLevel(level string) logger.LogLevel {
+	switch strings.ToLower(strings.TrimSpace(level)) {
+	case "debug":
+		return logger.Info
+	case "error":
+		return logger.Error
+	case "silent":
+		return logger.Silent
+	default:
+		return logger.Warn
+	}
+}
+
 // 连接 MySQL 数据库
 func connectMysql() error {
 	// 启用打印日志
 	newLogger := logger.New(
 		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
 		logger.Config{
-			SlowThreshold: time.Second, // 慢 SQL 阈值
-			LogLevel:      logger.Info, // 日志等级: Silent、Error、Warn、Info
-			Colorful:      false,       // 禁用彩色打印
+			SlowThreshold: time.Second,                          // 慢 SQL 阈值
+			LogLevel:      gormLogLevel(config.Server.LogLevel), // 由 server.logLevel 决定
+			Colorful:      false,                                // 禁用彩色打印
 		},
 	)
 
