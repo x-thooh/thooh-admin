@@ -57,7 +57,7 @@ func ListMenu(context *gin.Context) {
 			"data": result,
 		})
 	} else {
-		var result = system.SelectSysMenuListByUserId(int(userId.(float64)), param)
+		var result = system.SelectSysMenuListByUserId(userId.(string), param)
 		context.JSON(http.StatusOK, gin.H{
 			"msg":  "操作成功",
 			"code": http.StatusOK,

@@ -1,6 +1,7 @@
 package system
 
 import (
+	"fmt"
 	"strconv"
 	"time"
 
@@ -156,15 +157,11 @@ func FindUserByName(loginName string) SysUser {
 }
 
 func FindUserById(id any) SysUser {
-	userId := utils2.GetInterfaceToInt(id)
-	if userId < 1 {
-		panic(R.ReturnFailMsg("获取用户信息失败"))
-	}
 	var user SysUser
 	var db = mysql.MysqlDb().Model(&user).
 		Select("`sys_user`.*, d.name as dept_name, d.label as leader").
 		Joins("left join sys_org d on d.id = `sys_user`.orgid")
-	err := db.Where("id = ?", userId).First(&user).Error
+	err := db.Where("id = ?", fmt.Sprint(id)).First(&user).Error
 	if err != nil {
 		panic(R.ReturnFailMsg(err.Error()))
 	}
@@ -174,14 +171,10 @@ func FindUserById(id any) SysUser {
 
 // 查找用户密码
 func FindUserPassWordById(id any) string {
-	userId := utils2.GetInterfaceToInt(id)
-	if userId < 1 {
-		panic(R.ReturnFailMsg("获取用户信息失败"))
-	}
 	var user SysUser
 	var db = mysql.MysqlDb().Model(&user).
 		Select("`sys_user`.*")
-	err := db.Where("id = ?", userId).First(&user).Error
+	err := db.Where("id = ?", fmt.Sprint(id)).First(&user).Error
 	if err != nil {
 		panic(R.ReturnFailMsg(err.Error()))
 	}

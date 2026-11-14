@@ -332,7 +332,7 @@ func SelectMenuListByRoleId(roleId string, menuCheckStrictly bool) []int {
 	return menuIds
 }
 
-func SelectSysMenuListByUserId(userId int, params tools.SearchTableDataParam) []SysMenu {
+func SelectSysMenuListByUserId(userId string, params tools.SearchTableDataParam) []SysMenu {
 	sysMenu := params.Other.(SysMenu)
 	var sql = "select distinct m.id, m.pid, m.name, m.path, m.comp, m.param, m.shtag," +
 		" m.avtag, '' as perms, m.outag, m.catag, m.type, m.icon, m.ornum, m.crtim " +
@@ -340,7 +340,7 @@ func SelectSysMenuListByUserId(userId int, params tools.SearchTableDataParam) []
 		"left join sys_role_actor ur on rm.rid = ur.rid " +
 		"left join sys_role ro on ur.rid = ro.id "
 
-	sql += "where ur.aid = " + strconv.Itoa(userId) + " "
+	sql += "where ur.aid = '" + userId + "' "
 	var menuName = sysMenu.MenuName
 	if menuName != "" {
 		sql += "AND m.name like concat(%" + menuName + "%) "
