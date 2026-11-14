@@ -336,3 +336,14 @@
 - 被否：只在本文件说明「为什么必须关」——没有已知必须关的理由，写理由等于给风险盖章。
 - 边界：完全离线/内网环境需另设公司代理或 `GONOSUMDB` 仅限私有模块，不要再整体关闭。
 - written_by: agent T-4 / version: 1 / supersedes: — / status: active
+
+## D-24 旧 jwt.secret 已入 git 历史，只能轮换；弱凭据同口径
+
+- 决策：旧 `jwt.secret`（156f892 及更早）永久留在历史里，视为已泄露，**轮换**而不改写历史。三件事：
+  ① 新值用 `openssl rand -base64 48` 生成，只写进本地 `.env` 的 `THOOH_JWT_SECRET`，不进任何入库文件；
+  ② token 失效：JWT 为无状态签名，换密钥后旧密钥签的 token 验签全部失败，用户需重新登录，无需额外吊销表；
+  ③ 部署侧：本地 `.deploy/config.yaml` 的 `jwt.secret` 由明文改为 `${THOOH_JWT_SECRET}`，与 `.env` 同步（两者均 gitignore，不提交）。
+- 现网待办（需人工）：客户现网把 `THOOH_JWT_SECRET` 设为新生成的值（不得复用旧值或本地值），重启服务；
+  同时轮换曾在历史里出现过的数据库/Redis 等弱口令并同步 `THOOH_DB_PW` 等变量。轮换后所有在线用户被登出，属预期。
+- 被否：重写 git 历史（已被 clone/镜像，无法保证抹除，且破坏所有分支）。
+- written_by: agent T-6 / version: 1 / supersedes: — / status: active
