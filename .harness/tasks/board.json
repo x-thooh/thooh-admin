@@ -35,11 +35,12 @@
     {
       "id": "T-4",
       "title": "mise.toml 里 GOSUMDB = \"off\"",
-      "status": "open",
+      "status": "doing",
       "priority": "medium",
       "detail": "校验和被关掉 = 依赖完整性没人背书。要么改回 sum.golang.org（或公司内代理）并保留 GOPROXY，要么把「为什么必须关」写进 decisions.md。这是安全决策，不由脚本代劳。",
       "owner": "thooh",
-      "scope": ""
+      "scope": "",
+      "worktree": "T-4"
     },
     {
       "id": "T-5",
@@ -53,20 +54,22 @@
     {
       "id": "T-6",
       "title": "config.yaml 的 4 条弱默认凭据与账本里的 jwt.secret",
-      "status": "open",
+      "status": "doing",
       "priority": "medium",
       "detail": "SEC002 三条弱默认凭据与 SEC001 那条高熵密钥都已经从 config.yaml 里拿出去（T-19a：值改走 ${THOOH_*}，见门记录 20261029T012600Z）。风险没有跟着消失：原来那个 jwt.secret 仍在 git 历史（156f892 及更早）里，客户现网与 .deploy/config.yaml 也还在用它。要做的是轮换 + 让现存 token 失效 + 部署侧同步，一件都不能少；断言只看工作树文件，看不到历史值，所以这条只能靠人管（standards「判不了」表）。",
       "owner": "thooh",
-      "scope": "secret"
+      "scope": "secret",
+      "worktree": "T-6"
     },
     {
       "id": "T-7",
       "title": "复盘与轮次脚本（retro / round）未做",
-      "status": "open",
+      "status": "doing",
       "priority": "medium",
       "detail": "第三期：复盘三问的事实底板（数字先算，AI 只在数字上写）、环比 ERROR 与手册行数。现在只有 lessons.md 的手写条目。",
       "owner": "thooh",
-      "scope": ""
+      "scope": "",
+      "worktree": "T-7"
     },
     {
       "id": "T-8",
@@ -141,20 +144,22 @@
     {
       "id": "T-15",
       "title": "WKT001 的 WARN 档没有时限：这一域还没有年龄事实源",
-      "status": "open",
+      "status": "doing",
       "priority": "low",
       "detail": "「done 且这份工作已合进主树、只差撤树」现在是永久 WARN（撤树就消失）。按「限时而非禁止」本该 N 天 WARN、2N 天 ERROR，但 WKT001 手里没有可信的时刻：树的 HEAD 提交时间量的是工作何时做完，不是任务何时被判定结束；看板条目也没有 done_at。stale 与 state 已经各算一份天数，再补第三份就是第三处抄本（lessons L-6/L-8 的同一形状）。做法：先把年龄算法收成一处（带一个明确的时刻字段），再回来给这条加阈值。见 decisions D-19、standards.md「判不了」表。",
       "owner": "thooh",
-      "scope": "worktree"
+      "scope": "worktree",
+      "worktree": "T-15"
     },
     {
       "id": "T-16",
       "title": "make task-done 撤树后把分支名硬写成 task/<id>，给人一条指向不存在分支的命令",
-      "status": "open",
+      "status": "doing",
       "priority": "low",
       "detail": "wt.py 的 task_done 最后一句打印「分支 task/<id> 留在仓库里——git branch -d task/<id>」，但布局约定允许目录名即分支名（go125 这种人工树，WKT004 明明白白接受它）。撤这类树时提示里的分支不存在，照抄就跑错命令。改法：把消息里那个名字换成 rev-parse --abbrev-ref 读到的真分支，别再拿 task_id 拼第二次——拼字符串就是又开一份定义。现场：2026-10-29 撤 go125 时看到。",
       "owner": "thooh",
-      "scope": "worktree"
+      "scope": "worktree",
+      "worktree": "T-16"
     },
     {
       "id": "T-17",
@@ -170,11 +175,12 @@
     {
       "id": "T-18",
       "title": "WKT001 的 WARN 消息把整段 git status 贴进一行报告",
-      "status": "open",
+      "status": "doing",
       "priority": "low",
       "detail": "tree_state() 原样返回 status --porcelain 的多行字符串，消息拼进「树里另有没提交的东西…：」之后，一条 WARN 在终端里散成 5 行，把下面几行的对齐全冲掉（现场：2026-10-29 收尾那次提交的钩子输出）。改法：只报条数与前 2–3 个路径，剩下的写「…共 N 条，去树里 git status 看」。同族缺陷见 T-16（消息里给人抄的名字要读，不要拼）。",
       "owner": "thooh",
-      "scope": "worktree"
+      "scope": "worktree",
+      "worktree": "T-18"
     },
     {
       "id": "T-19",
@@ -300,11 +306,12 @@
     {
       "id": "T-35",
       "title": "跨树 git 调用要不要 scrub 只钉住了 wt.git() 一个入口",
-      "status": "open",
+      "status": "doing",
       "priority": "medium",
       "detail": "T-26 把钩子环境串台修在 `wt.git()` 上（`.harness/scripts/gitenv.py` 的 `clean()`），selftest 用 WKT004e/WKT00n4 钉住这一个入口。但仓库里还有四处直接 `subprocess.run([\"git\",\"-C\",root,…])`：`scopes/common.py` 的 `git_clean`、`scopes/commit.py` 的 `head_message`、`scopes/state.py` 的 `has_commit`、`tracked.py` 的 ignore 清单。这四处现在都以**被检的那棵树**为 target（钩子环境指的也是它），所以不串台——问题在于「以后有人拿它去读别的树」时没有任何东西会响。做法：加一条静态断言（拟 GTE001，域 entry 或新建 git 域），扫 `.harness/scripts/**/*.py` 里出现 `\"git\", \"-C\"` 的调用，要求同一语句带 `env=gitenv.clean()`，或紧邻注释写明「目标就是本仓库」；先在 standards.md 对照表占一行。",
       "owner": "thooh",
-      "scope": "entry"
+      "scope": "entry",
+      "worktree": "T-35"
     },
     {
       "id": "T-36",
