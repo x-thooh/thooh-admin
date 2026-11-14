@@ -369,11 +369,12 @@
     {
       "id": "T-34",
       "title": "鉴权白名单里 /auth/* 三项没有对应路由，确认移动端后再裁",
-      "status": "open",
+      "status": "doing",
       "priority": "low",
       "detail": "T-27 建的门（app/core/utils/jwt/gate.go:21,35）把 /auth/login、/auth/code、/auth/logout 列为免鉴权，实测 grep -rn '\"/auth' app/ modules/ 只有 gate.go 自己命中，web/ 里也没有调用——是 RuoYi 血统的抄件。默认拒绝的门里留着死条目本身不构成漏洞（没有注册路由，请求只会走 NoRoute），但它让「白名单=公开面」这张表说谎。故意没在本轮删：移动端接口约定不在仓库里，删错了是装好的 App 白屏。做法：跟移动端确认调用面（或看网关访问日志里有没有 /auth/* 命中），没有就删这三项并重跑登录-刷新矩阵。",
       "owner": "thooh",
-      "scope": "modules"
+      "scope": "modules",
+      "worktree": "T-34"
     },
     {
       "id": "T-37",
