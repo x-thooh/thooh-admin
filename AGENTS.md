@@ -20,6 +20,7 @@
 | `make check-strict` | 示例数据按 ERROR 处理 |
 | `make fix` | 只重建派生数据（codebase-guide），要求工作区干净 |
 | `make evidence` | 把一次全量校验的完整输出存进 `.harness/deliverables/evidence/` |
+| `make retro` | 复盘事实底板：只算数字（ERROR 环比、看板、手册行数），不写结论 |
 | `make selftest` | 反向测试：每条断言都要真的会报 |
 | `make commit-msg` | 判最近一条提交信息（提交时钩子跑同一套判据） |
 | `make build` / `vet` / `fmt` / `test` | Go 工具链 |

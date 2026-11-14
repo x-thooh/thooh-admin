@@ -19,6 +19,7 @@ CHECK_COMMIT := $(SCRIPTS)/check_commit.py
 WT := $(SCRIPTS)/wt.py
 GO_FILES := $(SCRIPTS)/go_files.py
 TRACKED := $(SCRIPTS)/tracked.py
+RETRO := $(SCRIPTS)/retro.py
 PY ?= python3
 
 export GOPATH := $(HOME)/.go
@@ -27,7 +28,7 @@ export GOPROXY := https://goproxy.cn,direct
 export GOFLAGS := -buildvcs=false
 
 .DEFAULT_GOAL := help
-.PHONY: help init check check-all check-json check-strict fix guide index ignored evidence selftest commit-msg \
+.PHONY: help init check check-all check-json check-strict fix guide index ignored evidence retro selftest commit-msg \
 	task-new task-done task-list build vet fmt test go-all up down clean
 
 help: ## 列出可用命令
@@ -91,6 +92,9 @@ evidence: ## 把一次全量校验的完整输出存成证据
 	  echo; \
 	  $(PY) $(VERIFY) --root $(ROOT) --all; echo "exit=$$?"; } > $$out; \
 	tail -3 $$out; echo "已存：$$out"
+
+retro: ## 复盘事实底板：只算数字（ERROR 环比、看板、手册行数），不写结论
+	@$(PY) $(RETRO) --root $(ROOT)
 
 selftest: ## 反向测试：每条断言都要真的会报
 	@$(PY) $(REVERSE) --root $(ROOT)

@@ -52,3 +52,7 @@ make selftest     # FLOW001–FLOW010 各有违规样本，外加一条干净树
 引用单向：`AGENTS.md` → 本层 → `specs/` → `scripts/` → 状态目录。本层可以引用
 `standards.md` 的对照表与 `contract.md` 的六问，**不许**被 `scripts/` 之外的状态文件反向引用为规则。
 断言在 `scripts/scopes/workflow.py`（`scope=workflow`）。
+
+## 复盘
+
+`make retro` 打印复盘事实底板（ERROR 环比、baseline 与看板计数、手册行数、lessons 条数），只算数字不写结论。口径：数字先算，AI 只在数字上写——lessons 里的判断必须能回指这里的数字。
