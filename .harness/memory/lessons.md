@@ -355,3 +355,23 @@
   grep 清零必须连 information_schema/原生 SQL 里的表名子查询一起算。
 - 补账：T-41 的 decisions 没记（subagent 只改了代码），主线程补了「代码生成器在 tool_code 口径下
   未实现」的说明；这提醒——「自主决策摘功能」类任务，验收时要确认决策写进了 decisions，不只看代码。
+
+## L-23 浏览器实测是唯一能把「接口 200」与「页面能用」分开的手
+
+- 拦到了什么（复盘①）：这一轮浏览器点遍菜单 + 真做 CRUD，抓到 8 类后端缺陷，全是 curl 与
+  go build 都测不出来的：legacy 层用 int 主键扫 varchar(36) 的 id（列表全空）、`bit(1)` 列按
+  字符串写（1406）、`sys_role`/`sys_menu` 的 bigint 主键没有自增也没人给值（1364）、软删写
+  `avtag=0` 但列表不过滤（删了还在）、`sys_role_menu` 写 `where id=`（1054）、空 roleIds 触发
+  `Create` 空切片、join 后 `where id` 歧义（1052）、`menu.comp` 指向产物里不存在的模块。
+- 漏了什么（②）：两点。一是菜单 25 个自定义模块（`sys/group`、`sys/api`、`tool/num`、
+  `tool/oss`、`bpm/*`、`demo/*`）在 `web/admin` 预构建产物里根本没有对应模块，页面点开报
+  `Cannot find module`——这不是改数据能解决的，需要前端源码重建，而仓库只有产物、无 `src/`、
+  无 `package.json`、无 sourcemap，git 历史里也从未有过。二是软删过滤只补了用户/角色/菜单三处
+  列表，其它模块（公告/字典/岗位）还有同类漏网。
+- 该加哪条断言（③）：无机器断言。`scope=modules` 判目录形状，判不出「模型类型与 dump 列类型
+  是否匹配」。人判的规矩：以 dump 为准重写模型时，**列名与列类型要一起对**——`varchar(36)` 的
+  id 不能留 int，`bit(1)` 不能留 string；这两类错误都不会在编译期或 `go vet` 冒头，只在真正读写
+  时炸。可复用的做法：`common/json/bitx` 这种 Scanner/Valuer 类型比在每个调用点手写转换更省，
+  它把「dump 的 bit=1 ↔ RuoYi 的 "0"」这对反向口径收在一处。
+- 验收口径的教训：`/sys/role` 返回 200 且 body 里有 rows，不等于列名对——旧实现的
+  `tools.Fail()` 也返回 200。判断「页面能不能用」必须看浏览器里的表格行数与控制台，不看 HTTP 码。
