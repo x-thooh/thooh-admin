@@ -431,11 +431,12 @@
     {
       "id": "T-41",
       "title": "gen.go 原生 SQL 对账到 tool_code 口径",
-      "status": "open",
+      "status": "doing",
       "priority": "medium",
       "owner": "thooh",
       "scope": "modules",
-      "detail": "app/admin/service/tools/gen.go 的原生 SQL 引用 gen_table/gen_table_column（RuoYi 长列名 table_id/table_name/table_comment/class_name/column_id 等），dump 是 tool_code_table/tool_code_field（短列名 id/name/notes/ornum/pmeid 等）。做法：逐字段对账 tool_code 表结构；对不上的字段若 tool_code 确实没有就标注未实现或摘掉代码生成器功能，并记 decisions；不许瞎猜映射。"
+      "detail": "app/admin/service/tools/gen.go 的原生 SQL 引用 gen_table/gen_table_column（RuoYi 长列名 table_id/table_name/table_comment/class_name/column_id 等），dump 是 tool_code_table/tool_code_field（短列名 id/name/notes/ornum/pmeid 等）。做法：逐字段对账 tool_code 表结构；对不上的字段若 tool_code 确实没有就标注未实现或摘掉代码生成器功能，并记 decisions；不许瞎猜映射。",
+      "worktree": "T-41"
     }
   ]
 }
