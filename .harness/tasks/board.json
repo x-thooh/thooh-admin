@@ -158,12 +158,13 @@
     {
       "id": "T-17",
       "title": "make task-done 半途失败后没有出路：只读模块缓存让 worktree remove 卡住",
-      "status": "doing",
+      "status": "done",
       "priority": "high",
       "detail": "2026-10-29 撤 go125 现场：树里 GOPATH 指向 .go/，Go 把 2516 个缓存目录建成 0555 只读，git worktree remove 删到一半撞 Permission denied 中止，而它已经先删掉 .git/worktrees/<id> 注册表。剩下的目录 git 不认识（rev-parse 报 not a git repository），task-done 再跑就回「这里没有树」，WKT001 反过来报 ERROR 说「判不了，先别撤树」，主树后续每一次提交都被这条钩子拦死——三条路没有一条走得通，最后靠人工 chmod -R u+rwX + rm -rf + git worktree prune（使用者批准）。做法：tree_state() 认这个态（.git 文件在但 admin 目录没了 = 孤儿树），task_done 失败时按「已经删了注册表」重新量一遍并打印真能跑的出路；顺带把 remove 之前先 chmod -R u+rwX 或改用 --force 之后立刻 prune 补一刀，别让注册表和磁盘各走一半。见 lessons L-11、门记录 20261028T171644Z 追计。2026-10-29 二次命中（撤 T-19）：一模一样——注册表没了、目录还在，主树每次提交被 WKT001 拦死。这回先试出更省的一手：把目录 mv 出被扫描的 <仓库名>-wt/（门禁 trees_of 只认那个父目录下的子目录），不删一个文件就解除拦提交，303M 只读缓存留着事后取证。出路里该有这一档：先挪开，再谈删。 三次命中（2026-10-30，收尾 T-27）：`make task-done` 三条前置（干净 / 看板 done / 已合并）都过，删树这一步又报 `error: failed to delete '…/thooh-admin-wt/T-27': Permission denied`，注册表已经删掉、目录留下 305M（大头是树里的 `.go` 模块缓存）。后果当场可见：主树 `make check` 报 WKT001 ERROR「这份工作有没有落地判不了」，主树的提交被堵住。非破坏的出路还是那一条：把残骸 `mv` 出被扫描的 `-wt/` 父目录（现在在 /private/tmp/t27-tree-debris，`.env` 的键名已确认与主树一致，没丢东西）。真正的修法在本任务里：`task_done` 在 `git worktree remove` 之前先对 `.go/` 递归 `chmod -R u+w`，或者 remove 失败后自己把 0555 目录清干净再撤注册表——先撤注册表再删目录这个顺序本身要改。",
       "owner": "thooh",
       "scope": "worktree",
-      "worktree": "T-17"
+      "worktree": "T-17",
+      "evidence": "commit:948d43f"
     },
     {
       "id": "T-18",
@@ -333,12 +334,13 @@
     {
       "id": "T-33",
       "title": "pub 下的接口不认当前用户：身份写死 admin、菜单不看角色",
-      "status": "doing",
+      "status": "done",
       "priority": "high",
       "detail": "实测（读代码 + 2026-10-30 容器）：modules/pub/api.go:40 GetUser 直接 user.Useid=\"u1\" / Usena=\"admin\" / Orgid=\"o1000\" 写死，谁登录拿到的都是 admin 的身份；GetMenus（同文件 60 行）SQL 是 select ... from sys_menu where m.avtag=1，没有按角色/机构过滤，全量菜单出站；GetActor 同理无过滤。T-27 的全局门把 /pub/* 纳入了要 token 的范围（免登录打是 401），但「有 token」不等于「按 token 里那个人来答」——私有化交付里这等于任何账号登录后都是管理员界面。做法：GetUser/GetMenus/GetActor 从 ctx 取 userId（Gate 已放进上下文），菜单走 sys_rece/sys_role_actor 关联过滤；改完实测两个不同角色的账号，拿到的菜单集合必须不同。",
       "owner": "thooh",
       "scope": "modules",
-      "worktree": "T-33"
+      "worktree": "T-33",
+      "evidence": "commit:45f7d5d"
     },
     {
       "id": "T-34",
@@ -352,12 +354,13 @@
     {
       "id": "T-37",
       "title": "菜单的 comp 与前端产物里的模块名对不上：树给到了，页面点不开",
-      "status": "doing",
+      "status": "done",
       "priority": "high",
       "owner": "thooh",
       "scope": "modules",
       "detail": "实测（2026-10-30，浏览器控制台）：/admin/sys/user → 「Error: Cannot find module './sys/user/index'」。web/admin 是预构建产物，它的懒加载上下文键是 ./system/user/index、./monitor/online/index、./tool/gen/index（RuoYi 目录名），dump 的 sys_menu.comp 是 sys/user/index、mon/online/user/index、tool/code/index。getRouters 侧已到位（路由建出来、侧边栏四条全在），差的是这一层名字。二选一：①改数据——把 42 行 comp 改成前端认得的键；②重建前端——按 dump 口径把 views 目录改名后重新构建 web/。①小、可断言（comp 必须在产物模块表里），②是另一轮工程。要人判的地方：web/ 只有产物没有源码，选②就得先找回源码，别在没源码时改产物目录名。",
-      "worktree": "T-37"
+      "worktree": "T-37",
+      "evidence": "commit:c7ee6e8"
     },
     {
       "id": "T-38",
