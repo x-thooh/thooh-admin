@@ -37,22 +37,26 @@ func GetInfo(c *gin.Context) {
 	var main SysRole
 	mysql.MysqlDb().Preload("Users").First(&main, "id = ?", id)
 	if main.Id == 0 {
-		panic(R.ReturnFailMsg("未找到记录"))
+		c.JSON(http.StatusOK, R.ReturnFailMsg("未找到记录"))
+		return
 	}
 
 	//成员、菜单与接口
 	var actorSql = "select t.id,t.name from sys_actor t inner join sys_role_actor a on a.aid=t.id where a.rid=?"
 	err := mysql.MysqlDb().Raw(actorSql, main.Id).Scan(&main.Actors).Error
 	if err != nil {
-		panic(R.ReturnFailMsg(err.Error()))
+		c.JSON(http.StatusOK, R.ReturnFailMsg(err.Error()))
+		return
 	}
 	err = mysql.MysqlDb().Raw("select mid id from sys_role_menu where rid=?", main.Id).Scan(&main.Menus).Error
 	if err != nil {
-		panic(R.ReturnFailMsg(err.Error()))
+		c.JSON(http.StatusOK, R.ReturnFailMsg(err.Error()))
+		return
 	}
 	err = mysql.MysqlDb().Raw("select aid id from sys_role_api where rid=?", main.Id).Scan(&main.Apis).Error
 	if err != nil {
-		panic(R.ReturnFailMsg(err.Error()))
+		c.JSON(http.StatusOK, R.ReturnFailMsg(err.Error()))
+		return
 	}
 	c.JSON(http.StatusOK, r.Ok(main))
 }
@@ -68,13 +72,17 @@ func Post(c *gin.Context) {
 	main.Uptim = main.Crtim
 	err := mysql.MysqlDb().Create(&main).Error
 	if err != nil {
-		panic(R.ReturnFailMsg(err.Error()))
+		c.JSON(http.StatusOK, R.ReturnFailMsg(err.Error()))
+		return
 	}
-	insertMapping(main)
+	if err := insertMapping(main); err != nil {
+		c.JSON(http.StatusOK, R.ReturnFailMsg(err.Error()))
+		return
+	}
 	c.JSON(http.StatusOK, r.Ok(main.Id))
 }
 
-func insertMapping(main SysRole) {
+func insertMapping(main SysRole) error {
 	actors := make([]SysRoleActor, len(main.Actors))
 
 	for i, src := range main.Actors {
@@ -86,7 +94,7 @@ func insertMapping(main SysRole) {
 	result := mysql.MysqlDb().CreateInBatches(actors, 10)
 
 	if result.Error != nil {
-		panic(R.ReturnFailMsg(result.Error.Error()))
+		return result.Error
 	}
 
 	menus := make([]SysRoleMenu, len(main.Menus))
@@ -100,7 +108,7 @@ func insertMapping(main SysRole) {
 	result = mysql.MysqlDb().CreateInBatches(menus, 10)
 
 	if result.Error != nil {
-		panic(R.ReturnFailMsg(result.Error.Error()))
+		return result.Error
 	}
 
 	apis := make([]SysRoleApi, len(main.Apis))
@@ -114,8 +122,9 @@ func insertMapping(main SysRole) {
 	result = mysql.MysqlDb().CreateInBatches(apis, 10)
 
 	if result.Error != nil {
-		panic(R.ReturnFailMsg(result.Error.Error()))
+		return result.Error
 	}
+	return nil
 }
 
 func Put(c *gin.Context) {
@@ -128,10 +137,14 @@ func Put(c *gin.Context) {
 	mysql.MysqlDb().Exec("delete from sys_role_actor where rid = ?", main.Id)
 	mysql.MysqlDb().Exec("delete from sys_role_menu where rid = ?", main.Id)
 	mysql.MysqlDb().Exec("delete from sys_role_api where rid = ?", main.Id)
-	insertMapping(main)
+	if err := insertMapping(main); err != nil {
+		c.JSON(http.StatusOK, R.ReturnFailMsg(err.Error()))
+		return
+	}
 	err := mysql.MysqlDb().Select("*").Omit("crtim,cruid").Updates(&main).Error
 	if err != nil {
-		panic(R.ReturnFailMsg(err.Error()))
+		c.JSON(http.StatusOK, R.ReturnFailMsg(err.Error()))
+		return
 	}
 	c.JSON(http.StatusOK, r.Ok(main.Id))
 
@@ -143,7 +156,8 @@ func Delete(c *gin.Context) {
 	for i := 0; i < len(arr); i++ {
 		err := mysql.MysqlDb().Where("id = ?", arr[i]).Delete(&SysRole{}).Error
 		if err != nil {
-			panic(R.ReturnFailMsg(err.Error()))
+			c.JSON(http.StatusOK, R.ReturnFailMsg(err.Error()))
+			return
 		}
 	}
 	c.JSON(http.StatusOK, r.Ok(len(arr)))
@@ -154,14 +168,16 @@ func GetPerms(c *gin.Context) {
 	var menus []MenuVo
 	err := mysql.MysqlDb().Raw(menuSql).Scan(&menus).Error
 	if err != nil {
-		panic(R.ReturnFailMsg(err.Error()))
+		c.JSON(http.StatusOK, R.ReturnFailMsg(err.Error()))
+		return
 	}
 
 	var apiSql = "select id,name,menid from sys_api where avtag=1 order by ornum"
 	var apis []ApiVo
 	err = mysql.MysqlDb().Raw(apiSql).Scan(&apis).Error
 	if err != nil {
-		panic(R.ReturnFailMsg(err.Error()))
+		c.JSON(http.StatusOK, R.ReturnFailMsg(err.Error()))
+		return
 	}
 
 	for i := range menus {

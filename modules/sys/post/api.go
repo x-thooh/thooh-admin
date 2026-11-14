@@ -37,7 +37,8 @@ func GetInfo(c *gin.Context) {
 	var main SysPost
 	mysql.MysqlDb().Preload("Users").First(&main, "id = ?", id)
 	if main.Id == "" {
-		panic(R.ReturnFailMsg("未找到记录"))
+		c.JSON(http.StatusOK, R.ReturnFailMsg("未找到记录"))
+		return
 	}
 	c.JSON(http.StatusOK, r.Ok(main))
 }
@@ -53,7 +54,8 @@ func Post(c *gin.Context) {
 	main.Uptim = main.Crtim
 	err := mysql.MysqlDb().Create(&main).Error
 	if err != nil {
-		panic(R.ReturnFailMsg(err.Error()))
+		c.JSON(http.StatusOK, R.ReturnFailMsg(err.Error()))
+		return
 	}
 	var sysActor actor.SysActor
 	sysActor.Id = main.Id
@@ -61,7 +63,8 @@ func Post(c *gin.Context) {
 	sysActor.Type = 4
 	err = mysql.MysqlDb().Create(&sysActor).Error
 	if err != nil {
-		panic(R.ReturnFailMsg(err.Error()))
+		c.JSON(http.StatusOK, R.ReturnFailMsg(err.Error()))
+		return
 	}
 	c.JSON(http.StatusOK, r.Ok(main.Id))
 }
@@ -76,7 +79,8 @@ func Put(c *gin.Context) {
 	mysql.MysqlDb().Exec("delete from sys_post_actor where pid = ?", main.Id)
 	err := mysql.MysqlDb().Select("*").Omit("crtim,cruid").Updates(&main).Error
 	if err != nil {
-		panic(R.ReturnFailMsg(err.Error()))
+		c.JSON(http.StatusOK, R.ReturnFailMsg(err.Error()))
+		return
 	}
 	mysql.MysqlDb().Model(&actor.SysActor{}).Where("id = ?", main.Id).Update("name", main.Name)
 	c.JSON(http.StatusOK, r.Ok(main.Id))
@@ -89,7 +93,8 @@ func Delete(c *gin.Context) {
 	for i := 0; i < len(arr); i++ {
 		err := mysql.MysqlDb().Where("id = ?", arr[i]).Delete(&SysPost{}).Error
 		if err != nil {
-			panic(R.ReturnFailMsg(err.Error()))
+			c.JSON(http.StatusOK, R.ReturnFailMsg(err.Error()))
+			return
 		}
 	}
 	c.JSON(http.StatusOK, r.Ok(len(arr)))
