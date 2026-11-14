@@ -53,7 +53,9 @@ cp .env.example .env
 #   THOOH_DB_PW=<openssl rand -base64 24>
 #   THOOH_JWT_SECRET=<openssl rand -base64 48>
 
-# 2) 起整套（首次会构建镜像；mysql 与 redis 的 healthcheck 都过了才起 webapp）
+# 2) 升级已有库前先跑 `make migrate`（服务启动不再自动改表）；全新库由 thooh-go.sql 导入
+
+# 2b) 起整套（首次会构建镜像；mysql 与 redis 的 healthcheck 都过了才起 webapp）
 make up            # 没有 make 就用：docker compose -f docker-compose.yml up -d
 
 # 3) 验证：三个容器都在，webapp 活着

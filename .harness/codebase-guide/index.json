@@ -99,6 +99,14 @@
       "kind": "dir"
     },
     {
+      "path": "cmd",
+      "kind": "dir"
+    },
+    {
+      "path": "cmd/migrate",
+      "kind": "dir"
+    },
+    {
       "path": "common",
       "kind": "dir"
     },

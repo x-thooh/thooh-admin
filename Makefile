@@ -28,7 +28,7 @@ export GOPROXY := https://goproxy.cn,direct
 export GOFLAGS := -buildvcs=false
 
 .DEFAULT_GOAL := help
-.PHONY: help init check check-all check-json check-strict fix guide index ignored evidence retro selftest commit-msg \
+.PHONY: help migrate init check check-all check-json check-strict fix guide index ignored evidence retro selftest commit-msg \
 	task-new task-done task-list build vet fmt test go-all up down clean
 
 help: ## 列出可用命令
@@ -101,6 +101,9 @@ selftest: ## 反向测试：每条断言都要真的会报
 
 commit-msg: ## 判最近一条提交信息「一件事、动宾短语、不并列」（提交时的钩子跑同一套判据）
 	@$(PY) $(CHECK_COMMIT) --root $(ROOT)
+
+migrate: ## 显式迁移表结构（服务启动不再改表；升级前跑）
+	@cd $(ROOT) && go run ./cmd/migrate
 
 build: ## go build
 	@cd $(ROOT) && go build ./... > /tmp/vben-build.log 2>&1; rc=$$?; \
