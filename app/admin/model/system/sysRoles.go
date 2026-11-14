@@ -56,13 +56,13 @@ func SelectRolePermissionByUserId(userId int) []SysRoles {
 	var roles []SysRoles
 	var sql = "select distinct r.* " +
 		"from sys_role r " +
-		"left join sys_user_role ur on ur.role_id = r.role_id " +
-		"left join sys_user u on u.user_id = ur.user_id " +
-		"left join sys_dept d on u.dept_id = d.dept_id " +
-		"where r.del_flag = '0'"
+		"left join sys_role_actor ur on ur.rid = r.id " +
+		"left join sys_user u on u.id = ur.aid " +
+		"left join sys_org d on u.orgid = d.id " +
+		"where 1=1"
 	if userId != 0 {
 		if !IsAdminById(userId) {
-			sql += " and ur.user_id = " + strconv.Itoa(userId)
+			sql += " and ur.aid = " + strconv.Itoa(userId)
 		}
 	}
 	err := mysql.MysqlDb().Raw(sql).Scan(&roles).Error
@@ -103,9 +103,9 @@ func GetMenuPermission(user SysUser) []string {
 		err := mysql.MysqlDb().Raw("select distinct m.perms "+
 			"from sys_menu m "+
 			"left join sys_role_menu rm on m.menu_id = rm.menu_id "+
-			"left join sys_user_role ur on rm.role_id = ur.role_id "+
-			"left join sys_role r on r.role_id = ur.role_id "+
-			"where m.status = '0' and r.status = '0' and ur.user_id = ?", user.UserId).
+			"left join sys_role_actor ur on rm.rid = ur.rid "+
+			"left join sys_role r on r.id = ur.rid "+
+			"where m.avtag = 0 and r.avtag = 0 and ur.aid = ?", user.UserId).
 			Scan(&permissions).Error
 		if err != nil {
 			panic(R.ReturnFailMsg(err.Error()))
@@ -119,10 +119,10 @@ func SelectRolesByUserName(userName string) string {
 	var result = ""
 	err := mysql.MysqlDb().Raw("select distinct r.* "+
 		"from sys_role r "+
-		"left join sys_user_role ur on ur.role_id = r.role_id "+
-		"left join sys_user u on u.user_id = ur.user_id "+
-		"left join sys_dept d on u.dept_id = d.dept_id "+
-		"WHERE r.del_flag = '0' and u.user_name = ?", userName).
+		"left join sys_role_actor ur on ur.rid = r.id "+
+		"left join sys_user u on u.id = ur.aid "+
+		"left join sys_org d on u.orgid = d.id "+
+		"WHERE u.username = ?", userName).
 		Scan(&roles).
 		Error
 	if err != nil {
@@ -152,9 +152,9 @@ func SelectRoleList(params tools.SearchTableDataParam, isPage bool) tools.TableD
 	var rows []SysRoles
 	var db = mysql.MysqlDb().Model(&rows).
 		Select("distinct `sys_role`.*").
-		Joins("left join sys_user_role ur on ur.role_id = `sys_role`.id").
-		Joins("left join sys_user u on u.user_id = ur.user_id").
-		Joins("left join sys_dept d on u.dept_id = d.dept_id")
+		Joins("left join sys_role_actor ur on ur.rid = `sys_role`.id").
+		Joins("left join sys_user u on u.id = ur.aid").
+		Joins("left join sys_org d on u.orgid = d.id")
 
 	db.Where("1 = 1")
 	var roleId = sysRoles.RoleId
@@ -167,14 +167,9 @@ func SelectRoleList(params tools.SearchTableDataParam, isPage bool) tools.TableD
 		db.Where("`sys_role`.role_name like ?", "%"+roleName+"%")
 	}
 
-	var roleKey = sysRoles.RoleKey
-	if roleKey != "" {
-		db.Where("`sys_role`.role_key like ?", "%"+roleKey+"%")
-	}
-
 	var status = sysRoles.Status
 	if status != "" {
-		db.Where("`sys_role`.status = ?", status)
+		db.Where("`sys_role`.avtag = ?", status)
 	}
 
 	var beginTime = params.Params.BeginTime
@@ -236,7 +231,7 @@ func InsertRolesByUser(userId int, roleIds []int) R.Result {
 
 // 添加权限管理用户
 func DeleteRolesByUser(userId []int) {
-	err := mysql.MysqlDb().Exec("delete from sys_user_role where user_id in (?)", userId).Error
+	err := mysql.MysqlDb().Exec("delete from sys_role_actor where aid in (?)", userId).Error
 	if err != nil {
 		panic(R.ReturnFailMsg("删除权限关联用户失败"))
 	}
@@ -259,8 +254,6 @@ func DeleteRolesById(roleId string, userId int) {
 	}
 	//删除角色与菜单关联
 	DeleteRoleMenu(roleId)
-	//删除角色与部门关联
-	DeleteRoleDept(roleId)
 
 	err := mysql.MysqlDb().Exec("update sys_role set avtag = 0 where id in (" + roleId + ")").Error
 	if err != nil {
@@ -279,8 +272,8 @@ func FindRoleInfoById(roleId string) SysRoles {
 
 // 校验角色是否有数据权限
 func CheckRoleDataScope(roleId string) bool {
-	var sql = baseSql + "where r.del_flag = '0' AND r.role_id = " + roleId + " "
-	sql += "order by r.role_sort"
+	var sql = baseSql + "where 1=1 AND r.id = " + roleId + " "
+	sql += "order by r.ornum"
 	var count int64
 	err := mysql.MysqlDb().Raw(sql).Count(&count).Error
 	if err != nil {
@@ -292,7 +285,7 @@ func CheckRoleDataScope(roleId string) bool {
 // 校验角色名称是否存在
 func checkRoleNameUnique(roleName string) SysRoles {
 	var role SysRoles
-	var sql = baseSql + "where r.role_name = '" + roleName + "' and r.del_flag = '0' limit 1"
+	var sql = baseSql + "where r.name = '" + roleName + "' limit 1"
 	err := mysql.MysqlDb().Raw(sql).Scan(&role).Error
 	if err != nil {
 		panic(R.ReturnFailMsg(err.Error()))
@@ -303,11 +296,8 @@ func checkRoleNameUnique(roleName string) SysRoles {
 // 校验角色key是否存在
 func checkRoleKeyUnique(roleKey string) SysRoles {
 	var role SysRoles
-	var sql = baseSql + "where r.role_key = '" + roleKey + "' and r.del_flag = '0' limit 1"
-	err := mysql.MysqlDb().Raw(sql).Scan(&role).Error
-	if err != nil {
-		panic(R.ReturnFailMsg(err.Error()))
-	}
+	_ = roleKey
+	// dump 的 sys_role 无 role_key 列，不做 key 唯一性校验
 	return role
 }
 
@@ -319,7 +309,7 @@ func checkRoleAllowed(roleId string) {
 }
 
 func countUserRoleByRoleId(roleId string) int {
-	sql := "select count(1) from sys_user_role where role_id=" + roleId
+	sql := "select count(1) from sys_role_actor where rid=" + roleId
 	var count int
 	err := mysql.MysqlDb().Raw(sql).Scan(&count).Error
 	if err != nil {
@@ -331,7 +321,7 @@ func countUserRoleByRoleId(roleId string) int {
 // 校验角色是否有数据权限
 func checkRoleDataScope(roleId string, userId int) {
 	if !IsAdminById(utils2.GetInterfaceToInt(userId)) {
-		var sql = baseSql + "where r.del_flag = '0' AND r.role_id = " + roleId + " " + "order by r.role_sort"
+		var sql = baseSql + "where 1=1 AND r.id = " + roleId + " " + "order by r.ornum"
 		var list []SysRoles
 		err := mysql.MysqlDb().Raw(sql).Scan(&list).Error
 		if err != nil {
@@ -343,12 +333,12 @@ func checkRoleDataScope(roleId string, userId int) {
 	}
 }
 
-const baseSql = "select distinct r.role_id, r.role_name, r.role_key, r.role_sort, r.data_scope, r.menu_check_strictly, r.dept_check_strictly, " +
-	"r.status, r.del_flag, r.create_time, r.remark " +
+const baseSql = "select distinct r.id, r.name, r.ornum, r.scope, " +
+	"r.avtag, r.crtim, r.notes " +
 	"from sys_role r " +
-	"left join sys_user_role ur on ur.role_id = r.role_id " +
-	"left join sys_user u on u.user_id = ur.user_id " +
-	"left join sys_dept d on u.dept_id = d.dept_id "
+	"left join sys_role_actor ur on ur.rid = r.id " +
+	"left join sys_user u on u.id = ur.aid " +
+	"left join sys_org d on u.orgid = d.id "
 
 func SaveRole(roles SysRolesParam) R.Result {
 	/*角色名称已存在*/
@@ -391,20 +381,6 @@ func insertRoleMenu(roles SysRolesParam) {
 	}
 }
 
-func insertRoleDept(roles SysRolesParam) {
-	deptIds := roles.DeptIds
-	var roleDept []SysRoleDept
-	for i := 0; i < len(deptIds); i++ {
-		deptId := deptIds[i]
-		roleId := roles.RoleId
-		roleDept = append(roleDept, SysRoleDept{roleId, deptId})
-	}
-	err := mysql.MysqlDb().Model(&SysRoleDept{}).Create(&roleDept).Error
-	if err != nil {
-		panic(R.ReturnFailMsg(err.Error()))
-	}
-}
-
 /*更新*/
 func UploadRole(rolesParam SysRolesParam, userId int) R.Result {
 	//校验角色是否允许操作
@@ -431,7 +407,7 @@ func UploadRole(rolesParam SysRolesParam, userId int) R.Result {
 	}
 
 	err = mysql.MysqlDb().Model(&SysRoles{}).
-		Where("role_id = ?", roles.RoleId).
+		Where("rid = ?", roles.RoleId).
 		Updates(&roles).Error
 	if err != nil {
 		return R.ReturnFailMsg(err.Error())
@@ -450,14 +426,10 @@ func PutDataScope(rolesParam SysRolesParam, userId int) R.Result {
 	/*校验角色是否有数据权限*/
 	checkRoleDataScope(strconv.Itoa(rolesParam.RoleId), userId)
 	/*修改角色信息*/
-	err := mysql.MysqlDb().Model(&SysRoles{}).Where("role_id", rolesParam.RoleId).Updates(&rolesParam).Error
+	err := mysql.MysqlDb().Model(&SysRoles{}).Where("id", rolesParam.RoleId).Updates(&rolesParam).Error
 	if err != nil {
 		panic(R.ReturnFailMsg(err.Error()))
 	}
-	/*删除角色与部门关联*/
-	DeleteRoleDeptByRole(strconv.Itoa(rolesParam.RoleId))
-	/*新增角色和部门信息（数据权限）*/
-	insertRoleDept(rolesParam)
 	return R.ReturnSuccess("操作成功")
 }
 
@@ -474,8 +446,8 @@ func ChangeRoleStatus(rolesParam SysRoles, userId int) R.Result {
 }
 
 func GetRoleOptionSelect() R.Result {
-	var sql = baseSql + "where r.del_flag = '0'"
-	sql += "order by r.role_sort"
+	var sql = baseSql + "where 1=1"
+	sql += "order by r.ornum"
 	var rols []SysRoles
 	err := mysql.MysqlDb().Raw(sql).Scan(&rols).Error
 	if err != nil {
@@ -493,14 +465,14 @@ func GetAllocatedList(params tools.SearchTableDataParam) tools.TableDataInfo {
 	var rows []SysUser
 
 	sql := "select distinct u.* " +
-		"from sys_user u left join sys_dept d on u.dept_id = d.dept_id " +
-		"left join sys_user_role ur on u.user_id = ur.user_id " +
-		"left join sys_role r on r.role_id = ur.role_id " +
-		"where u.del_flag = '0' and r.role_id = " + strconv.Itoa(sysUser.RoleId)
+		"from sys_user u left join sys_org d on u.orgid = d.id " +
+		"left join sys_role_actor ur on u.id = ur.aid " +
+		"left join sys_role r on r.id = ur.rid " +
+		"where r.id = " + strconv.Itoa(sysUser.RoleId)
 
 	var userNmae = sysUser.UserName
 	if userNmae != "" {
-		sql += "AND u.user_name like concat('%', " + userNmae + ", '%')"
+		sql += "AND u.username like concat('%', " + userNmae + ", '%')"
 	}
 	var phonenumber = sysUser.Phonenumber
 	if phonenumber != "" {
@@ -539,15 +511,15 @@ func GetUnAllocatedList(params tools.SearchTableDataParam) tools.TableDataInfo {
 	var rows []SysUser
 
 	sql := "select distinct u.* " +
-		"from sys_user u left join sys_dept d on u.dept_id = d.dept_id " +
-		"left join sys_user_role ur on u.user_id = ur.user_id " +
-		"left join sys_role r on r.role_id = ur.role_id " +
-		"where u.del_flag = '0' and (r.role_id != " + strconv.Itoa(sysUser.RoleId) + " or r.role_id IS NULL) " +
-		"and u.user_id not in (select u.user_id from sys_user u inner join sys_user_role ur on u.user_id = ur.user_id and ur.role_id = " + strconv.Itoa(sysUser.RoleId) + ") "
+		"from sys_user u left join sys_org d on u.orgid = d.id " +
+		"left join sys_role_actor ur on u.id = ur.aid " +
+		"left join sys_role r on r.id = ur.rid " +
+		"where (r.id != " + strconv.Itoa(sysUser.RoleId) + " or r.id IS NULL) " +
+		"and u.id not in (select u.id from sys_user u inner join sys_role_actor ur on u.id = ur.aid and ur.rid = " + strconv.Itoa(sysUser.RoleId) + ") "
 
 	var userNmae = sysUser.UserName
 	if userNmae != "" {
-		sql += "AND u.user_name like concat('%', " + userNmae + ", '%')"
+		sql += "AND u.username like concat('%', " + userNmae + ", '%')"
 	}
 	var phonenumber = sysUser.Phonenumber
 	if phonenumber != "" {
@@ -578,7 +550,7 @@ func GetUnAllocatedList(params tools.SearchTableDataParam) tools.TableDataInfo {
 }
 
 func CancelRole(userId int, roleId int) R.Result {
-	err := mysql.MysqlDb().Exec("delete from sys_user_role where user_id = ? and role_id = ?", userId, roleId).Error
+	err := mysql.MysqlDb().Exec("delete from sys_role_actor where aid = ? and rid = ?", userId, roleId).Error
 	if err != nil {
 		panic(R.ReturnFailMsg(err.Error()))
 	}
@@ -586,7 +558,7 @@ func CancelRole(userId int, roleId int) R.Result {
 }
 
 func CancelAllRole(roleId string, userIds string) R.Result {
-	sql := "delete from sys_user_role where role_id=" + roleId + " and user_id in ( " + userIds + " )"
+	sql := "delete from sys_role_actor where rid=" + roleId + " and aid in ( " + userIds + " )"
 	err := mysql.MysqlDb().Exec(sql).Error
 	if err != nil {
 		panic(R.ReturnFailMsg(err.Error()))
@@ -608,25 +580,4 @@ func SelectRoleAll(roleId string, userIdStr string, userId int) R.Result {
 		panic(R.ReturnFailMsg(err.Error()))
 	}
 	return R.ReturnSuccess("操作成功")
-}
-
-func GetDeptTreeRole(roleId string) []int {
-	role := FindRoleInfoById(roleId)
-	deptCheckStrictly := role.DeptCheckStrictly
-
-	sql := "select d.dept_id from sys_dept d " +
-		"left join sys_role_dept rd on d.dept_id = rd.dept_id " +
-		"where rd.role_id = " + roleId + " "
-	if deptCheckStrictly {
-		sql += "and d.dept_id not in (select d.parent_id from sys_dept d inner join sys_role_dept rd on d.dept_id = rd.dept_id and rd.role_id = " + roleId + ") "
-	}
-	sql += "order by d.parent_id, d.order_num"
-
-	var count []int
-	err := mysql.MysqlDb().Raw(sql).Find(&count).Error
-	if err != nil {
-		panic(R.ReturnFailMsg(err.Error()))
-	}
-
-	return count
 }

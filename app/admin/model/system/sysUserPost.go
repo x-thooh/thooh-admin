@@ -8,5 +8,5 @@ type SysUserPost struct {
 
 // TableName 指定数据库表名称
 func (SysUserPost) TableName() string {
-	return "sys_user_post"
+	return "sys_post_actor"
 }

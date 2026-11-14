@@ -71,7 +71,7 @@ func SelectMenuTreeByUserId(userId int) []SysMenu {
 			panic(R.ReturnFailMsg("查询错误"))
 		}
 	} else {
-		err := mysql.MysqlDb().Raw("select distinct m.* from sys_menu m left join sys_role_menu rm on m.id = rm.mid left join sys_user_role ur on rm.rid = ur.role_id left join sys_role ro on ur.role_id = ro.role_id left join sys_user u on ur.user_id = u.user_id where u.user_id = ? and m.type in ('M', 'C') and m.avtag = 0  AND ro.avtag = 0 order by m.pid, m.ornum", userId).Scan(&menu).Error
+		err := mysql.MysqlDb().Raw("select distinct m.* from sys_menu m left join sys_role_menu rm on m.id = rm.mid left join sys_role_actor ur on rm.rid = ur.rid left join sys_role ro on ur.rid = ro.id left join sys_user u on ur.aid = u.id where u.id = ? and m.type in ('M', 'C') and m.avtag = 0  AND ro.avtag = 0 order by m.pid, m.ornum", userId).Scan(&menu).Error
 		if err != nil {
 			panic(R.ReturnFailMsg("查询错误"))
 		}
@@ -102,9 +102,9 @@ func SelectMenuTree(userId int, menu SysMenu) []SysMenu {
 		}
 	} else {
 		sql += "left join sys_role_menu rm on m.id = rm.mid "
-		sql += "left join sys_user_role ur on rm.rid = ur.role_id "
-		sql += "left join sys_role ro on ur.role_id = ro.role_id "
-		sql += "where ur.user_id = " + strconv.Itoa(userId)
+		sql += "left join sys_role_actor ur on rm.rid = ur.rid "
+		sql += "left join sys_role ro on ur.rid = ro.id "
+		sql += "where ur.aid = " + strconv.Itoa(userId)
 		var menuName = menu.MenuName
 		if menuName != "" {
 			sql += "AND m.name like concat('%', " + menuName + ", '%')"
@@ -337,10 +337,10 @@ func SelectSysMenuListByUserId(userId int, params tools.SearchTableDataParam) []
 	var sql = "select distinct m.id, m.pid, m.name, m.path, m.comp, m.param, m.shtag," +
 		" m.avtag, '' as perms, m.outag, m.catag, m.type, m.icon, m.ornum, m.crtim " +
 		"from sys_menu m left join sys_role_menu rm on m.id = rm.mid " +
-		"left join sys_user_role ur on rm.rid = ur.role_id " +
-		"left join sys_role ro on ur.role_id = ro.role_id "
+		"left join sys_role_actor ur on rm.rid = ur.rid " +
+		"left join sys_role ro on ur.rid = ro.id "
 
-	sql += "where ur.user_id = " + strconv.Itoa(userId) + " "
+	sql += "where ur.aid = " + strconv.Itoa(userId) + " "
 	var menuName = sysMenu.MenuName
 	if menuName != "" {
 		sql += "AND m.name like concat(%" + menuName + "%) "
