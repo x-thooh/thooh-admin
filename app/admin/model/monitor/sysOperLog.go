@@ -14,22 +14,22 @@ import (
 
 // SysOperLog model：数据库字段
 type SysOperLog struct {
-	OperId        int       `json:"operId" gorm:"column:oper_id;primaryKey"` //表示主键
-	Title         string    `json:"title" gorm:"title"`
-	BusinessType  string    `json:"businessType" gorm:"business_type"`
-	Method        string    `json:"method" gorm:"method"`
-	RequestMethod string    `json:"requestMethod" gorm:"request_method"`
-	OperatorType  string    `json:"operatorType" gorm:"operator_type"`
-	OperName      string    `json:"operName" gorm:"oper_name"`
-	DeptName      string    `json:"deptName" gorm:"dept_name"`
-	OperUrl       string    `json:"operUrl" gorm:"oper_url"`
-	OperIp        string    `json:"operIp" gorm:"oper_ip"`
-	OperLocation  string    `json:"operLocation" gorm:"oper_location"`
-	OperParam     string    `json:"operParam" gorm:"oper_param"`
-	JsonResult    string    `json:"jsonResult" gorm:"json_result"`
-	Status        string    `json:"status" gorm:"status"`
-	ErrorMsg      string    `json:"errorMsg" gorm:"error_msg"`
-	OperTime      time.Time `json:"operTime" gorm:"column:oper_time;type:datetime;autoCreateTime"`
+	OperId        int       `json:"operId" gorm:"column:id;primaryKey"` //表示主键
+	Title         string    `json:"title" gorm:"column:opmod"`
+	BusinessType  string    `json:"businessType" gorm:"column:butyp"`
+	Method        string    `json:"method" gorm:"column:remet"`
+	RequestMethod string    `json:"requestMethod" gorm:"column:reway"`
+	OperatorType  string    `json:"operatorType" gorm:"column:optyp"`
+	OperName      string    `json:"operName" gorm:"column:opuna"`
+	DeptName      string    `json:"deptName" gorm:"column:opdna"`
+	OperUrl       string    `json:"operUrl" gorm:"column:reurl"`
+	OperIp        string    `json:"operIp" gorm:"column:opip"`
+	OperLocation  string    `json:"operLocation" gorm:"column:oploc"`
+	OperParam     string    `json:"operParam" gorm:"column:bapar"`
+	JsonResult    string    `json:"jsonResult" gorm:"column:repar"`
+	Status        string    `json:"status" gorm:"column:sutag"`
+	ErrorMsg      string    `json:"errorMsg" gorm:"column:ermsg"`
+	OperTime      time.Time `json:"operTime" gorm:"column:optim;type:datetime;autoCreateTime"`
 }
 
 // 表中的状态值
@@ -46,7 +46,7 @@ const (
 
 // TableName 指定数据库表名称
 func (SysOperLog) TableName() string {
-	return "sys_oper_log"
+	return "mon_oper_log"
 }
 
 func SelectOperLogList(params tools.SearchTableDataParam) tools.TableDataInfo {
@@ -70,7 +70,7 @@ func SelectOperLogList(params tools.SearchTableDataParam) tools.TableDataInfo {
 	}
 	var businessType = sysOperLog.BusinessType
 	if businessType != "" {
-		db.Where("business_type = ?", businessType)
+		db.Where("butyp = ?", businessType)
 	}
 
 	/*目前没有用*/
@@ -87,7 +87,7 @@ func SelectOperLogList(params tools.SearchTableDataParam) tools.TableDataInfo {
 
 	var oper_name = sysOperLog.OperName
 	if oper_name != "" {
-		db.Where("oper_name like concat('%', ?, '%')", oper_name)
+		db.Where("opuna like concat('%', ?, '%')", oper_name)
 	}
 	var orderByColumn = params.OrderByColumn
 	var isAsc = params.IsAsc
@@ -95,18 +95,18 @@ func SelectOperLogList(params tools.SearchTableDataParam) tools.TableDataInfo {
 	if orderByColumn != "" {
 		if "ascending" == isAsc {
 			if "operTime" == orderByColumn {
-				db.Order("oper_time DESC")
+				db.Order("optim DESC")
 			}
 			if "operName" == orderByColumn {
-				db.Order("oper_name DESC")
+				db.Order("opuna DESC")
 			}
 		}
 		if "descending" == isAsc {
 			if "operTime" == orderByColumn {
-				db.Order("oper_time ASC")
+				db.Order("optim ASC")
 			}
 			if "operName" == orderByColumn {
-				db.Order("oper_name ASC")
+				db.Order("opuna ASC")
 			}
 		}
 	}
@@ -117,12 +117,12 @@ func SelectOperLogList(params tools.SearchTableDataParam) tools.TableDataInfo {
 		//endTime = endTime + " 23:59:59"
 		//endTime1, _ := time.ParseInLocation(constants.DateFormat, endTime, Loc)
 		startTime1, endTime1 := utils2.GetBeginAndEndTime(beginTime, endTime)
-		//db.Where("oper_time >= ? and oper_time <= ?", startTime1, endTime1)
-		db.Where("oper_time >= ?", startTime1)
-		db.Where("oper_time <= ?", endTime1)
+		//db.Where("optim >= ? and optim <= ?", startTime1, endTime1)
+		db.Where("optim >= ?", startTime1)
+		db.Where("optim <= ?", endTime1)
 	}
 
-	db.Order("oper_id desc")
+	db.Order("id desc")
 	if err := db.Table(sysOperLog.TableName()).Count(&total).Error; err != nil {
 		return tools.Fail()
 	}
@@ -138,14 +138,14 @@ func SelectOperLogList(params tools.SearchTableDataParam) tools.TableDataInfo {
 }
 
 func DelectOperlog(operIds []int) R.Result {
-	if err := mysql.MysqlDb().Where("oper_id in (?)", operIds).Delete(&SysOperLog{}).Error; err != nil {
+	if err := mysql.MysqlDb().Where("id in (?)", operIds).Delete(&SysOperLog{}).Error; err != nil {
 		return R.ReturnFailMsg(err.Error())
 	}
 	return R.ReturnSuccess("操作成功")
 }
 
 func ClearOperlog() R.Result {
-	if err := mysql.MysqlDb().Exec("truncate table sys_oper_log").Error; err != nil {
+	if err := mysql.MysqlDb().Exec("truncate table mon_oper_log").Error; err != nil {
 		return R.ReturnFailMsg(err.Error())
 	}
 	return R.ReturnSuccess("操作成功")

@@ -9,16 +9,16 @@ import (
 )
 
 type SysNotice struct {
-	NoticeId      int       `json:"noticeId" gorm:"column:notice_id;primaryKey"` //表示主键
-	NoticeTitle   string    `json:"noticeTitle" gorm:"notice_title"`
-	NoticeType    string    `json:"noticeType" gorm:"notice_type"`
-	NoticeContent string    `json:"noticeContent" gorm:"notice_content"`
-	Status        string    `json:"status" gorm:"status"`
-	CreateBy      string    `json:"createBy" gorm:"create_by"`
-	CreateTime    time.Time `json:"createTime" gorm:"column:create_time;type:datetime;autoCreateTime"`
-	UpdateBy      string    `json:"updateBy" gorm:"update_by"`
-	UpdateTime    time.Time `json:"updateTime" gorm:"column:update_time;type:datetime;autoCreateTime"`
-	Remark        string    `json:"remark" gorm:"remark"`
+	NoticeId      int       `json:"noticeId" gorm:"column:id;primaryKey"` //表示主键
+	NoticeTitle   string    `json:"noticeTitle" gorm:"column:name"`
+	NoticeType    string    `json:"noticeType" gorm:"column:type"`
+	NoticeContent string    `json:"noticeContent" gorm:"column:cont"`
+	Status        string    `json:"status" gorm:"column:avtag"`
+	CreateBy      string    `json:"createBy" gorm:"-"`
+	CreateTime    time.Time `json:"createTime" gorm:"column:crtim;type:datetime;autoCreateTime"`
+	UpdateBy      string    `json:"updateBy" gorm:"-"`
+	UpdateTime    time.Time `json:"updateTime" gorm:"column:uptim;type:datetime;autoCreateTime"`
+	Remark        string    `json:"remark" gorm:"column:notes"`
 }
 
 // TableName 指定数据库表名称
@@ -38,17 +38,17 @@ func SelectSysNoticeList(params tools.SearchTableDataParam, isPage bool) tools.T
 
 	var noticeTitle = sysRoles.NoticeTitle
 	if noticeTitle != "" {
-		db.Where("notice_title like concat('%', ?, '%')", noticeTitle)
+		db.Where("name like concat('%', ?, '%')", noticeTitle)
 	}
 
 	var noticeType = sysRoles.NoticeType
 	if noticeType != "" {
-		db.Where("notice_type = ?", noticeType)
+		db.Where("type = ?", noticeType)
 	}
 
 	var createBy = sysRoles.CreateBy
 	if createBy != "" {
-		db.Where("create_by like concat('%', ?, '%')", createBy)
+		db.Where("1 = 1") // dump 无 create_by 列
 	}
 
 	var beginTime = params.Params.BeginTime
@@ -60,8 +60,8 @@ func SelectSysNoticeList(params tools.SearchTableDataParam, isPage bool) tools.T
 		//endTime = endTime + " 23:59:59"
 		//endTime1, _ := time.ParseInLocation(constants.TimeFormat, endTime, Loc)
 		startTime1, endTime1 := utils2.GetBeginAndEndTime(beginTime, endTime)
-		db.Where("`sys_role`.create_time >= ?", startTime1)
-		db.Where("`sys_role`.create_time <= ?", endTime1)
+		db.Where("crtim >= ?", startTime1)
+		db.Where("crtim <= ?", endTime1)
 	}
 
 	if err := db.Count(&total).Error; err != nil {
@@ -88,7 +88,7 @@ func SelectSysNoticeList(params tools.SearchTableDataParam, isPage bool) tools.T
 
 func FindNoticeInfoById(noticeId string) SysNotice {
 	var notice SysNotice
-	err := mysql.MysqlDb().Where("notice_id = ?", noticeId).First(&notice).Error
+	err := mysql.MysqlDb().Where("id = ?", noticeId).First(&notice).Error
 	if err != nil {
 		panic(R.ReturnFailMsg(err.Error()))
 	}
@@ -115,7 +115,7 @@ func DeleteNotice(noticeIds string) R.Result {
 	ids := utils2.Split(noticeIds)
 	for i := 0; i < len(ids); i++ {
 		id := ids[i]
-		err := mysql.MysqlDb().Where("notice_id = ?", id).Delete(&SysNotice{}).Error
+		err := mysql.MysqlDb().Where("id = ?", id).Delete(&SysNotice{}).Error
 		if err != nil {
 			return R.ReturnFailMsg(err.Error())
 		}

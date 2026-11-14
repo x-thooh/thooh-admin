@@ -11,20 +11,20 @@ import (
 
 // SysDictType model：数据库字段
 type SysDictType struct {
-	DictId     int       `json:"dictId" gorm:"column:dict_id;primaryKey"` //表示主键
-	DictName   string    `json:"dictName" gorm:"dict_name"`
-	DictType   string    `json:"dictType" gorm:"dict_type"`
-	Status     string    `json:"status" gorm:"status"`
-	CreateBy   string    `json:"createBy" gorm:"create_by"`
-	CreateTime time.Time `json:"createTime" gorm:"column:create_time;type:datetime;autoCreateTime"`
-	UpdateBy   string    `json:"updateBy" gorm:"update_by"`
-	UpdateTime time.Time `json:"updateTime" gorm:"column:update_time;type:datetime;autoCreateTime"`
-	Remark     string    `json:"remark" gorm:"remark"`
+	DictId     int       `json:"dictId" gorm:"column:id;primaryKey"` //表示主键
+	DictName   string    `json:"dictName" gorm:"column:name"`
+	DictType   string    `json:"dictType" gorm:"column:code"`
+	Status     string    `json:"status" gorm:"column:avtag"`
+	CreateBy   string    `json:"createBy" gorm:"-"`
+	CreateTime time.Time `json:"createTime" gorm:"column:crtim;type:datetime;autoCreateTime"`
+	UpdateBy   string    `json:"updateBy" gorm:"-"`
+	UpdateTime time.Time `json:"updateTime" gorm:"column:uptim;type:datetime;autoCreateTime"`
+	Remark     string    `json:"remark" gorm:"column:notes"`
 }
 
 // TableName 指定数据库表名称
 func (SysDictType) TableName() string {
-	return "sys_dict_type"
+	return "tool_dict"
 }
 
 // 分页查询
@@ -40,17 +40,17 @@ func SelectSysDictTypeList(params tools.SearchTableDataParam, isPage bool) tools
 
 	var dictName = sysDictType.DictName
 	if dictName != "" {
-		db.Where("dict_name like ?", "%"+dictName+"%")
+		db.Where("name like ?", "%"+dictName+"%")
 	}
 
 	var status = sysDictType.Status
 	if status != "" {
-		db.Where("status =", status)
+		db.Where("avtag =", status)
 	}
 
 	var dictType = sysDictType.DictType
 	if dictType != "" {
-		db.Where("dict_type like ?", dictType)
+		db.Where("code like ?", dictType)
 	}
 
 	var beginTime = params.Params.BeginTime
@@ -62,8 +62,8 @@ func SelectSysDictTypeList(params tools.SearchTableDataParam, isPage bool) tools
 		//endTime = endTime + " 23:59:59"
 		//endTime1, _ := time.ParseInLocation(constants.TimeFormat, endTime, Loc)
 		startTime1, endTime1 := utils2.GetBeginAndEndTime(beginTime, endTime)
-		db.Where("create_time >= ?", startTime1)
-		db.Where("create_time <= ?", endTime1)
+		db.Where("crtim >= ?", startTime1)
+		db.Where("crtim <= ?", endTime1)
 	}
 	if err := db.Count(&total).Error; err != nil {
 		return tools.Fail()
@@ -87,7 +87,7 @@ func SelectSysDictTypeList(params tools.SearchTableDataParam, isPage bool) tools
 
 func FindTypeDictById(dictId string) SysDictType {
 	var dictType SysDictType
-	err := mysql.MysqlDb().Where("dict_id = ?", dictId).First(&dictType).Error
+	err := mysql.MysqlDb().Where("id = ?", dictId).First(&dictType).Error
 	if err != nil {
 		panic(R.ReturnFailMsg(err.Error()))
 	}
@@ -114,7 +114,7 @@ func DeleteDataType(dictIds string) R.Result {
 	ids := utils2.Split(dictIds)
 	for i := 0; i < len(ids); i++ {
 		id := ids[i]
-		err := mysql.MysqlDb().Where("dict_id = ?", id).Delete(&SysDictType{}).Error
+		err := mysql.MysqlDb().Where("id = ?", id).Delete(&SysDictType{}).Error
 		if err != nil {
 			return R.ReturnFailMsg(err.Error())
 		}

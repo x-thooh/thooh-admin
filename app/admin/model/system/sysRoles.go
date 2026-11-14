@@ -12,37 +12,37 @@ import (
 
 // SysRoles model：数据库字段
 type SysRoles struct {
-	RoleId            int       `json:"roleId" gorm:"column:role_id;primaryKey"` //表示主键
-	RoleName          string    `json:"roleName" gorm:"role_name"`
-	RoleKey           string    `json:"roleKey" gorm:"role_key"`
-	RoleSort          int       `json:"roleSort" gorm:"role_sort"`
-	DataScope         string    `json:"dataScope" gorm:"data_scope"`
-	Status            string    `json:"status" gorm:"status"`
-	MenuCheckStrictly bool      `json:"menuCheckStrictly" gorm:"menu_check_strictly"`
-	DeptCheckStrictly bool      `json:"deptCheckStrictly" gorm:"dept_check_strictly"`
-	DelFlag           string    `json:"delFlag" gorm:"del_flag"`
-	CreateBy          string    `json:"createBy" gorm:"create_by"`
-	CreateTime        time.Time `json:"createTime" gorm:"column:create_time;type:datetime;autoCreateTime"`
-	UpdateBy          string    `json:"updateBy" gorm:"update_by"`
-	UpdateTime        time.Time `json:"updateTime" gorm:"column:update_time;type:datetime;autoCreateTime"`
-	Remark            string    `json:"remark" gorm:"remark"`
+	RoleId            int       `json:"roleId" gorm:"column:id;primaryKey"` //表示主键
+	RoleName          string    `json:"roleName" gorm:"column:name"`
+	RoleKey           string    `json:"roleKey" gorm:"-"`
+	RoleSort          int       `json:"roleSort" gorm:"column:ornum"`
+	DataScope         string    `json:"dataScope" gorm:"column:scope"`
+	Status            string    `json:"status" gorm:"column:avtag"`
+	MenuCheckStrictly bool      `json:"menuCheckStrictly" gorm:"-"`
+	DeptCheckStrictly bool      `json:"deptCheckStrictly" gorm:"-"`
+	DelFlag           string    `json:"delFlag" gorm:"-"`
+	CreateBy          string    `json:"createBy" gorm:"-"`
+	CreateTime        time.Time `json:"createTime" gorm:"column:crtim;type:datetime;autoCreateTime"`
+	UpdateBy          string    `json:"updateBy" gorm:"-"`
+	UpdateTime        time.Time `json:"updateTime" gorm:"column:uptim;type:datetime;autoCreateTime"`
+	Remark            string    `json:"remark" gorm:"column:notes"`
 }
 
 type SysRolesParam struct {
-	RoleId            int       `json:"roleId" gorm:"column:role_id;primaryKey"` //表示主键
-	RoleName          string    `json:"roleName" gorm:"role_name"`
-	RoleKey           string    `json:"roleKey" gorm:"role_key"`
-	RoleSort          int       `json:"roleSort" gorm:"role_sort"`
-	DataScope         string    `json:"dataScope" gorm:"data_scope"`
-	Status            string    `json:"status" gorm:"status"`
-	MenuCheckStrictly bool      `json:"menuCheckStrictly" gorm:"menu_check_strictly"`
-	DeptCheckStrictly bool      `json:"deptCheckStrictly" gorm:"dept_check_strictly"`
-	DelFlag           string    `json:"delFlag" gorm:"del_flag"`
-	CreateBy          string    `json:"createBy" gorm:"create_by"`
-	CreateTime        time.Time `json:"createTime" gorm:"column:create_time;type:datetime"`
-	UpdateBy          string    `json:"updateBy" gorm:"update_by"`
-	UpdateTime        time.Time `json:"updateTime" gorm:"column:update_time;type:datetime"`
-	Remark            string    `json:"remark" gorm:"remark"`
+	RoleId            int       `json:"roleId" gorm:"column:id;primaryKey"` //表示主键
+	RoleName          string    `json:"roleName" gorm:"column:name"`
+	RoleKey           string    `json:"roleKey" gorm:"-"`
+	RoleSort          int       `json:"roleSort" gorm:"column:ornum"`
+	DataScope         string    `json:"dataScope" gorm:"column:scope"`
+	Status            string    `json:"status" gorm:"column:avtag"`
+	MenuCheckStrictly bool      `json:"menuCheckStrictly" gorm:"-"`
+	DeptCheckStrictly bool      `json:"deptCheckStrictly" gorm:"-"`
+	DelFlag           string    `json:"delFlag" gorm:"-"`
+	CreateBy          string    `json:"createBy" gorm:"-"`
+	CreateTime        time.Time `json:"createTime" gorm:"column:crtim;type:datetime"`
+	UpdateBy          string    `json:"updateBy" gorm:"-"`
+	UpdateTime        time.Time `json:"updateTime" gorm:"column:uptim;type:datetime"`
+	Remark            string    `json:"remark" gorm:"column:notes"`
 	MenuIds           []int     `json:"menuIds"`
 	DeptIds           []int     `json:"deptIds"`
 }
@@ -152,14 +152,14 @@ func SelectRoleList(params tools.SearchTableDataParam, isPage bool) tools.TableD
 	var rows []SysRoles
 	var db = mysql.MysqlDb().Model(&rows).
 		Select("distinct `sys_role`.*").
-		Joins("left join sys_user_role ur on ur.role_id = `sys_role`.role_id").
+		Joins("left join sys_user_role ur on ur.role_id = `sys_role`.id").
 		Joins("left join sys_user u on u.user_id = ur.user_id").
 		Joins("left join sys_dept d on u.dept_id = d.dept_id")
 
-	db.Where("`sys_role`.del_flag = '0'")
+	db.Where("1 = 1")
 	var roleId = sysRoles.RoleId
 	if roleId != 0 {
-		db.Where("`sys_role`.role_id = ?", roleId)
+		db.Where("`sys_role`.id = ?", roleId)
 	}
 
 	var roleName = sysRoles.RoleName
@@ -262,7 +262,7 @@ func DeleteRolesById(roleId string, userId int) {
 	//删除角色与部门关联
 	DeleteRoleDept(roleId)
 
-	err := mysql.MysqlDb().Exec("update sys_role set del_flag = '2' where role_id in (" + roleId + ")").Error
+	err := mysql.MysqlDb().Exec("update sys_role set avtag = 0 where id in (" + roleId + ")").Error
 	if err != nil {
 		panic(R.ReturnFailMsg("删除权限关联用户失败"))
 	}
@@ -270,7 +270,7 @@ func DeleteRolesById(roleId string, userId int) {
 
 func FindRoleInfoById(roleId string) SysRoles {
 	var role SysRoles
-	err := mysql.MysqlDb().Where("role_id = ?", roleId).First(&role).Error
+	err := mysql.MysqlDb().Where("id = ?", roleId).First(&role).Error
 	if err != nil {
 		panic(R.ReturnFailMsg(err.Error()))
 	}

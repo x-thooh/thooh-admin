@@ -12,20 +12,20 @@ import (
 
 // SysDictData model：数据库字段
 type SysDictData struct {
-	DictCode   int       `json:"dictCode" gorm:"column:dict_code;primaryKey"` //表示主键
-	DictSort   int       `json:"dictSort" gorm:"dict_sort"`
-	DictLabel  string    `json:"dictLabel" gorm:"dict_label"`
-	DictValue  string    `json:"dictValue" gorm:"dict_value"`
-	DictType   string    `json:"dictType" gorm:"dict_type"`
-	CssClass   string    `json:"CssClass" gorm:"css_class"`
-	ListClass  string    `json:"listClass" gorm:"list_class"`
-	IsDefault  string    `json:"isDefault" gorm:"is_default"`
-	Status     string    `json:"status" gorm:"status"`
-	CreateBy   string    `json:"createBy" gorm:"create_by"`
-	CreateTime time.Time `json:"createTime" gorm:"column:create_time;type:datetime;autoCreateTime"`
-	UpdateBy   string    `json:"updateBy" gorm:"update_by"`
-	UpdateTime time.Time `json:"updateTime" gorm:"column:update_time;type:datetime;autoCreateTime"`
-	Remark     string    `json:"remark" gorm:"remark"`
+	DictCode   int       `json:"dictCode" gorm:"column:id;primaryKey"` //表示主键
+	DictSort   int       `json:"dictSort" gorm:"column:ornum"`
+	DictLabel  string    `json:"dictLabel" gorm:"column:dalab"`
+	DictValue  string    `json:"dictValue" gorm:"column:daval"`
+	DictType   string    `json:"dictType" gorm:"column:dicid"`
+	CssClass   string    `json:"CssClass" gorm:"-"`
+	ListClass  string    `json:"listClass" gorm:"column:shsty"`
+	IsDefault  string    `json:"isDefault" gorm:"column:detag"`
+	Status     string    `json:"status" gorm:"column:avtag"`
+	CreateBy   string    `json:"createBy" gorm:"-"`
+	CreateTime time.Time `json:"createTime" gorm:"column:crtim;type:datetime;autoCreateTime"`
+	UpdateBy   string    `json:"updateBy" gorm:"-"`
+	UpdateTime time.Time `json:"updateTime" gorm:"column:uptim;type:datetime;autoCreateTime"`
+	Remark     string    `json:"remark" gorm:"column:notes"`
 }
 
 func OrderByDictSortAsc(dictDataList []SysDictData) {
@@ -42,12 +42,12 @@ func (d ByDictSort) Less(i, j int) bool { return d[i].DictSort < d[j].DictSort }
 
 // TableName 指定数据库表名称
 func (SysDictData) TableName() string {
-	return "sys_dict_data"
+	return "tool_dict_data"
 }
 
 func SelectDictDataByType(dictType string) []SysDictData {
 	var dictData []SysDictData
-	mysql.MysqlDb().Raw("select * from sys_dict_data where status = '0' and dict_type = ? order by dict_sort", dictType).Scan(&dictData)
+	mysql.MysqlDb().Raw("select * from tool_dict_data where avtag = 1 and dicid = ? order by ornum", dictType).Scan(&dictData)
 	return dictData
 }
 
@@ -64,18 +64,18 @@ func SelectDictDataList(params tools.SearchTableDataParam, isPage bool) tools.Ta
 
 	var dictLabel = sysDictData.DictLabel
 	if dictLabel != "" {
-		db.Where("dict_label = ?", dictLabel)
+		db.Where("dalab = ?", dictLabel)
 	}
 	var dictType = sysDictData.DictType
 	if dictType != "" {
-		db.Where("dict_type like concat('%', ?, '%')", dictType)
+		db.Where("dicid like concat('%', ?, '%')", dictType)
 	}
 	var status = sysDictData.Status
 	if status != "" {
-		db.Where("status = ?", status)
+		db.Where("avtag = ?", status)
 	}
 
-	db.Order("dict_sort asc")
+	db.Order("ornum asc")
 
 	if err := db.Count(&total).Error; err != nil {
 		return tools.Fail()
@@ -99,7 +99,7 @@ func SelectDictDataList(params tools.SearchTableDataParam, isPage bool) tools.Ta
 
 func FindDictCodeById(dictCode string) SysDictData {
 	var dictData SysDictData
-	err := mysql.MysqlDb().Where("dict_code = ?", dictCode).First(&dictData).Error
+	err := mysql.MysqlDb().Where("id = ?", dictCode).First(&dictData).Error
 	if err != nil {
 		panic(R.ReturnFailMsg(err.Error()))
 	}
@@ -137,7 +137,7 @@ func DeleteDictData(dictCodes string) R.Result {
 
 	for i := 0; i < len(ids); i++ {
 		id := ids[i]
-		err := tx.Where("dict_code = ?", id).Delete(&SysDictData{}).Error
+		err := tx.Where("id = ?", id).Delete(&SysDictData{}).Error
 		if err != nil {
 			tx.Rollback()
 			return R.ReturnFailMsg(err.Error())
