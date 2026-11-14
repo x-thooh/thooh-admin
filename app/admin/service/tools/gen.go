@@ -31,8 +31,8 @@ func GenDbList(params tools.SearchTableDataParam) tools.TableDataInfo {
 	var total int64
 	var rows []tools.GenTable
 
-	sqlCount := "select count(*) as count from information_schema.tables where table_schema = (select database()) AND table_name NOT LIKE 'qrtz_%' AND table_name NOT LIKE 'gen_%' AND table_name NOT IN (select table_name from gen_table) "
-	sql := "select table_name as Table_Name, table_comment as TableComment, create_time as CreateTime, update_time as UpdateTime from information_schema.tables where table_schema = (select database()) AND table_name NOT LIKE 'qrtz_%' AND table_name NOT LIKE 'gen_%' AND table_name NOT IN (select table_name from gen_table) "
+	sqlCount := "select count(*) as count from information_schema.tables where table_schema = (select database()) AND table_name NOT LIKE 'qrtz_%' AND table_name NOT LIKE 'gen_%' AND table_name NOT IN (select name from tool_code_table) "
+	sql := "select table_name as Table_Name, table_comment as TableComment, create_time as CreateTime, update_time as UpdateTime from information_schema.tables where table_schema = (select database()) AND table_name NOT LIKE 'qrtz_%' AND table_name NOT LIKE 'gen_%' AND table_name NOT IN (select name from tool_code_table) "
 
 	var tableName = genTable.Table_Name
 	if tableName != "" {
